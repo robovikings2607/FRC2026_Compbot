@@ -27,6 +27,14 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.subsystems.FlywheelSubsystem;
+import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
+import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.SpindexerSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
@@ -37,7 +45,7 @@ import frc.robot.utilities.AxisButton;
 public class RobotContainer {
     public Field2d field = new Field2d();
 
-    private double MaxSpeed = 0.3 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double MaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -55,7 +63,6 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private boolean fieldCentricDrive = true;
     private boolean lowGear = true;
     private double highGear = 1.0; // 0.6 or 60% (max speed) for competition
@@ -65,21 +72,26 @@ public class RobotContainer {
     
     public boolean safeToMove = false;
     private SendableChooser<Command> autoChooser;
+    
+    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final LimelightSubsystem limelight = new LimelightSubsystem(this);
+    public final TurretSubsystem turret = new TurretSubsystem(this);
+    public final FlywheelSubsystem flywheel = new FlywheelSubsystem(this);
+    public final HoodSubsystem hood = new HoodSubsystem(this);
+    public final IntakeSubsystem intake = new IntakeSubsystem(this);
+    public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
+    public final FeederSubsystem feeder = new FeederSubsystem(this);
+    public final LEDSubsystem leds = new LEDSubsystem(this);
 
     public RobotContainer() {
 
         configureBindings();
 
-        // Build an auto chooser. This will use Commands.none() as the default option.
-        // As an example, this will only show autos that start with "comp" while at
-        // competition as defined by the programmer
         autoChooser = AutoBuilder.buildAutoChooser();
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-
-        SmartDashboard.putData("Field!!!", field);
         
-        setFieldCentric(true);        
-
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+        SmartDashboard.putData("Field!!!", field);
+        SmartDashboard.putNumber("kFrontRightEncoderOffset", drivetrain.getModule(1).getEncoder().getAbsolutePosition().getValueAsDouble());
     }
 
     private void configureBindings() {
@@ -204,10 +216,12 @@ public class RobotContainer {
         }
     }
 
+    
     public Command getAutonomousCommand() {
        return autoChooser.getSelected();
             
     }
+    
 public static class OI {
   public final XboxController controller;
   public final JoystickButton buttonA, buttonB, buttonY, buttonX, startButton, screenShotButton,
@@ -248,3 +262,5 @@ public static class OI {
 }
 
 }
+
+//Test Comment
