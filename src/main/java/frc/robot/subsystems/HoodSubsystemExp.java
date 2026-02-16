@@ -5,17 +5,10 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.GeometryUtil;
-
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
-import frc.robot.Constants.FlywheelConstants;
 import frc.robot.Constants.HoodConstants;
 
 
@@ -58,11 +51,12 @@ public class HoodSubsystemExp extends ShooterSubsystemExp {
 
   
 
-   @Override
+  @Override
   public void periodic() {
   }
 
-  public void configureMotor(){
+  @Override
+  protected void configureMotor(){
 
     TalonFXConfiguration configs = new TalonFXConfiguration();
 

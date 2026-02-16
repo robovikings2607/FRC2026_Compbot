@@ -39,7 +39,7 @@ public class FlywheelSubsystemExp extends ShooterSubsystemExp {
     }
 
     @Override
-    public void configureMotor(){
+    protected void configureMotor(){
 
     TalonFXConfiguration configs = new TalonFXConfiguration();
 

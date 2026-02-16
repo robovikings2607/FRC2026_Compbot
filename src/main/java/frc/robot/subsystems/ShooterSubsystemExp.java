@@ -39,7 +39,7 @@ public abstract class ShooterSubsystemExp extends SubsystemBase {
       return error < getTargetTolerance();
     }
 
-    public abstract void configureMotor();
+    protected abstract void configureMotor();
 
     public boolean isReadyToShoot() {
       return isAtTarget();
