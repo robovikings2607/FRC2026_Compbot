@@ -13,6 +13,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -25,18 +27,22 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
+import frc.robot.commands.shooter.TrackHubTargetExp;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.subsystems.FeederSubsystemExp;
 import frc.robot.subsystems.FlywheelSubsystem;
+import frc.robot.subsystems.FlywheelSubsystemExp;
 import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.HoodSubsystemExp;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
-
+import frc.robot.subsystems.TurretSubsystemExp;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -76,14 +82,23 @@ public class RobotContainer {
     
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
-    public final TurretSubsystem turret = new TurretSubsystem(this);
-   /* public final FlywheelSubsystem flywheel = new FlywheelSubsystem(this);
-    public final HoodSubsystem hood = new HoodSubsystem(this);
-    public final FeederSubsystem feeder = new FeederSubsystem(this);
-    public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
-    public final IntakeSubsystem intake = new IntakeSubsystem(this); */
+
+    //Subsystems
+    //real
+    //public final TurretSubsystem turret = new TurretSubsystem(this);
+    // public final FlywheelSubsystem flywheel = new FlywheelSubsystem(this);
+    // public final HoodSubsystem hood = new HoodSubsystem(this);
+    // public final FeederSubsystem feeder = new FeederSubsystem(this);
+    // public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
+    // public final IntakeSubsystem intake = new IntakeSubsystem(this); 
     // public final LEDSubsystem leds = new LEDSubsystem(this);
-    //public final ClimberSubsystem climber = new ClimberSubsystem(this);
+    // public final ClimberSubsystem climber = new ClimberSubsystem(this);
+
+    //experimental
+    public final TurretSubsystemExp turret = new TurretSubsystemExp(this);
+    public final HoodSubsystemExp hood = new HoodSubsystemExp(this);
+    public final FlywheelSubsystemExp flywheel = new FlywheelSubsystemExp(this);
+    public final FeederSubsystemExp feeder = new FeederSubsystemExp(this);    
 
     public RobotContainer() {
 
@@ -103,6 +118,14 @@ public class RobotContainer {
 
         // Initialize the swerve drive to be controlled by the driver's controller
         setDrivetrainMode();
+
+        TrackHubTargetExp trackHubCommand = new TrackHubTargetExp(
+            turret, 
+            () -> this.drivetrain.getState().Pose,
+            () -> getFieldRelativeVelocity()
+        );
+        this.turret.setDefaultCommand(trackHubCommand);
+
 
         // reset the field-centric heading on left bumper press
         driverController.startButton.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -224,6 +247,27 @@ public class RobotContainer {
             
     }
     
+    /**
+     * Gets the actual measured velocity of the robot in Field-Relative coordinates.
+     * This is what you need for shooting on the move.
+     */
+    public ChassisSpeeds getFieldRelativeVelocity() {
+        // 1. Get the current state of all modules (Velocity & Angle)
+        // You likely already have a method or array for this to update Odometry.
+        SwerveModuleState[] moduleStates = drivetrain.getModuleStates();
+
+        // 2. Convert Module States -> Robot-Relative ChassisSpeeds
+        // This tells us: "Robot is moving 2m/s Forward relative to its own nose."
+        ChassisSpeeds robotRelativeSpeeds = drivetrain.getKinematics().toChassisSpeeds(moduleStates);
+
+        // 3. Convert Robot-Relative -> Field-Relative
+        // This tells us: "Robot is moving 1.5m/s North and 1m/s East."
+        // We need the Gyroscope rotation for this math.
+        
+        return ChassisSpeeds.fromRobotRelativeSpeeds(
+            robotRelativeSpeeds, drivetrain.getState().Pose.getRotation()); 
+    }
+
 public static class OI {
   public final XboxController controller;
   public final JoystickButton buttonA, buttonB, buttonY, buttonX, startButton, screenShotButton,
@@ -264,5 +308,3 @@ public static class OI {
 }
 
 }
-
-//Test Comment

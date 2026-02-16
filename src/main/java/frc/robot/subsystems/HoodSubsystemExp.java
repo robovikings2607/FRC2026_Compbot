@@ -1,0 +1,112 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems;
+
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
+import frc.robot.utilities.GeometryUtil;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import frc.robot.Constants.HoodConstants;
+
+
+public class HoodSubsystemExp extends SubsystemBase {
+  private static final double GEAR_RATIO = 10.0; // 10 motor turns = 1 turret turn  
+  private final InterpolatingDoubleTreeMap distanceToAngleMap = new InterpolatingDoubleTreeMap();
+  private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
+  private TalonFX hoodMotor;
+  private double currentTargetRotations = 0.0;
+  // Define your tolerance (e.g., 1 degree converted to rotations)
+  private final double TOLERANCE = 0.01;  
+
+  
+  public HoodSubsystemExp(RobotContainer robot) {
+    initializeDistanceToAngleMap();
+    configureMotor();
+  }
+
+  private void initializeDistanceToAngleMap() {
+      distanceToAngleMap.put(1.0, 15.0);
+      distanceToAngleMap.put(5.0, 55.0);
+  }
+
+  /**
+   * The subsystem decides what angle that requires.
+   */
+  public void SetAngleForDistance(double distanceMeters) {
+    double targetAngleDegrees = distanceToAngleMap.get(distanceMeters);
+    SetAngle(targetAngleDegrees);
+  }
+
+    /**
+   * Sets the angle of motor directly assuming the correct angle
+   * is already known and does not have to be looked up in the map
+   */
+  public void SetAngle(double targetAngleDegrees) {
+    double finalMotorSetpointRotations = GeometryUtil.getDegreesAsMotorRotations(targetAngleDegrees, GEAR_RATIO);
+    
+    hoodMotor.setControl(magicMotionRequest.withPosition(finalMotorSetpointRotations));
+
+    SmartDashboard.putNumber("Hood/newSetPointRotations", finalMotorSetpointRotations);    
+    this.currentTargetRotations = finalMotorSetpointRotations;
+  }
+
+
+  
+  public boolean isAtTarget() {
+      double currentPos = hoodMotor.getPosition().getValueAsDouble();
+
+      // 2. Calculate error manually
+      double error = Math.abs(currentTargetRotations - currentPos);
+
+      return error < TOLERANCE;
+  }
+
+   @Override
+  public void periodic() {
+  }
+
+  public void configureMotor(){
+    hoodMotor = new TalonFX(HoodConstants.HOOD_ID);
+
+    TalonFXConfiguration configs = new TalonFXConfiguration();
+
+    var slot0Configs = configs.Slot0;
+        slot0Configs.kS = 0.25; // Voltage output to overcome static friction
+        slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
+        slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
+        slot0Configs.kP = 4.8; // A position error of 2.5 rotations requires this voltage output
+        slot0Configs.kI = 0; // no output for integrated error
+        slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
+
+    var motionMagicConfigs = configs.MotionMagic;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 160; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 320; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds)
+
+/*     //enable software limits
+    configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
+    //limits (in rotations)
+    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = rotationsPerDegree * 120;
+    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -rotationsPerDegree * 240; */
+  
+    hoodMotor.getConfigurator().apply(configs);
+    hoodMotor.setNeutralMode(NeutralModeValue.Brake);
+
+    hoodMotor.setPosition(0); //
+  }
+
+}
+
+
+
+

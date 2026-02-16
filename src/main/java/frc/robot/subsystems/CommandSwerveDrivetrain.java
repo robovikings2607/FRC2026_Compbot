@@ -18,6 +18,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -358,4 +359,28 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
     }
+
+    /**
+     * Gets the current state (velocity and angle) of all modules.
+     * Converts from CTRE format to WPILib format for Kinematics.
+     */
+    public SwerveModuleState[] getModuleStates() {
+        // 1. Get the raw states from the CTRE SwerveDrivetrain
+        // (This returns com.ctre.phoenix6.mechanisms.swerve.SwerveModule.SwerveModuleState[])
+        var ctreStates = this.getState().ModuleStates;
+
+        // 2. Create an empty array of WPILib states
+        SwerveModuleState[] wpilibStates = new SwerveModuleState[ctreStates.length];
+
+        // 3. Convert each module
+        for (int i = 0; i < ctreStates.length; i++) {
+            wpilibStates[i] = new SwerveModuleState(
+                ctreStates[i].speedMetersPerSecond, // Velocity
+                ctreStates[i].angle                 // Rotation2d
+            );
+        }
+
+        return wpilibStates;
+    }    
+
 }
