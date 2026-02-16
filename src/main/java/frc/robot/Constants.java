@@ -31,8 +31,8 @@ public final class Constants {
   public static final class TurretConstants {
     public static final int TURRET_ID = 30;
     
-    public static final double MAX_ANGLE = 309.96;
-    public static final double MIN_ANGLE = -50.04;
+    public static final double MAX_ANGLE = 85.428;
+    public static final double MIN_ANGLE = -309.96;
   }
 
   public static final class FlywheelConstants {

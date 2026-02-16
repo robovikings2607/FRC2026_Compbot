@@ -11,7 +11,7 @@ import frc.robot.Constants.IntakeConstants;
 public class IntakeSubsystem extends SubsystemBase {
 
   private final TalonFX rollerMotor;
-  private final TalonFX pivotMotor;
+  // private final TalonFX pivotMotor;
 
   private final PositionVoltage positionVoltage = new PositionVoltage(0);
 
@@ -23,15 +23,15 @@ public class IntakeSubsystem extends SubsystemBase {
     this.robot = robot;
 
     rollerMotor = new TalonFX(IntakeConstants.ROLLER_ID);
-    pivotMotor = new TalonFX(IntakeConstants.PIVOT_ID);
+    // pivotMotor = new TalonFX(IntakeConstants.PIVOT_ID);
 
     configurePivotMotor();
-    zeroIntake();
+    // zeroIntake();
   }
 
   @Override
   public void periodic() {
-    pivotMotor.setControl(positionVoltage.withPosition(intakePosition));
+    // pivotMotor.setControl(positionVoltage.withPosition(intakePosition));
   }
 
   public void configurePivotMotor(){
@@ -45,7 +45,7 @@ public class IntakeSubsystem extends SubsystemBase {
         slot0Configs.kI = 0; // no output for integrated error
         slot0Configs.kD = 0.0; // A velocity error of 1 rps requires this voltage output
     
-    pivotMotor.getConfigurator().apply(slot0Configs);
+    // pivotMotor.getConfigurator().apply(slot0Configs);
   }
 
   public void runRollers(){
@@ -73,12 +73,12 @@ public class IntakeSubsystem extends SubsystemBase {
     intakePosition = IntakeConstants.INTAKE_RETRACTED;
   }
 
-  public void zeroIntake(){
+ /*  public void zeroIntake(){
     pivotMotor.set(0.5);
 
     if(pivotMotor.getStatorCurrent().getValueAsDouble() > 10.0){
       pivotMotor.set(0.0);
       pivotMotor.setPosition(0.0);
     }
-  }
+  } */
 }

@@ -77,9 +77,9 @@ public class TurretSubsystem extends SubsystemBase {
         slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 160; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 320; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 10; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 20; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 100; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
 /*     //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
@@ -108,15 +108,14 @@ public class TurretSubsystem extends SubsystemBase {
     //checks alliance and aims at corresponding hub
     double newSetPoint = 0;
 
-/*     if(DriverStation.getAlliance() == null){
-      return;
-    }
-    else  */
-    if(DriverStation.getAlliance().get() == Alliance.Blue){
+    if(DriverStation.getAlliance().equals(null)){
       newSetPoint = getTurretSetPoint(shooterPose, FieldElements.BLUE_HUB, robotRotation);      
     }
-    else if(DriverStation.getAlliance().get() == Alliance.Red){
-      newSetPoint = getTurretSetPoint(shooterPose, FieldElements.RED_HUB, robotRotation);            
+    else if(DriverStation.getAlliance().get().equals(Alliance.Blue)){
+      newSetPoint = getTurretSetPoint(shooterPose, FieldElements.BLUE_HUB, robotRotation);      
+    }
+    else if(DriverStation.getAlliance().get().equals(Alliance.Red)){
+      newSetPoint = getTurretSetPoint(shooterPose, FieldElements.BLUE_HUB, robotRotation);      
     }
 
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
@@ -128,12 +127,7 @@ public class TurretSubsystem extends SubsystemBase {
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
-    if(isZeroed){
-      turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos));
-    }
-/*     else{
-      zeroTurret();
-    } */
+    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - .401367));
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);

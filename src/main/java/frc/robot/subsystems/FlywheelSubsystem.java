@@ -45,10 +45,13 @@ public class FlywheelSubsystem extends SubsystemBase {
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
     Translation2d goalPose = new Translation2d();
 
-    if(DriverStation.getAlliance().get() == Alliance.Blue){
+    if(DriverStation.getAlliance().equals(null)){
+      goalPose = FieldElements.BLUE_HUB;
+    }
+    else if(DriverStation.getAlliance().get().equals(Alliance.Blue)){
       goalPose = FieldElements.BLUE_HUB;      
     }
-    else if(DriverStation.getAlliance().get() == Alliance.Red){
+    else if(DriverStation.getAlliance().get().equals(Alliance.Red)){
       goalPose = FieldElements.RED_HUB;            
     }
 
@@ -57,7 +60,7 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     flywheelMotor.setControl(velocityControl.withVelocity(rps)
                                             .withAcceleration(100)
-                                            .withFeedForward(rps * 0.012));
+                                            .withFeedForward(rps * 0.012)); //should be constant
   }
 
   public void configureMotor(){ 
