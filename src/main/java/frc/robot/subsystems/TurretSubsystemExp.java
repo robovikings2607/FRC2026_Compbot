@@ -122,6 +122,7 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
 
       Translation2d driftAdjustment = new Translation2d(robotVx * timeOfFlight, robotVy * timeOfFlight);
       Translation2d virtualTarget = turretPose.getTranslation().minus(driftAdjustment);
+      double virtualDistance = virtualTarget.getDistance(turretPose.getTranslation());
 
       //calculate the angle from the turret center to the target center
       double turretTargetAngleDegrees = GeometryUtil.getTargetAngleDegrees(
@@ -134,7 +135,7 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
         turretTargetAngleDegrees, 
         robotRotationDegrees);
 
-      return new Translation2d(distance, Rotation2d.fromDegrees(adjustedTurretTargetAngleDegrees));
+      return new Translation2d(virtualDistance, Rotation2d.fromDegrees(adjustedTurretTargetAngleDegrees));
     }
 
   /**
@@ -169,7 +170,7 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
       boolean isRobotMoving = (Math.abs(robotVelocity.vxMetersPerSecond) > 0.1) || 
                               (Math.abs(robotVelocity.omegaRadiansPerSecond) > 0.2);
 
-      double currentTolerance = isRobotMoving ? 3.0 : 1.0;
+      double currentToleranceDegrees = isRobotMoving ? 3.0 : 1.0;
       
       // --- 6. STABILITY CHECK (Velocity Interlock) ---
       // Even if error is low, don't fire if we are "sweeping" past the target.
@@ -179,7 +180,7 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
       boolean isStable = Math.abs(turretVelocityDegPerSec) < 10.0;
 
       // --- 7. FINAL DECISION ---
-      return (error < currentTolerance) && isStable;
+      return (error < currentToleranceDegrees) && isStable;
   }  
 
   @Override
