@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.TurretConstants;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
@@ -272,6 +273,50 @@ public class RobotContainer {
         
         return ChassisSpeeds.fromRobotRelativeSpeeds(
             robotRelativeSpeeds, drivetrain.getState().Pose.getRotation()); 
+    }
+
+    public static double calculateRotationOverride(double currentDegrees, double targetDegrees) {
+
+        // A. The "Pin" Check (Are we physically stuck?)
+        // We consider the turret "stuck" if it is within 5 degrees of the limit.
+        // Example: 130 - 5 = 125.0
+        double NEAR_LIMIT_POS = TurretConstants.MAX_ANGLE - 5.0;
+        double NEAR_LIMIT_NEG = TurretConstants.MAX_ANGLE + 5.0; // -130 + 5 = -125
+
+        // B. The "Trigger" (When to ask for help)
+        // We only ask for help if the target is significantly PAST the limit.
+        // This prevents the robot from jittering if the target is just barely out of reach.
+        // Example: 130 + 5 = 135.0
+        double TRIGGER_POS = TurretConstants.MAX_ANGLE + 5.0;
+        double TRIGGER_NEG = TurretConstants.MAX_ANGLE - 5.0; // -130 - 5 = -135
+
+        // --- 3. THE SPEED ---
+        double UNWIND_SPEED = 2.0; // Rad/Sec
+
+        // --- LOGIC: LEFT SIDE (Positive) ---
+        // 1. Is the target asking us to go past the trigger point? (e.g. > 135)
+        boolean targetIsForbiddenLeft = targetDegrees > TRIGGER_POS;
+        
+        // 2. Is the turret physically at the limit? (e.g. > 125)
+        boolean turretIsPinnedLeft = currentDegrees > NEAR_LIMIT_POS;
+
+        if (targetIsForbiddenLeft && turretIsPinnedLeft) {
+            return UNWIND_SPEED; // Turn Left
+        }
+
+        // --- LOGIC: RIGHT SIDE (Negative) ---
+        // 1. Is the target asking us to go past the trigger point? (e.g. < -135)
+        boolean targetIsForbiddenRight = targetDegrees < TRIGGER_NEG;
+        
+        // 2. Is the turret physically at the limit? (e.g. < -125)
+        boolean turretIsPinnedRight = currentDegrees < NEAR_LIMIT_NEG;
+
+        if (targetIsForbiddenRight && turretIsPinnedRight) {
+            return -UNWIND_SPEED; // Turn Right
+        }
+
+        return 0.0;
+
     }
 
 public static class OI {

@@ -19,12 +19,9 @@ import frc.robot.utilities.GeometryUtil;
 
 public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
   private static final double GEAR_RATIO = 10.0; // 10 motor turns = 1 turret turn  
-  private static final double rotationsPerDegree = 10.0/360.0;
   private static final  double BOT_TO_TURRET_DISTANCE_INCHES = Math.sqrt(Math.pow(0, 2) + Math.pow(7, 2));
   private static final double BOT_TO_TURRET_ANGLE_DEGREES = Math.toDegrees(Math.atan2(7, 0));
 
-  private static final int MAX_TURRET_ANGLE_DEGREES = 162;
-  private static final int MIN_TURRET_ANGLE_DEGREES = -162;  
   private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;    
   
   public TurretSubsystemExp(RobotContainer robot) {
@@ -47,12 +44,10 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
     ChassisSpeeds robotVelocity) {
 
     double idealTurretTargetAngleDegrees = getTurretAngleToTarget(robotPose, targetCoordinates, robotVelocity);
+    SmartDashboard.putNumber("Turret/newTurretAngleToTargetDegrees", idealTurretTargetAngleDegrees);
 
-    //can't allow target angle to exceed the soft limits in either direction
-    double safeTargetAngleDegrees = MathUtil.clamp(
-      idealTurretTargetAngleDegrees, MIN_TURRET_ANGLE_DEGREES, MAX_TURRET_ANGLE_DEGREES);
-
-    SmartDashboard.putNumber("Turret/newTurretAngleToTargetDegrees", safeTargetAngleDegrees);
+    //no longer need to clamp the value between soft limits because those soft limits are
+    //being set in the motor configuration.
     
     double finalMotorSetpointRotations = GeometryUtil.getDegreesAsMotorRotations(idealTurretTargetAngleDegrees, GEAR_RATIO);
     SmartDashboard.putNumber("Turret/newSetPointRotations", finalMotorSetpointRotations);
@@ -60,24 +55,6 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
     motor.setControl(magicMotionRequest.withPosition(finalMotorSetpointRotations));
   }  
 
-  public void trackTarget2(
-    Pose2d robotPose, 
-    Translation2d targetCoordinates,
-    ChassisSpeeds robotVelocity) {
-
-    double idealTurretTargetAngleDegrees = getTurretAngleToTarget(robotPose, targetCoordinates, robotVelocity);
-
-    //can't allow target angle to exceed the soft limits in either direction
-    double safeTargetAngleDegrees = MathUtil.clamp(
-      idealTurretTargetAngleDegrees, MIN_TURRET_ANGLE_DEGREES, MAX_TURRET_ANGLE_DEGREES);
-
-    SmartDashboard.putNumber("Turret/newTurretAngleToTargetDegrees", safeTargetAngleDegrees);
-    
-    double finalMotorSetpointRotations = GeometryUtil.getDegreesAsMotorRotations(idealTurretTargetAngleDegrees, GEAR_RATIO);
-    SmartDashboard.putNumber("Turret/newSetPointRotations", finalMotorSetpointRotations);
-    
-    motor.setControl(magicMotionRequest.withPosition(finalMotorSetpointRotations));
-  }  
 
     private double getTurretAngleToTarget(
       Pose2d robotPose, 
@@ -205,8 +182,8 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
 
     // 2. SET THE THRESHOLDS (in Rotations)
     // ALWAYS set these slightly safer than the physical hard stop.
-    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = GeometryUtil.getMotorRotationsAsDegrees(MAX_TURRET_ANGLE_DEGREES, GEAR_RATIO);
-    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = GeometryUtil.getMotorRotationsAsDegrees(MIN_TURRET_ANGLE_DEGREES, GEAR_RATIO);;
+    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = GeometryUtil.getMotorRotationsAsDegrees(TurretConstants.MAX_ANGLE, GEAR_RATIO);
+    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = GeometryUtil.getMotorRotationsAsDegrees(TurretConstants.MIN_ANGLE, GEAR_RATIO);;
 
 
     motor.getConfigurator().apply(configs);
