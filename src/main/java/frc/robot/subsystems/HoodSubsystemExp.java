@@ -12,7 +12,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants.HoodConstants;
 
 
-public class HoodSubsystemExp extends ShooterSubsystemExp {
+public class HoodSubsystemExp extends ShooterComponentSubsystemExp {
   private static final double GEAR_RATIO = 1.0;
   private final InterpolatingDoubleTreeMap distanceToAngleMap = new InterpolatingDoubleTreeMap();
   private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;  

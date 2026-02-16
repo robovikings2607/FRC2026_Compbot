@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
+import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
 import frc.robot.commands.shooter.TrackHubTargetExp;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -40,6 +41,7 @@ import frc.robot.subsystems.HoodSubsystemExp;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.ShooterSubsystemExp;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TurretSubsystemExp;
@@ -99,6 +101,7 @@ public class RobotContainer {
     public final HoodSubsystemExp hood = new HoodSubsystemExp(this);
     public final FlywheelSubsystemExp flywheel = new FlywheelSubsystemExp(this);
     public final FeederSubsystemExp feeder = new FeederSubsystemExp(this);    
+    public final ShooterSubsystemExp shooter = new ShooterSubsystemExp(this);        
 
     public RobotContainer() {
 
@@ -119,12 +122,15 @@ public class RobotContainer {
         // Initialize the swerve drive to be controlled by the driver's controller
         setDrivetrainMode();
 
-        TrackHubTargetExp trackHubCommand = new TrackHubTargetExp(
+        AutoAimAndShootCommandExp autoShootCommand = new AutoAimAndShootCommandExp(
             turret, 
+            hood, 
+            flywheel, 
+            feeder,
             () -> this.drivetrain.getState().Pose,
             () -> getFieldRelativeVelocity()
         );
-        this.turret.setDefaultCommand(trackHubCommand);
+        this.shooter.setDefaultCommand(autoShootCommand);        
 
 
         // reset the field-centric heading on left bumper press

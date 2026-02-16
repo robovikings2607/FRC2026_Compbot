@@ -1,28 +1,44 @@
 package frc.robot.commands.shooter;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.FieldElements;
 import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.subsystems.FeederSubsystemExp;
 import frc.robot.subsystems.FlywheelSubsystemExp;
 import frc.robot.subsystems.HoodSubsystemExp;
 import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.TurretSubsystemExp;
 
 public class AutoAimAndShootCommandExp extends Command {
-    private final TurretSubsystem turret;
+    private final TurretSubsystemExp turret;
     private final HoodSubsystemExp hood;
     private final FlywheelSubsystemExp flywheel;
-    private final FeederSubsystem feeder;
-    private final DoubleSupplier distanceSupplier;
+    private final FeederSubsystemExp feeder;
+    private final Supplier<Pose2d> robotPoseProvider;  
+    private final Supplier<ChassisSpeeds> robotVelocityProvider;    
 
-    public AutoAimAndShootCommandExp(TurretSubsystem turret, HoodSubsystemExp hood, 
-                          FlywheelSubsystemExp flywheel, FeederSubsystem feeder,
-                          DoubleSupplier distanceSupplier) {
+    public AutoAimAndShootCommandExp(
+        TurretSubsystemExp turret, 
+        HoodSubsystemExp hood, 
+        FlywheelSubsystemExp flywheel, 
+        FeederSubsystemExp feeder,
+        Supplier<Pose2d> robotPoseProvider,
+        Supplier<ChassisSpeeds> robotVelocityProvider) {
+
         this.turret = turret;
         this.hood = hood;
         this.flywheel = flywheel;
         this.feeder = feeder;
-        this.distanceSupplier = distanceSupplier;
+        this.robotPoseProvider = robotPoseProvider;    
+        this.robotVelocityProvider = robotVelocityProvider;        
         
         // Command requires all these subsystems
         addRequirements(turret, hood, flywheel, feeder);
@@ -30,19 +46,41 @@ public class AutoAimAndShootCommandExp extends Command {
 
     @Override
     public void execute() {
-        // 1. Get the single source of truth (Distance)
-        double dist = distanceSupplier.getAsDouble();
 
-        // 2. Broadcast distance to subsystems
-        // turret.trackTarget();       // Turret handles aiming
-        // hood.setTargetDistance(dist);   // Hood handles Angle mapping
-        // flywheel.setTargetDistance(dist); // Flywheel handles RPM mapping
+        Pose2d robotPose = robotPoseProvider.get();
+        ChassisSpeeds robotVelocity = robotVelocityProvider.get();
 
-        // // 3. Check if everyone is ready
-        // if (turret.isAligned() && hood.isAtTarget() && flywheel.isAtTarget()) {
-        //     feeder.run();
-        // } else {
-        //     feeder.stop();
-        // }
+        if (DriverStation.getAlliance().isPresent()) {
+            Translation2d hubCoordinates = DriverStation.getAlliance().get() == Alliance.Blue ? 
+            FieldElements.BLUE_HUB : FieldElements.RED_HUB;
+        
+            Translation2d targetTranslation = this.turret.getTurretTranslationToTarget(
+                robotPose,
+                hubCoordinates, 
+                robotVelocity);
+        
+            turret.trackTarget(
+                robotPose, 
+                hubCoordinates, 
+                robotVelocity); //Turret handles horizontal angle mapping
+
+            double dist = targetTranslation.getNorm();
+            
+            hood.SetAngleForDistance(dist);   // Hood handles vertical angle mapping
+            flywheel.setRPMForDistance(dist); // Flywheel handles RPM mapping
+
+            if (turret.isReadyToShoot(targetTranslation.getAngle().getDegrees(), robotVelocity) && 
+                hood.isReadyToShoot() && flywheel.isReadyToShoot()) {
+                feeder.run(1.0); // Pass 1.0 (Full Speed)
+            }
+            else {
+                feeder.stop();
+            }
+
+        }
+
+
+
+
     }
 }

@@ -45,7 +45,7 @@ public class TrackHubTargetExp extends Command {
         FieldElements.BLUE_HUB : FieldElements.RED_HUB;
         
         
-        turretSubsystem.positionTurretOnTarget(robotPoseProvider.get(), hubCoordinates, robotVelocityProvider.get());
+        turretSubsystem.trackTarget(robotPoseProvider.get(), hubCoordinates, robotVelocityProvider.get());
     }
   }
 

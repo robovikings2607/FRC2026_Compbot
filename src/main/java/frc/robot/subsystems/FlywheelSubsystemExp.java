@@ -8,7 +8,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants.FlywheelConstants;
 
 
-public class FlywheelSubsystemExp extends ShooterSubsystemExp {
+public class FlywheelSubsystemExp extends ShooterComponentSubsystemExp {
     private static final double GEAR_RATIO = 1.0;
     private final InterpolatingDoubleTreeMap distanceToRPMMap = new InterpolatingDoubleTreeMap();
     private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;  

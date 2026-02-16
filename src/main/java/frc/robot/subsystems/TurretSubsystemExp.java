@@ -22,7 +22,7 @@ import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.utilities.GeometryUtil;
 
-public class TurretSubsystemExp extends ShooterSubsystemExp {
+public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
   private static final double GEAR_RATIO = 10.0; // 10 motor turns = 1 turret turn  
   private static final double rotationsPerDegree = 10.0/360.0;
   private static final  double BOT_TO_TURRET_DISTANCE_INCHES = Math.sqrt(Math.pow(0, 2) + Math.pow(7, 2));
@@ -46,7 +46,26 @@ public class TurretSubsystemExp extends ShooterSubsystemExp {
 
   }
 
-  public void positionTurretOnTarget(
+  public void trackTarget(
+    Pose2d robotPose, 
+    Translation2d targetCoordinates,
+    ChassisSpeeds robotVelocity) {
+
+    double idealTurretTargetAngleDegrees = getTurretAngleToTarget(robotPose, targetCoordinates, robotVelocity);
+
+    //can't allow target angle to exceed the soft limits in either direction
+    double safeTargetAngleDegrees = MathUtil.clamp(
+      idealTurretTargetAngleDegrees, MIN_TURRET_ANGLE_DEGREES, MAX_TURRET_ANGLE_DEGREES);
+
+    SmartDashboard.putNumber("Turret/newTurretAngleToTargetDegrees", safeTargetAngleDegrees);
+    
+    double finalMotorSetpointRotations = GeometryUtil.getDegreesAsMotorRotations(idealTurretTargetAngleDegrees, GEAR_RATIO);
+    SmartDashboard.putNumber("Turret/newSetPointRotations", finalMotorSetpointRotations);
+    
+    motor.setControl(magicMotionRequest.withPosition(finalMotorSetpointRotations));
+  }  
+
+  public void trackTarget2(
     Pose2d robotPose, 
     Translation2d targetCoordinates,
     ChassisSpeeds robotVelocity) {
@@ -66,6 +85,19 @@ public class TurretSubsystemExp extends ShooterSubsystemExp {
   }  
 
     private double getTurretAngleToTarget(
+      Pose2d robotPose, 
+      Translation2d targetCoordinates, 
+      ChassisSpeeds robotVelocity) {
+    
+      Translation2d targetTranslation = getTurretTranslationToTarget(
+          robotPose,
+          targetCoordinates, 
+          robotVelocity);
+
+      return targetTranslation.getAngle().getDegrees();
+    }
+
+    public Translation2d getTurretTranslationToTarget(
       Pose2d robotPose, 
       Translation2d targetCoordinates, 
       ChassisSpeeds robotVelocity) {
@@ -102,7 +134,7 @@ public class TurretSubsystemExp extends ShooterSubsystemExp {
         turretTargetAngleDegrees, 
         robotRotationDegrees);
 
-      return adjustedTurretTargetAngleDegrees;
+      return new Translation2d(distance, Rotation2d.fromDegrees(adjustedTurretTargetAngleDegrees));
     }
 
   /**
@@ -113,14 +145,8 @@ public class TurretSubsystemExp extends ShooterSubsystemExp {
    * @return True if safe to fire, False if aiming or unstable.
    */
   public boolean isReadyToShoot(
-    Pose2d currentRobotPose, 
-    Translation2d targetCoordinates, 
+    double idealTargetDegrees, 
     ChassisSpeeds robotVelocity) {
-      
-      // --- 1. THE TRUTH (Recalculate Fresh Target) ---
-      // We re-calculate the angle right now to account for any robot lag.
-      // NOTE: This must be the UNCLAMPED, ideal angle (-180 to 180).
-      double idealTargetDegrees = getTurretAngleToTarget(currentRobotPose,  targetCoordinates, robotVelocity);
       
       // --- 2. THE REALITY (Actual Turret State) ---
       // Get the current position and velocity from the motor.
