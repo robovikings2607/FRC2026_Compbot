@@ -42,7 +42,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final DigitalInput limitSwitch;
   private double previousSetPoint, previousEncoderPos;
   private boolean isPressed, isZeroed;
-
+  private double offset = .442;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -127,7 +127,7 @@ public class TurretSubsystem extends SubsystemBase {
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
-    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - .401367));
+    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - offset));
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);

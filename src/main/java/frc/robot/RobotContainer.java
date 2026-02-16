@@ -25,6 +25,9 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
+import frc.robot.commands.intake.ReverseIntake;
+import frc.robot.commands.intake.RunIntake;
+import frc.robot.commands.intake.StopIntake;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -76,12 +79,12 @@ public class RobotContainer {
     
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
-    public final TurretSubsystem turret = new TurretSubsystem(this);
-   /* public final FlywheelSubsystem flywheel = new FlywheelSubsystem(this);
-    public final HoodSubsystem hood = new HoodSubsystem(this);
-    public final FeederSubsystem feeder = new FeederSubsystem(this);
-    public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
-    public final IntakeSubsystem intake = new IntakeSubsystem(this); */
+    //public final TurretSubsystem turret = new TurretSubsystem(this);
+    //public final FlywheelSubsystem flywheel = new FlywheelSubsystem(this);
+    //public final HoodSubsystem hood = new HoodSubsystem(this);
+    //public final FeederSubsystem feeder = new FeederSubsystem(this);
+    //public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
+    public final IntakeSubsystem intake = new IntakeSubsystem(this);
     // public final LEDSubsystem leds = new LEDSubsystem(this);
     //public final ClimberSubsystem climber = new ClimberSubsystem(this);
 
@@ -111,6 +114,11 @@ public class RobotContainer {
 
         // toggle between hi gear and low gear
         driverController.rightStick.onTrue(new ToggleHighLowGear(this));
+
+        //Intake
+        driverController.leftBumper.onTrue(new RunIntake(this));
+        driverController.leftTriggerButton.onTrue(new StopIntake(this));
+        driverController.rightBumper.onTrue(new ReverseIntake(this));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
