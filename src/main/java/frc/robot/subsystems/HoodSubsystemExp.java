@@ -14,20 +14,20 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import frc.robot.Constants.FlywheelConstants;
 import frc.robot.Constants.HoodConstants;
 
 
-public class HoodSubsystemExp extends SubsystemBase {
-  private static final double GEAR_RATIO = 10.0; // 10 motor turns = 1 turret turn  
+public class HoodSubsystemExp extends ShooterSubsystemExp {
+  private static final double GEAR_RATIO = 1.0;
   private final InterpolatingDoubleTreeMap distanceToAngleMap = new InterpolatingDoubleTreeMap();
-  private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
-  private TalonFX hoodMotor;
-  private double currentTargetRotations = 0.0;
-  // Define your tolerance (e.g., 1 degree converted to rotations)
-  private final double TOLERANCE = 0.01;  
+  private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;  
 
   
   public HoodSubsystemExp(RobotContainer robot) {
+    super(robot, HoodConstants.HOOD_ID);    
+    
     initializeDistanceToAngleMap();
     configureMotor();
   }
@@ -50,31 +50,19 @@ public class HoodSubsystemExp extends SubsystemBase {
    * is already known and does not have to be looked up in the map
    */
   public void SetAngle(double targetAngleDegrees) {
-    double finalMotorSetpointRotations = GeometryUtil.getDegreesAsMotorRotations(targetAngleDegrees, GEAR_RATIO);
+    double motorSetpointRotations = GeometryUtil.getDegreesAsMotorRotations(targetAngleDegrees, GEAR_RATIO);
     
-    hoodMotor.setControl(magicMotionRequest.withPosition(finalMotorSetpointRotations));
-
-    SmartDashboard.putNumber("Hood/newSetPointRotations", finalMotorSetpointRotations);    
-    this.currentTargetRotations = finalMotorSetpointRotations;
+    SetMotorPosition(motorSetpointRotations, "Hood/newSetPointRotations");    
   }
 
 
   
-  public boolean isAtTarget() {
-      double currentPos = hoodMotor.getPosition().getValueAsDouble();
-
-      // 2. Calculate error manually
-      double error = Math.abs(currentTargetRotations - currentPos);
-
-      return error < TOLERANCE;
-  }
 
    @Override
   public void periodic() {
   }
 
   public void configureMotor(){
-    hoodMotor = new TalonFX(HoodConstants.HOOD_ID);
 
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
@@ -99,10 +87,15 @@ public class HoodSubsystemExp extends SubsystemBase {
     configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = rotationsPerDegree * 120;
     configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -rotationsPerDegree * 240; */
   
-    hoodMotor.getConfigurator().apply(configs);
-    hoodMotor.setNeutralMode(NeutralModeValue.Brake);
+    motor.getConfigurator().apply(configs);
+    motor.setNeutralMode(NeutralModeValue.Brake);
 
-    hoodMotor.setPosition(0); //
+    motor.setPosition(0); //
+  }
+
+  @Override
+  public double getTargetTolerance() {
+    return TARGET_ERR_TOLERANCE_ROTATIONS;
   }
 
 }

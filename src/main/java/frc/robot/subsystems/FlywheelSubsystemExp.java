@@ -1,20 +1,17 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotContainer;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import frc.robot.Constants.FlywheelConstants;
 
 
 public class FlywheelSubsystemExp extends ShooterSubsystemExp {
-    private static final double GEAR_RATIO = 10.0; // 10 motor turns = 1 turret turn  
-    private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
+    private static final double GEAR_RATIO = 1.0;
     private final InterpolatingDoubleTreeMap distanceToRPMMap = new InterpolatingDoubleTreeMap();
-    private final double TARGET_ERR_TOLERANCE = 0.01;  
+    private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;  
 
 
 
@@ -36,24 +33,15 @@ public class FlywheelSubsystemExp extends ShooterSubsystemExp {
     }
 
     public void setRPM(double targetRPM) {
-        double finalMotorSetpointRotations = targetRPM / GEAR_RATIO;
-        
-        motor.setControl(magicMotionRequest.withPosition(finalMotorSetpointRotations));
-        SmartDashboard.putNumber("Hood/newSetPointRotations", finalMotorSetpointRotations);
+        double motorSetpointRotations = targetRPM / GEAR_RATIO;
 
-        this.currentTargetRotations = finalMotorSetpointRotations;
+        SetMotorPosition(motorSetpointRotations, "Flywheel/newSetPointRotations");
     }
 
     @Override
     public void configureMotor(){
 
     TalonFXConfiguration configs = new TalonFXConfiguration();
-
-    //If you set the SensorToMechanismRatio then the Pheonix does the math to convert
-    //to motor rotations but you must then set everything inclduing
-    //the pid values below in terms of mechanism rotations
-    //configsFeedback.SensorToMechanismRatio = GEAR_RATIO;
-
 
     var slot0Configs = configs.Slot0;
         slot0Configs.kS = 0.25; // Voltage output to overcome static friction
@@ -84,6 +72,6 @@ public class FlywheelSubsystemExp extends ShooterSubsystemExp {
 
   @Override
   public double getTargetTolerance() {
-    return TARGET_ERR_TOLERANCE;
+    return TARGET_ERR_TOLERANCE_ROTATIONS;
   }
 }

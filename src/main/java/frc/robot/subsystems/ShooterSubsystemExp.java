@@ -1,13 +1,17 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 
 public abstract class ShooterSubsystemExp extends SubsystemBase {
-    protected TalonFX motor;
-    protected RobotContainer robot;
+    protected final TalonFX motor;
+    protected final RobotContainer robot;
+    protected final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);    
     protected double currentTargetRotations = 0.0;
 
     public ShooterSubsystemExp(RobotContainer robot, int canId) {
@@ -16,6 +20,12 @@ public abstract class ShooterSubsystemExp extends SubsystemBase {
       configureMotor();
     }
 
+    protected void SetMotorPosition(double motorSetpointRotations, String smartDashBoardKey) {
+        motor.setControl(magicMotionRequest.withPosition(motorSetpointRotations));
+        SmartDashboard.putNumber(smartDashBoardKey, motorSetpointRotations);
+
+        this.currentTargetRotations = motorSetpointRotations;
+    }
 
     public void setCurrentRotations(double currentTargetRotations) {
         this.currentTargetRotations = currentTargetRotations;
