@@ -22,9 +22,12 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.FlywheelConstants;
+import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.TurretConstants;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
@@ -42,7 +45,6 @@ import frc.robot.subsystems.HoodSubsystemExp;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
-import frc.robot.subsystems.ShooterSubsystemExp;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TurretSubsystemExp;
@@ -102,17 +104,35 @@ public class RobotContainer {
     public final HoodSubsystemExp hood = new HoodSubsystemExp(this);
     public final FlywheelSubsystemExp flywheel = new FlywheelSubsystemExp(this);
     public final FeederSubsystemExp feeder = new FeederSubsystemExp(this);    
-    public final ShooterSubsystemExp shooter = new ShooterSubsystemExp(this);        
 
     public RobotContainer() {
 
         configureBindings();
+        configureDefaultCommands();
 
         autoChooser = AutoBuilder.buildAutoChooser();
         
         SmartDashboard.putData("Auto Chooser", autoChooser);
         SmartDashboard.putData("Field!!!", field);
         SmartDashboard.putNumber("kFrontRightEncoderOffset", drivetrain.getModule(1).getEncoder().getAbsolutePosition().getValueAsDouble());
+    }
+
+    private void configureDefaultCommands() {
+        turret.setDefaultCommand(new TrackHubTargetExp(
+            turret, 
+            () -> drivetrain.getState().Pose,
+            this::getFieldRelativeVelocity
+        ));
+
+        flywheel.setDefaultCommand(new RunCommand(
+            () -> flywheel.setRPM(FlywheelConstants.IDLE_RPM), 
+            flywheel
+        ));
+
+        hood.setDefaultCommand(new RunCommand(
+            () -> hood.setAngle(HoodConstants.ZERO_POSITION_ANGLE), 
+            hood
+        ));
     }
 
     private void configureBindings() {
@@ -122,16 +142,6 @@ public class RobotContainer {
 
         // Initialize the swerve drive to be controlled by the driver's controller
         setDrivetrainMode();
-
-        AutoAimAndShootCommandExp autoShootCommand = new AutoAimAndShootCommandExp(
-            turret, 
-            hood, 
-            flywheel, 
-            feeder,
-            () -> this.drivetrain.getState().Pose,
-            () -> getFieldRelativeVelocity()
-        );
-        this.shooter.setDefaultCommand(autoShootCommand);        
 
 
         // reset the field-centric heading on left bumper press
@@ -166,6 +176,17 @@ public class RobotContainer {
 
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+
+        joystick.rightBumper().whileTrue(
+            new AutoAimAndShootCommandExp(
+                turret, 
+                hood, 
+                flywheel, 
+                feeder,
+                () -> this.drivetrain.getState().Pose,
+                this::getFieldRelativeVelocity
+            )            
+        );        
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

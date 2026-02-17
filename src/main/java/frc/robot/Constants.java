@@ -37,6 +37,7 @@ public final class Constants {
 
   public static final class FlywheelConstants {
     public static final int FLYWHEEL_ID = 17;
+    public static final double IDLE_RPM = 1500.0;    
   }
 
   public static final class HoodConstants {
@@ -47,6 +48,8 @@ public final class Constants {
     
     public static final double MAX_SHOT_ANGLE = 90.0 - 38.2; //check these later 
     public static final double MIN_SHOT_ANGLE = 90.0 - 59.91; //check these later
+
+    public static final double ZERO_POSITION_ANGLE = 0.0;
   }
 
   public static final class IntakeConstants {

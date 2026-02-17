@@ -33,16 +33,16 @@ public class HoodSubsystemExp extends ShooterComponentSubsystemExp {
   /**
    * The subsystem decides what angle that requires.
    */
-  public void SetAngleForDistance(double distanceMeters) {
+  public void setAngleForDistance(double distanceMeters) {
     double targetAngleDegrees = distanceToAngleMap.get(distanceMeters);
-    SetAngle(targetAngleDegrees);
+    setAngle(targetAngleDegrees);
   }
 
     /**
    * Sets the angle of motor directly assuming the correct angle
    * is already known and does not have to be looked up in the map
    */
-  public void SetAngle(double targetAngleDegrees) {
+  public void setAngle(double targetAngleDegrees) {
     double motorSetpointRotations = GeometryUtil.getDegreesAsMotorRotations(targetAngleDegrees, GEAR_RATIO);
     
     SetMotorPosition(motorSetpointRotations, "Hood/newSetPointRotations");    

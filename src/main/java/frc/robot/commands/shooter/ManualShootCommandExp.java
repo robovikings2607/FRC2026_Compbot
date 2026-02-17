@@ -29,7 +29,7 @@ public class ManualShootCommandExp extends Command {
     @Override
     public void execute() {
         // Direct control: Bypass the "Distance" logic
-        hood.SetAngle(targetAngle); 
+        hood.setAngle(targetAngle); 
         flywheel.setRPM(targetRPM);
 
         // Simple check: Are we there yet?
