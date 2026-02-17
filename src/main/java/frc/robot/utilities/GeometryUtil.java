@@ -28,10 +28,10 @@ public final class GeometryUtil {
     Pose2d startingPoint, 
     double offsetDistanceMeters, 
     Rotation2d offsetAngleDegrees,
-    Rotation2d offsetBaseAngleDegrees) {
+    Rotation2d zeroMotorPositionAngleDegrees) {
 
     Translation2d offsetVector = new Translation2d(offsetDistanceMeters, offsetAngleDegrees);
-    Transform2d robotToOffset = new Transform2d(offsetVector, offsetBaseAngleDegrees);
+    Transform2d robotToOffset = new Transform2d(offsetVector, zeroMotorPositionAngleDegrees);
     Pose2d offsetPose = startingPoint.transformBy(robotToOffset);    
     
     return offsetPose;    
