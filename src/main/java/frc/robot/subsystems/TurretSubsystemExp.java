@@ -50,9 +50,8 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
     //being set in the motor configuration.
     
     double finalMotorSetpointRotations = GeometryUtil.getDegreesAsMotorRotations(idealTurretTargetAngleDegrees, GEAR_RATIO);
-    SmartDashboard.putNumber("Turret/newSetPointRotations", finalMotorSetpointRotations);
-    
-    motor.setControl(magicMotionRequest.withPosition(finalMotorSetpointRotations));
+   
+    SetAgressiveMotorPosition(finalMotorSetpointRotations, "Turret/newSetPointRotations");
   }  
 
 
@@ -168,6 +167,13 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
         slot0Configs.kP = 20.0; // A position error of .55 rotations requires this voltage output
         slot0Configs.kI = 0; // no output for integrated error
         slot0Configs.kD = 0.5; // A velocity error of .5 rps requires this voltage output
+
+    var slot1Configs = configs.Slot1; // Use Slot 1 for Tracking!
+      slot1Configs.kS = 0.25;        
+      slot1Configs.kV = 0.12; // Feedforward is critical for tracking
+      slot1Configs.kP = 40.0; // Much stiffer! (Example value, must tune)
+      slot1Configs.kI = 0.0;
+      slot1Configs.kD = 2.0;  // High damping to stop the shake
 
     var motionMagicConfigs = configs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = 160; // Target cruise velocity of 80 rps
