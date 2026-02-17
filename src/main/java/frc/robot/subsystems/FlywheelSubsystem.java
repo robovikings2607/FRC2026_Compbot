@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -15,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.FieldElements;
@@ -26,7 +28,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   /** Creates a new ShooterHoodSubsystem. */
   private final TalonFX flywheelMotor;
   private final RobotContainer robot;
-  private VelocityDutyCycle velocityControl = new VelocityDutyCycle(0);
+  private VelocityVoltage velocityControl = new VelocityVoltage(0);
   private double rps;
   private InterpolatingDoubleTreeMap flywheelInterp = new InterpolatingDoubleTreeMap();
 
@@ -56,11 +58,14 @@ public class FlywheelSubsystem extends SubsystemBase {
     }
 
     double distance = shooterPose.getDistance(goalPose);
-    setGoal(distance);
+
+    SmartDashboard.putNumber("Flywheel/Speed", 0);
+    // rps = 50.0;
+    // setGoal(distance);
 
     flywheelMotor.setControl(velocityControl.withVelocity(rps)
-                                            .withAcceleration(100)
-                                            .withFeedForward(rps * 0.012)); //should be constant
+                                            .withAcceleration(rps)
+                                            .withFeedForward(rps * 0.114)); //should be constant, but not entirely sure
   }
 
   public void configureMotor(){ 
@@ -70,9 +75,9 @@ public class FlywheelSubsystem extends SubsystemBase {
           // slot0Configs.kS = 0.0; // Voltage output to overcome static friction
           // slot0Configs.kV = 0.0; // A velocity target of 1 rps requires this voltage output.
           // slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
-          slot0Configs.kP = 0.05; // A position error of 2.5 rotations requires this voltage output
+          slot0Configs.kP = 0.07; // A position error of 2.5 rotations requires this voltage output
           slot0Configs.kI = 0; // no output for integrated error
-          slot0Configs.kD = 0.01; // A velocity error of 1 rps requires this voltage output
+          slot0Configs.kD = 0.007; // A velocity error of 1 rps requires this voltage output
 
     flywheelMotor.getConfigurator().apply(configs);
     flywheelMotor.setNeutralMode(NeutralModeValue.Coast);
@@ -81,7 +86,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(null, null);
+    flywheelInterp.put(0.0, 0.0);
   }
 
   public void setGoal(double distance){

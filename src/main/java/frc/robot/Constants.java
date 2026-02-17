@@ -60,13 +60,13 @@ public final class Constants {
   public static final class FeederConstants {
     public static final int FEEDER_ID = 16;
 
-    public static final double FEEDER_SPEED = 0.33; //check this later
+    public static final double FEEDER_SPEED = 11.7; //check this later
   }
 
   public static final class SpindexerConstants {
     public static final int SPINDEXER_ID = 15;
 
-    public static final double SPINDEXER_SPEED = 0.25; //check this later
+    public static final double SPINDEXER_SPEED = 12.0; //check this later
   }
 
   public static final class ClimberConstants {
