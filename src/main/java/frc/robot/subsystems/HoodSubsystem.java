@@ -50,13 +50,10 @@ public class HoodSubsystem extends SubsystemBase {
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
     Translation2d goalPose = new Translation2d();
 
-    if(DriverStation.getAlliance().equals(null)){
+    if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){
       goalPose = FieldElements.BLUE_HUB;
     }
-    else if(DriverStation.getAlliance().get().equals(Alliance.Blue)){
-      goalPose = FieldElements.BLUE_HUB;      
-    }
-    else if(DriverStation.getAlliance().get().equals(Alliance.Red)){
+    else {
       goalPose = FieldElements.RED_HUB;            
     }
 
