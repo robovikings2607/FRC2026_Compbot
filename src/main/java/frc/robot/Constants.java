@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
@@ -24,8 +25,10 @@ public final class Constants {
   }
 
   public static final class ShooterConstants{
-    public static final double BOT_TO_SHOOTER_DISTANCE = Math.sqrt(Math.pow(Units.inchesToMeters(-5.5625), 2) + Math.pow(Units.inchesToMeters(6.625), 2));
-    public static final double BOT_TO_SHOOTER_ANGLE = Math.atan2(Units.inchesToMeters(6.625), Units.inchesToMeters(-5.5625));
+    public static final double BOT_TO_SHOOTER_DISTANCE = -Math.sqrt(Math.pow(Units.inchesToMeters(5.75), 2) + Math.pow(Units.inchesToMeters(-6.75), 2));
+    public static final double BOT_TO_SHOOTER_ANGLE = Math.atan2(Units.inchesToMeters(-6.75), Units.inchesToMeters(5.75));
+
+    public static final Transform2d  BOT_TO_SHOOTER_TRANSFORM = new Transform2d(5.75, -6.75, new Rotation2d());
   }
 
   public static final class TurretConstants {

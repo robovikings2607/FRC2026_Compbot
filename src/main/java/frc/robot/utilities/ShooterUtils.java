@@ -16,7 +16,7 @@ import frc.robot.RobotContainer;
 public final class ShooterUtils {
 
  public static Translation2d getShooterPose(Pose2d robotPose){    
-    double robotRotation = MathUtil.inputModulus(robotPose.getRotation().getDegrees(), -180, 180);
+/*     double robotRotation = MathUtil.inputModulus(robotPose.getRotation().getDegrees(), -180, 180);
 
     double shooterX = robotPose.getX() 
               + Units.inchesToMeters(ShooterConstants.BOT_TO_SHOOTER_DISTANCE)
@@ -24,11 +24,11 @@ public final class ShooterUtils {
     double shooterY = robotPose.getY()
               + Units.inchesToMeters(ShooterConstants.BOT_TO_SHOOTER_DISTANCE)
               * Math.sin(Math.PI + ShooterConstants.BOT_TO_SHOOTER_ANGLE + Math.toRadians(robotRotation)); 
-    return new Translation2d(shooterX, shooterY);
+    return new Translation2d(shooterX, shooterY); */
 
-   /*  return GeometryUtil.getOffsetPose(robotPose, 
+   return GeometryUtil.getOffsetPose(robotPose, 
                                       ShooterConstants.BOT_TO_SHOOTER_DISTANCE, 
                                       new Rotation2d(ShooterConstants.BOT_TO_SHOOTER_ANGLE)
-                                      ).getTranslation(); */
+                                      ).getTranslation();
   }
 }

@@ -54,7 +54,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void runRollersUnjammed(){
-    rollerMotor.setVoltage(6.0);
+    rollerMotor.setVoltage(8.0);
   }
 
   public void runRollersJammed(){
@@ -66,11 +66,11 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void reverseRollers(){
-    rollerMotor.setVoltage(-6.0);
+    rollerMotor.setVoltage(-8.0);
   }
 
   public boolean isJammed(){
-    return rollerMotor.getStatorCurrent().getValueAsDouble() > 70.0;
+    return rollerMotor.getStatorCurrent().getValueAsDouble() > 100.0;
   }
 
   public void deployIntake(){

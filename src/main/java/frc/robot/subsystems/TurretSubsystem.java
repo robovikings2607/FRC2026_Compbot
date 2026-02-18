@@ -42,7 +42,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final DigitalInput limitSwitch;
   private double previousSetPoint, previousEncoderPos;
   private boolean isPressed, isZeroed;
-  private double offset = .442;
+  private double offset = .433;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;

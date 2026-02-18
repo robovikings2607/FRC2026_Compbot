@@ -39,7 +39,8 @@ public class HoodSubsystem extends SubsystemBase {
     this.robot = robot;
 
     configureMotor();
-    // createInterpMap();
+    createInterpMap();
+    SmartDashboard.putNumber("Hood/SetPoint", 0);
   }
 
   @Override
@@ -59,10 +60,9 @@ public class HoodSubsystem extends SubsystemBase {
 
     double distance = shooterPose.getDistance(goalPose);
     SmartDashboard.putNumber("Hood/Distance", distance);
-    // setGoal(distance);
+    setGoal(distance);
 
-    SmartDashboard.putNumber("Hood/SetPoint", setPoint);
-    setPoint = -0.25;
+    // setPoint = SmartDashboard.getNumber("Hood/SetPoint", 0) * rotationsPerDegree;
 
     hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
   }
@@ -103,7 +103,12 @@ public class HoodSubsystem extends SubsystemBase {
   public void createInterpMap(){
     //key = distance from goal
     //value = position of hood in desired shot angle
-    hoodInterp.put(null, null);
+    hoodInterp.put(0.0, 0.0);
+    hoodInterp.put(2.4, -3.0);
+    hoodInterp.put(3.03, -3.0);
+    hoodInterp.put(3.51, -4.0);
+    hoodInterp.put(4.03, 0.0);
+    hoodInterp.put(5.5, -3.0);
   }
 
   public void setGoal(double distance){
