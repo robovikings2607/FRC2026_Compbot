@@ -43,12 +43,12 @@ public class FlywheelSubsystemExp extends SubsystemBase {
       distanceToRPSMap.put(5.0, 1000.0);
     }
 
-    public void setRPMForDistance(double distanceMeters) {
+    public void setRPSForDistance(double distanceMeters) {
         double targetRPM = distanceToRPSMap.get(distanceMeters);
-        setRPM(targetRPM);
+        setRPS(targetRPM);
     }
 
-    public void setRPM(double targetRPS) {
+    public void setRPS(double targetRPS) {
         double adjustedTargetRPS = targetRPS / GEAR_RATIO;
 
         SetMotorPosition(adjustedTargetRPS, "Flywheel/newTargetRPS");
@@ -70,6 +70,10 @@ public class FlywheelSubsystemExp extends SubsystemBase {
 
     public boolean isReadyToShoot() {
       return isAtTarget();
+    }
+
+    public void stop() {
+      
     }
 
     protected void configureMotor(){

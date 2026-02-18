@@ -30,7 +30,7 @@ public class ManualShootCommandExp extends Command {
     public void execute() {
         // Direct control: Bypass the "Distance" logic
         hood.setAngle(targetAngle); 
-        flywheel.setRPM(targetRPM);
+        flywheel.setRPS(targetRPM);
 
         // Simple check: Are we there yet?
         if (hood.isReadyToShoot() && flywheel.isReadyToShoot()) {

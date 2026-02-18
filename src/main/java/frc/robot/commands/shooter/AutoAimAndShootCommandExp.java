@@ -67,7 +67,7 @@ public class AutoAimAndShootCommandExp extends Command {
             double dist = targetTranslation.getNorm();
             
             hood.setAngleForDistance(dist);   // Hood handles vertical angle mapping
-            flywheel.setRPMForDistance(dist); // Flywheel handles RPM mapping
+            flywheel.setRPSForDistance(dist); // Flywheel handles RPM mapping
 
             if (turret.isReadyToShoot(targetTranslation.getAngle().getDegrees(), robotVelocity) && 
                 hood.isReadyToShoot() && flywheel.isReadyToShoot()) {

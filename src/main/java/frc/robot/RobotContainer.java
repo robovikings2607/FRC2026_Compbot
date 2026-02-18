@@ -33,6 +33,7 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
 import frc.robot.commands.shooter.TrackHubTargetExp;
+import frc.robot.commands.shooter.TuneFlywheelCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -125,7 +126,7 @@ public class RobotContainer {
         ));
 
         flywheel.setDefaultCommand(new RunCommand(
-            () -> flywheel.setRPM(FlywheelConstants.IDLE_RPM), 
+            () -> flywheel.setRPS(FlywheelConstants.IDLE_RPM), 
             flywheel
         ));
 
@@ -163,8 +164,17 @@ public class RobotContainer {
         joystick.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
-
-
+        joystick.x().whileTrue(
+            new AutoAimAndShootCommandExp(
+                turret, 
+                hood, 
+                flywheel, 
+                feeder,
+                () -> this.drivetrain.getState().Pose,
+                this::getFieldRelativeVelocity
+            )            
+        );        
+        joystick.y().whileTrue(new TuneFlywheelCommand(flywheel));
 
 
         // Run SysId routines when holding back/start and X/Y.
@@ -177,16 +187,8 @@ public class RobotContainer {
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-        joystick.rightBumper().whileTrue(
-            new AutoAimAndShootCommandExp(
-                turret, 
-                hood, 
-                flywheel, 
-                feeder,
-                () -> this.drivetrain.getState().Pose,
-                this::getFieldRelativeVelocity
-            )            
-        );        
+
+
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
