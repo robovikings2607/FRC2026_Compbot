@@ -80,9 +80,9 @@ public class RobotContainer {
     
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
-    //public final TurretSubsystem turret = new TurretSubsystem(this);
-    // public final FlywheelSubsystem flywheel = new FlywheelSubsystem(this);
-    //public final HoodSubsystem hood = new HoodSubsystem(this);
+    public final TurretSubsystem turret = new TurretSubsystem(this);
+    public final FlywheelSubsystem flywheel = new FlywheelSubsystem(this);
+    public final HoodSubsystem hood = new HoodSubsystem(this);
     public final FeederSubsystem feeder = new FeederSubsystem(this);
     public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
     public final IntakeSubsystem intake = new IntakeSubsystem(this);
@@ -117,9 +117,9 @@ public class RobotContainer {
         driverController.rightStick.onTrue(new ToggleHighLowGear(this));
 
         //Intake
-        driverController.leftBumper.onTrue(new RunIntake(this));
-        driverController.leftTriggerButton.onTrue(new StopIntake(this));
-        // driverController.rightBumper.onTrue(new ReverseIntake(this));
+        driverController.leftBumper.onTrue(new RunIntake(this)); //will be deploy later
+        driverController.leftTriggerButton.onTrue(new StopIntake(this)); //will be retract later
+        driverController.rightBumper.onTrue(new ReverseIntake(this));
 
         //Feeder + Spindexer
         driverController.rightTriggerButton.whileTrue(new TransferPieces(this));

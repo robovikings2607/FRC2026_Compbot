@@ -36,7 +36,7 @@ public class FlywheelSubsystem extends SubsystemBase {
     this.robot = robot;
     flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
     configureMotor();
-    createInterpMap();
+    // createInterpMap();
   }
 
   @Override
@@ -59,8 +59,9 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     double distance = shooterPose.getDistance(goalPose);
 
-    SmartDashboard.putNumber("Flywheel/Speed", 0);
-    // rps = 50.0;
+    SmartDashboard.putNumber("Flywheel/Speed", rps);
+    
+    rps = 60.0;
     // setGoal(distance);
 
     flywheelMotor.setControl(velocityControl.withVelocity(rps)
@@ -79,8 +80,8 @@ public class FlywheelSubsystem extends SubsystemBase {
           slot0Configs.kI = 0; // no output for integrated error
           slot0Configs.kD = 0.007; // A velocity error of 1 rps requires this voltage output
 
-    flywheelMotor.getConfigurator().apply(configs);
     flywheelMotor.setNeutralMode(NeutralModeValue.Coast);
+    flywheelMotor.getConfigurator().apply(configs);
   }
 
   public void createInterpMap(){

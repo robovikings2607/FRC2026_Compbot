@@ -8,6 +8,7 @@ import com.pathplanner.lib.config.RobotConfig;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.IntakeSubsystem;
 
@@ -40,13 +41,12 @@ public class RunIntake extends Command {
       intake.runRollersJammed();
       timer.start();
 
-      if(timer.get() > 0.25){
+      if(timer.get() > 1.0){
         intake.reverseRollers();
-        timer.stop();
-        timer.reset();
       }
     }
     else{
+      timer.reset();
       intake.runRollersUnjammed();
     }
   }

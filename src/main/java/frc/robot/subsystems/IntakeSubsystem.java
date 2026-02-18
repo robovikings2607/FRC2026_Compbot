@@ -66,7 +66,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void reverseRollers(){
-    rollerMotor.setVoltage(-12.0);
+    rollerMotor.setVoltage(-6.0);
   }
 
   public boolean isJammed(){

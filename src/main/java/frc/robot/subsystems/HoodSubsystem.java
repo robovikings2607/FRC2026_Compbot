@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.ShooterUtils;
@@ -28,7 +29,8 @@ public class HoodSubsystem extends SubsystemBase {
   private RobotContainer robot;
 
   private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
-  private static final double rotationsPerDegree = 7.0/360.0;
+  private static final double gearRatio = ((350.0/50.0)*(26.0/12.0));
+  private static final double rotationsPerDegree = gearRatio/360.0;
   private double setPoint, goal;
   private InterpolatingDoubleTreeMap hoodInterp = new InterpolatingDoubleTreeMap();
 
@@ -37,7 +39,7 @@ public class HoodSubsystem extends SubsystemBase {
     this.robot = robot;
 
     configureMotor();
-    createInterpMap();
+    // createInterpMap();
   }
 
   @Override
@@ -59,7 +61,11 @@ public class HoodSubsystem extends SubsystemBase {
     }
 
     double distance = shooterPose.getDistance(goalPose);
-    setGoal(distance);
+    SmartDashboard.putNumber("Hood/Distance", distance);
+    // setGoal(distance);
+
+    SmartDashboard.putNumber("Hood/SetPoint", setPoint);
+    setPoint = -0.25;
 
     hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
   }
@@ -79,20 +85,22 @@ public class HoodSubsystem extends SubsystemBase {
         slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 40; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 80; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 400; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 10; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 20; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 100; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
      //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     //limits (in rotations)
-    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = rotationsPerDegree * HoodConstants.MIN_HOOD_ANGLE;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = rotationsPerDegree * HoodConstants.MAX_HOOD_ANGLE; 
+    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = HoodConstants.MIN_HOOD_ANGLE * rotationsPerDegree;
+    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = HoodConstants.MAX_HOOD_ANGLE * rotationsPerDegree; 
   
     hoodMotor.getConfigurator().apply(configs);
-    hoodMotor.setNeutralMode(NeutralModeValue.Coast);
+    hoodMotor.setNeutralMode(NeutralModeValue.Brake);
+
+    hoodMotor.setPosition(0);
   }
 
   public void createInterpMap(){

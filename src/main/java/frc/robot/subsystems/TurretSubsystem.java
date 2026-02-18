@@ -146,7 +146,7 @@ public class TurretSubsystem extends SubsystemBase {
     double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
     double robotRotationAdjustedAngle = angle - robotRotation;   
 
-    return -robotRotationAdjustedAngle * rotationsPerDegree;
+    return -robotRotationAdjustedAngle * rotationsPerDegree + (30 * rotationsPerDegree);
   }
 
   private static double getDelta(double previousSetPoint, double newSetPoint){
