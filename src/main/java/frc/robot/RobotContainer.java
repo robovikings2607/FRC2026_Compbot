@@ -33,7 +33,7 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
 import frc.robot.commands.shooter.TrackHubTargetExp;
-import frc.robot.commands.shooter.TuneFlywheelCommand;
+import frc.robot.commands.shooter.TuneShooterCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -174,7 +174,7 @@ public class RobotContainer {
                 this::getFieldRelativeVelocity
             )            
         );        
-        joystick.y().whileTrue(new TuneFlywheelCommand(flywheel));
+        joystick.y().whileTrue(new TuneShooterCommand(flywheel, hood));
 
 
         // Run SysId routines when holding back/start and X/Y.

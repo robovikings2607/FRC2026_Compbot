@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +17,8 @@ import frc.robot.subsystems.FlywheelSubsystemExp;
 import frc.robot.subsystems.HoodSubsystemExp;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TurretSubsystemExp;
+import frc.robot.utilities.AimingCalculator;
+import frc.robot.utilities.ShooterState;
 
 public class AutoAimAndShootCommandExp extends Command {
     private final TurretSubsystemExp turret;
@@ -24,6 +27,7 @@ public class AutoAimAndShootCommandExp extends Command {
     private final FeederSubsystemExp feeder;
     private final Supplier<Pose2d> robotPoseProvider;  
     private final Supplier<ChassisSpeeds> robotVelocityProvider;    
+    private final AimingCalculator aimingMap = new AimingCalculator();
 
     public AutoAimAndShootCommandExp(
         TurretSubsystemExp turret, 
@@ -66,8 +70,10 @@ public class AutoAimAndShootCommandExp extends Command {
 
             double dist = targetTranslation.getNorm();
             
-            hood.setAngleForDistance(dist);   // Hood handles vertical angle mapping
-            flywheel.setRPSForDistance(dist); // Flywheel handles RPM mapping
+            ShooterState state = aimingMap.getTargetState(dist);
+
+            flywheel.setRPS(state.rps);
+            hood.setAngle(state.hoodAngle);            
 
             if (turret.isReadyToShoot(targetTranslation.getAngle().getDegrees(), robotVelocity) && 
                 hood.isReadyToShoot() && flywheel.isReadyToShoot()) {

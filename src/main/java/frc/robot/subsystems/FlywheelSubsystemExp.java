@@ -73,7 +73,7 @@ public class FlywheelSubsystemExp extends SubsystemBase {
     }
 
     public void stop() {
-      
+      motor.stopMotor();
     }
 
     protected void configureMotor(){
@@ -113,7 +113,7 @@ public class FlywheelSubsystemExp extends SubsystemBase {
             slot0Configs.kD = 0.01; // A velocity error of 1 rps requires this voltage output
 
       motor.getConfigurator().apply(configs);
-      motor.setNeutralMode(NeutralModeValue.Brake);
+      motor.setNeutralMode(NeutralModeValue.Coast);
 
       motor.setPosition(0); //
     }

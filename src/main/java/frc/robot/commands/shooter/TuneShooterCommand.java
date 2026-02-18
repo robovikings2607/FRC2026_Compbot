@@ -3,28 +3,37 @@ package frc.robot.commands.shooter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.FlywheelSubsystemExp;
+import frc.robot.subsystems.HoodSubsystemExp;
 
-public class TuneFlywheelCommand extends Command {
+public class TuneShooterCommand extends Command {
     private final FlywheelSubsystemExp flywheel;
+    private final HoodSubsystemExp hood;    
     
     // Define the exact name of the text box that will appear on your dashboard
-    private final String tuningKey = "Tuning/TargetRPS";
+    private final String flywheelTuningKey = "Tuning/TargetRPS";
+    private final String hoodTuningKey = "Tuning/HoodAngle";    
 
-    public TuneFlywheelCommand(FlywheelSubsystemExp flywheel) {
+    public TuneShooterCommand(
+        FlywheelSubsystemExp flywheel,
+        HoodSubsystemExp hood) {
         this.flywheel = flywheel;
+        this.hood = hood;        
 
-        addRequirements(flywheel); 
+        addRequirements(flywheel, hood); 
         
-        SmartDashboard.setDefaultNumber(tuningKey, 0.0);
+        SmartDashboard.setDefaultNumber(flywheelTuningKey, 0.0);
+        SmartDashboard.setDefaultNumber(hoodTuningKey, 0.0);        
     }
 
     @Override
     public void execute() {
         // 1. Read the current number from the dashboard
-        double targetRPS = SmartDashboard.getNumber(tuningKey, 0.0);
+        double targetRPS = SmartDashboard.getNumber(flywheelTuningKey, 0.0);
+        double hoodAngle = SmartDashboard.getNumber(hoodTuningKey, 0.0);        
         
         // 2. Send that target to your subsystem's existing Velocity/Voltage method
         flywheel.setRPS(targetRPS);
+        hood.setAngle(hoodAngle);        
     }
 
     @Override
