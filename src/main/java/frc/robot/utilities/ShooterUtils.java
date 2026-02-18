@@ -31,4 +31,8 @@ public final class ShooterUtils {
                                       new Rotation2d(ShooterConstants.BOT_TO_SHOOTER_ANGLE)
                                       ).getTranslation();
   }
+
+  public static double getRPS(double RPM) {
+    return RPM / 60;
+  }
 }
