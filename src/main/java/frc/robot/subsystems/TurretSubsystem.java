@@ -108,7 +108,7 @@ public class TurretSubsystem extends SubsystemBase {
     //checks alliance and aims at corresponding hub
     double newSetPoint = 0;
 
-    if(DriverStation.getAlliance().equals(null)){
+    if(DriverStation.getAlliance().isEmpty()){
       newSetPoint = getTurretSetPoint(shooterPose, FieldElements.BLUE_HUB, robotRotation);      
     }
     else if(DriverStation.getAlliance().get().equals(Alliance.Blue)){
