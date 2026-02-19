@@ -33,6 +33,7 @@ public class HoodSubsystem extends SubsystemBase {
   private static final double rotationsPerDegree = gearRatio/360.0;
   private double setPoint, goal;
   private InterpolatingDoubleTreeMap hoodInterp = new InterpolatingDoubleTreeMap();
+  private boolean readyToShoot = false;
 
 
   public HoodSubsystem(RobotContainer robot) {
@@ -60,11 +61,14 @@ public class HoodSubsystem extends SubsystemBase {
 
     double distance = shooterPose.getDistance(goalPose);
     SmartDashboard.putNumber("Hood/Distance", distance);
-    setGoal(distance);
+    
+    if(!readyToShoot){}
+    else{
+      setGoal(distance);
+      hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
+    }
 
     // setPoint = SmartDashboard.getNumber("Hood/SetPoint", 0) * rotationsPerDegree;
-
-    hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
   }
 
 
@@ -131,5 +135,9 @@ public class HoodSubsystem extends SubsystemBase {
 
   public double getSetPoint(){
     return setPoint;
+  }
+
+  public void readyShot(boolean ready){
+    readyToShoot = ready;
   }
 }

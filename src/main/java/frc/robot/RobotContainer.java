@@ -28,6 +28,7 @@ import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.intake.StopIntake;
+import frc.robot.commands.shooter.PrepareShooter;
 import frc.robot.commands.shooter.TransferPieces;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -119,10 +120,13 @@ public class RobotContainer {
         //Intake
         driverController.leftBumper.onTrue(new RunIntake(this)); //will be deploy later
         driverController.leftTriggerButton.onTrue(new StopIntake(this)); //will be retract later
-        driverController.rightBumper.onTrue(new ReverseIntake(this));
+        // driverController.rightBumper.onTrue(new ReverseIntake(this));
 
         //Feeder + Spindexer
         driverController.rightTriggerButton.whileTrue(new TransferPieces(this));
+
+        //Flywheel + Hood
+        driverController.rightBumper.onTrue(new PrepareShooter(this));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.

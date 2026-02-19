@@ -31,6 +31,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   private VelocityVoltage velocityControl = new VelocityVoltage(0);
   private double rps;
   private InterpolatingDoubleTreeMap flywheelInterp = new InterpolatingDoubleTreeMap();
+  private boolean readyToShoot = false;
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -59,7 +60,12 @@ public class FlywheelSubsystem extends SubsystemBase {
     double distance = shooterPose.getDistance(goalPose);
     
     // rps = SmartDashboard.getNumber("Flywheel/Speed", distance);
-    setGoal(distance);
+    if(!readyToShoot){
+      rps = 0;
+    }
+    else{
+      setGoal(distance);
+    }
 
     flywheelMotor.setControl(velocityControl.withVelocity(rps)); //should be constant, but not entirely sure
   }
@@ -71,7 +77,7 @@ public class FlywheelSubsystem extends SubsystemBase {
           // slot0Configs.kS = 0.0; // Voltage output to overcome static friction
           slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
           // slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
-          slot0Configs.kP = 0.66; // A position error of 2.5 rotations requires this voltage output
+          slot0Configs.kP = 0.62; // A position error of 2.5 rotations requires this voltage output
           slot0Configs.kI = 0; // no output for integrated error
           slot0Configs.kD = 0.000; // A velocity error of 1 rps requires this voltage output
 
@@ -82,7 +88,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, 0.0);
+    flywheelInterp.put(0.0, -45.0);
     flywheelInterp.put(2.4, -45.0);
     flywheelInterp.put(3.03, -50.0);
     flywheelInterp.put(3.51, -52.0);
@@ -100,5 +106,9 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   public double getSpeed(){
     return flywheelMotor.getVelocity().getValueAsDouble();
+  }
+
+  public void readyShot(boolean ready){
+    readyToShoot = ready;
   }
 }
