@@ -112,7 +112,7 @@ public class TurretSubsystem extends SubsystemBase {
       newSetPoint = getTurretSetPoint(shooterPose, FieldElements.BLUE_HUB, robotRotation);      
     }
     else {
-      newSetPoint = getTurretSetPoint(shooterPose, FieldElements.BLUE_HUB, robotRotation);      
+      newSetPoint = getTurretSetPoint(shooterPose, FieldElements.RED_HUB, robotRotation);      
     }
 
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
