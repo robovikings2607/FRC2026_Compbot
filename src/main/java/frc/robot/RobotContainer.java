@@ -96,20 +96,20 @@ public class RobotContainer {
 
     //Subsystems
     //real
-    //public final TurretSubsystem turret = new TurretSubsystem(this);
-    // public final FlywheelSubsystem flywheel = new FlywheelSubsystem(this);
-    // public final HoodSubsystem hood = new HoodSubsystem(this);
-    // public final FeederSubsystem feeder = new FeederSubsystem(this);
-    // public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
-    // public final IntakeSubsystem intake = new IntakeSubsystem(this); 
-    // public final LEDSubsystem leds = new LEDSubsystem(this);
-    // public final ClimberSubsystem climber = new ClimberSubsystem(this);
+    public final TurretSubsystem turret = new TurretSubsystem(this);
+    public final FlywheelSubsystem flywheel = new FlywheelSubsystem(this);
+    public final HoodSubsystem hood = new HoodSubsystem(this);
+    public final FeederSubsystem feeder = new FeederSubsystem(this);
+    public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
+    public final IntakeSubsystem intake = new IntakeSubsystem(this); 
+    public final LEDSubsystem leds = new LEDSubsystem(this);
+    public final ClimberSubsystem climber = new ClimberSubsystem(this);
 
     //experimental
-    public final TurretSubsystemExp turret = new TurretSubsystemExp(this);
-    public final HoodSubsystemExp hood = new HoodSubsystemExp(this);
-    public final FlywheelSubsystemExp flywheel = new FlywheelSubsystemExp(this);
-    public final FeederSubsystemExp feeder = new FeederSubsystemExp(this);    
+    public final TurretSubsystemExp turretExp = new TurretSubsystemExp(this);
+    public final HoodSubsystemExp hoodExp = new HoodSubsystemExp(this);
+    public final FlywheelSubsystemExp flywheelExp = new FlywheelSubsystemExp(this);
+    public final FeederSubsystemExp feederExp = new FeederSubsystemExp(this);    
 
     public RobotContainer() {
 
@@ -124,20 +124,20 @@ public class RobotContainer {
     }
 
     private void configureDefaultCommands() {
-        turret.setDefaultCommand(new TrackHubTargetExp(
-            turret, 
+        turretExp.setDefaultCommand(new TrackHubTargetExp(
+            turretExp, 
             () -> drivetrain.getState().Pose,
             this::getFieldRelativeVelocity
         ));
 
-        flywheel.setDefaultCommand(new RunCommand(
-            () -> flywheel.setRPS(FlywheelConstants.IDLE_RPM), 
-            flywheel
+        flywheelExp.setDefaultCommand(new RunCommand(
+            () -> flywheelExp.setRPS(FlywheelConstants.IDLE_RPM), 
+            flywheelExp
         ));
 
-        hood.setDefaultCommand(new RunCommand(
-            () -> hood.setAngle(HoodConstants.ZERO_POSITION_ANGLE), 
-            hood
+        hoodExp.setDefaultCommand(new RunCommand(
+            () -> hoodExp.setAngle(HoodConstants.ZERO_POSITION_ANGLE), 
+            hoodExp
         ));
     }
 
@@ -182,15 +182,15 @@ public class RobotContainer {
         ));
         joystick.x().whileTrue(
             new AutoAimAndShootCommandExp(
-                turret, 
-                hood, 
-                flywheel, 
-                feeder,
+                turretExp, 
+                hoodExp, 
+                flywheelExp, 
+                feederExp,
                 () -> this.drivetrain.getState().Pose,
                 this::getFieldRelativeVelocity
             )            
         );        
-        joystick.y().whileTrue(new TuneShooterCommand(flywheel, hood));
+        joystick.y().whileTrue(new TuneShooterCommand(flywheelExp, hoodExp));
 
 
         // Run SysId routines when holding back/start and X/Y.
