@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.ShooterUtils;
@@ -28,9 +29,11 @@ public class HoodSubsystem extends SubsystemBase {
   private RobotContainer robot;
 
   private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
-  private static final double rotationsPerDegree = 7.0/360.0;
+  private static final double gearRatio = ((350.0/50.0)*(26.0/12.0));
+  private static final double rotationsPerDegree = gearRatio/360.0;
   private double setPoint, goal;
   private InterpolatingDoubleTreeMap hoodInterp = new InterpolatingDoubleTreeMap();
+  private boolean readyToShoot = false;
 
 
   public HoodSubsystem(RobotContainer robot) {
@@ -38,6 +41,7 @@ public class HoodSubsystem extends SubsystemBase {
 
     configureMotor();
     createInterpMap();
+    SmartDashboard.putNumber("Hood/SetPoint", 0);
   }
 
   @Override
@@ -48,20 +52,23 @@ public class HoodSubsystem extends SubsystemBase {
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
     Translation2d goalPose = new Translation2d();
 
-    if(DriverStation.getAlliance().equals(null)){
+    if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){
       goalPose = FieldElements.BLUE_HUB;
     }
-    else if(DriverStation.getAlliance().get().equals(Alliance.Blue)){
-      goalPose = FieldElements.BLUE_HUB;      
-    }
-    else if(DriverStation.getAlliance().get().equals(Alliance.Red)){
+    else {
       goalPose = FieldElements.RED_HUB;            
     }
 
     double distance = shooterPose.getDistance(goalPose);
-    setGoal(distance);
+    SmartDashboard.putNumber("Hood/Distance", distance);
+    
+    if(!readyToShoot){}
+    else{
+      setGoal(distance);
+      hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
+    }
 
-    hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
+    // setPoint = SmartDashboard.getNumber("Hood/SetPoint", 0) * rotationsPerDegree;
   }
 
 
@@ -79,26 +86,33 @@ public class HoodSubsystem extends SubsystemBase {
         slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 40; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 80; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 400; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 10; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 20; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 100; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
      //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     //limits (in rotations)
-    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = rotationsPerDegree * HoodConstants.MIN_HOOD_ANGLE;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = rotationsPerDegree * HoodConstants.MAX_HOOD_ANGLE; 
+    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = HoodConstants.MIN_HOOD_ANGLE * rotationsPerDegree;
+    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = HoodConstants.MAX_HOOD_ANGLE * rotationsPerDegree; 
   
     hoodMotor.getConfigurator().apply(configs);
-    hoodMotor.setNeutralMode(NeutralModeValue.Coast);
+    hoodMotor.setNeutralMode(NeutralModeValue.Brake);
+
+    hoodMotor.setPosition(0);
   }
 
   public void createInterpMap(){
     //key = distance from goal
     //value = position of hood in desired shot angle
-    hoodInterp.put(null, null);
+    hoodInterp.put(0.0, 0.0);
+    hoodInterp.put(2.4, -3.0);
+    hoodInterp.put(3.03, -3.0);
+    hoodInterp.put(3.51, -4.0);
+    hoodInterp.put(4.03, 0.0);
+    hoodInterp.put(5.5, -3.0);
   }
 
   public void setGoal(double distance){
@@ -121,5 +135,9 @@ public class HoodSubsystem extends SubsystemBase {
 
   public double getSetPoint(){
     return setPoint;
+  }
+
+  public void readyShot(boolean ready){
+    readyToShoot = ready;
   }
 }

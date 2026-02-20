@@ -41,20 +41,40 @@ public class LimelightSubsystem extends SubsystemBase {
     // Switch to pipeline 0
 
     m_robot = robot;
+    //Left
     LimelightHelpers.setPipelineIndex("limelight-left", 0);
     LimelightHelpers.SetIMUMode("limelight-left", 0);
-    // LimelightHelpers.SetIMUMode("", 2);
-    //  gyro = new Pigeon2(TunerConstants.kPigeonId, "drivetrain");
+
+    //Right
+    LimelightHelpers.setPipelineIndex("limelight-right", 0);
+    LimelightHelpers.SetIMUMode("limelight-right", 0);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   yaw = m_robot.drivetrain.getState().Pose.getRotation().getDegrees();
-  // yaw = m_robot.drivetrain.getPigeon2().getYaw().getValueAsDouble();
 
+  LimelightHelpers.SetRobotOrientation("limelight-right", yaw, 0, 0, 0, 0, 0);
   LimelightHelpers.SetRobotOrientation("limelight-left", yaw, 0, 0, 0, 0, 0);
-  LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left");
+  LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-right");
+  LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left");
+  LimelightHelpers.PoseEstimate mt2 = rightLL;
+
+  if(rightLL == null && leftLL != null){
+    mt2 = leftLL;
+  }
+  else if(rightLL != null && leftLL == null){
+    mt2 = rightLL;
+  }
+  else{
+    if(leftLL.avgTagDist < rightLL.avgTagDist){
+      mt2 = leftLL;
+    }
+    else{
+      mt2 = rightLL;
+    }
+  }
   
   fieldVisionDetections = m_robot.field.getObject("Limelight"+"/visionDetections");
   fieldVisionPose = m_robot.field.getObject("Limelight"+"/fieldVisionPose");

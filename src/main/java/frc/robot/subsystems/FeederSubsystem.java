@@ -8,6 +8,7 @@ import java.net.PortUnreachableException;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -27,15 +28,15 @@ public class FeederSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void startMotor() {
-    feederMotor.set(FeederConstants.FEEDER_SPEED);
+  public void runMotor() {
+    feederMotor.setVoltage(FeederConstants.FEEDER_SPEED);
   }
 
   public void stopMotor() {
-    feederMotor.set(0);
+    feederMotor.setVoltage(0);
   }
 
   public void reverseMotor() {
-    feederMotor.set(-FeederConstants.FEEDER_SPEED);;
+    feederMotor.setVoltage(-FeederConstants.FEEDER_SPEED);;
   }
 }

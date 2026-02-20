@@ -42,7 +42,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final DigitalInput limitSwitch;
   private double previousSetPoint, previousEncoderPos;
   private boolean isPressed, isZeroed;
-
+  private double offset = .433;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -108,14 +108,11 @@ public class TurretSubsystem extends SubsystemBase {
     //checks alliance and aims at corresponding hub
     double newSetPoint = 0;
 
-    if(DriverStation.getAlliance().equals(null)){
+    if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){
       newSetPoint = getTurretSetPoint(shooterPose, FieldElements.BLUE_HUB, robotRotation);      
     }
-    else if(DriverStation.getAlliance().get().equals(Alliance.Blue)){
-      newSetPoint = getTurretSetPoint(shooterPose, FieldElements.BLUE_HUB, robotRotation);      
-    }
-    else if(DriverStation.getAlliance().get().equals(Alliance.Red)){
-      newSetPoint = getTurretSetPoint(shooterPose, FieldElements.BLUE_HUB, robotRotation);      
+    else {
+      newSetPoint = getTurretSetPoint(shooterPose, FieldElements.RED_HUB, robotRotation);      
     }
 
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
@@ -127,7 +124,7 @@ public class TurretSubsystem extends SubsystemBase {
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
-    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - .401367));
+    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - offset));
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);
@@ -146,7 +143,7 @@ public class TurretSubsystem extends SubsystemBase {
     double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
     double robotRotationAdjustedAngle = angle - robotRotation;   
 
-    return -robotRotationAdjustedAngle * rotationsPerDegree;
+    return -robotRotationAdjustedAngle * rotationsPerDegree + (30 * rotationsPerDegree);
   }
 
   private static double getDelta(double previousSetPoint, double newSetPoint){

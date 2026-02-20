@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -15,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.FieldElements;
@@ -26,15 +28,18 @@ public class FlywheelSubsystem extends SubsystemBase {
   /** Creates a new ShooterHoodSubsystem. */
   private final TalonFX flywheelMotor;
   private final RobotContainer robot;
-  private VelocityDutyCycle velocityControl = new VelocityDutyCycle(0);
+  private VelocityVoltage velocityControl = new VelocityVoltage(0);
   private double rps;
   private InterpolatingDoubleTreeMap flywheelInterp = new InterpolatingDoubleTreeMap();
+  private boolean readyToShoot = false;
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
     flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
     configureMotor();
     createInterpMap();
+
+    SmartDashboard.putNumber("Flywheel/Speed", 0);
   }
 
   @Override
@@ -45,22 +50,24 @@ public class FlywheelSubsystem extends SubsystemBase {
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
     Translation2d goalPose = new Translation2d();
 
-    if(DriverStation.getAlliance().equals(null)){
+    if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){
       goalPose = FieldElements.BLUE_HUB;
     }
-    else if(DriverStation.getAlliance().get().equals(Alliance.Blue)){
-      goalPose = FieldElements.BLUE_HUB;      
-    }
-    else if(DriverStation.getAlliance().get().equals(Alliance.Red)){
+    else {
       goalPose = FieldElements.RED_HUB;            
     }
 
     double distance = shooterPose.getDistance(goalPose);
-    setGoal(distance);
+    
+    // rps = SmartDashboard.getNumber("Flywheel/Speed", distance);
+    if(!readyToShoot){
+      rps = 0;
+    }
+    else{
+      setGoal(distance);
+    }
 
-    flywheelMotor.setControl(velocityControl.withVelocity(rps)
-                                            .withAcceleration(100)
-                                            .withFeedForward(rps * 0.012)); //should be constant
+    flywheelMotor.setControl(velocityControl.withVelocity(rps)); //should be constant, but not entirely sure
   }
 
   public void configureMotor(){ 
@@ -68,20 +75,25 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     var slot0Configs = configs.Slot0;
           // slot0Configs.kS = 0.0; // Voltage output to overcome static friction
-          // slot0Configs.kV = 0.0; // A velocity target of 1 rps requires this voltage output.
+          slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
           // slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
-          slot0Configs.kP = 0.05; // A position error of 2.5 rotations requires this voltage output
+          slot0Configs.kP = 0.62; // A position error of 2.5 rotations requires this voltage output
           slot0Configs.kI = 0; // no output for integrated error
-          slot0Configs.kD = 0.01; // A velocity error of 1 rps requires this voltage output
+          slot0Configs.kD = 0.000; // A velocity error of 1 rps requires this voltage output
 
-    flywheelMotor.getConfigurator().apply(configs);
     flywheelMotor.setNeutralMode(NeutralModeValue.Coast);
+    flywheelMotor.getConfigurator().apply(configs);
   }
 
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(null, null);
+    flywheelInterp.put(0.0, -45.0);
+    flywheelInterp.put(2.4, -45.0);
+    flywheelInterp.put(3.03, -50.0);
+    flywheelInterp.put(3.51, -52.0);
+    flywheelInterp.put(4.01, -56.0);
+    flywheelInterp.put(4.5, -60.0);
   }
 
   public void setGoal(double distance){
@@ -94,5 +106,9 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   public double getSpeed(){
     return flywheelMotor.getVelocity().getValueAsDouble();
+  }
+
+  public void readyShot(boolean ready){
+    readyToShoot = ready;
   }
 }

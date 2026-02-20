@@ -26,15 +26,15 @@ public class SpindexerSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void startMotor(double speed) {
-    spindexerMotor.set(SpindexerConstants.SPINDEXER_SPEED);
+  public void runMotor() {
+    spindexerMotor.setVoltage(SpindexerConstants.SPINDEXER_SPEED);
   }
 
   public void stopMotor() {
-    spindexerMotor.set(0);
+    spindexerMotor.setVoltage(0);
   }
 
   public void reverseMotor() {
-    spindexerMotor.set(-SpindexerConstants.SPINDEXER_SPEED);
+    spindexerMotor.setVoltage(-SpindexerConstants.SPINDEXER_SPEED);
   }
 }

@@ -4,6 +4,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.IntakeConstants;
@@ -16,6 +18,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private final PositionVoltage positionVoltage = new PositionVoltage(0);
 
   private double intakePosition = IntakeConstants.INTAKE_RETRACTED;
+  private double desiredVoltage;
 
   private RobotContainer robot;
 
@@ -32,6 +35,8 @@ public class IntakeSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // pivotMotor.setControl(positionVoltage.withPosition(intakePosition));
+    SmartDashboard.putBoolean("Intake/IsJammed", isJammed());
+    SmartDashboard.putNumber("Intake/Voltage", desiredVoltage);
   }
 
   public void configurePivotMotor(){
@@ -48,21 +53,24 @@ public class IntakeSubsystem extends SubsystemBase {
     // pivotMotor.getConfigurator().apply(slot0Configs);
   }
 
-  public void runRollers(){
-    if(!isJammed()){
-      rollerMotor.set(0.5);
-    }
-    else{
-      rollerMotor.set(1.0);
-    }
+  public void runRollersUnjammed(){
+    rollerMotor.setVoltage(8.0);
+  }
+
+  public void runRollersJammed(){
+    rollerMotor.setVoltage(12.0);
   }
 
   public void stopRollers(){
-    rollerMotor.set(0.0);
+    rollerMotor.setVoltage(0.0);
+  }
+
+  public void reverseRollers(){
+    rollerMotor.setVoltage(-8.0);
   }
 
   public boolean isJammed(){
-    return rollerMotor.getStatorCurrent().getValueAsDouble() > 50.0;
+    return rollerMotor.getStatorCurrent().getValueAsDouble() > 100.0;
   }
 
   public void deployIntake(){
