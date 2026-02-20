@@ -4,36 +4,24 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.hardware.Pigeon2;
-
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.RobotContainer;
-// import frc.robot.Constants.VisionConstants;
 import frc.robot.utilities.LimelightHelpers;
 
 public class LimelightSubsystemExp extends SubsystemBase {
-  /** Creates a new LimelightSubsystem. */
-  boolean doRejectUpdate = false;
-  // PiCameraSubsystem photonVision;
   RobotContainer m_robot;
-  Pigeon2 gyro;
   FieldObject2d fieldVisionDetections, fieldVisionPose;
-  double yaw;
-  // AprilTagFieldLayout fieldLayout;
-  int hasTargets = 0;
-  String RIGHT_CAMERA_NAME = "limelight-right";
-  String LEFT_CAMERA_NAME = "limelight-left";  
+  public final String RIGHT_CAMERA_NAME = "limelight-right";
+  public final String LEFT_CAMERA_NAME = "limelight-left";  
 
   public LimelightSubsystemExp(RobotContainer robot) {
-    // Switch to pipeline 0
 
     m_robot = robot;
 
@@ -50,11 +38,11 @@ public class LimelightSubsystemExp extends SubsystemBase {
 
   @Override
   public void periodic() {
-    yaw = m_robot.drivetrain.getState().Pose.getRotation().getDegrees();
 
     fieldVisionDetections = m_robot.field.getObject("Limelight"+"/visionDetections");
     fieldVisionPose = m_robot.field.getObject("Limelight"+"/fieldVisionPose");
 
+    double yaw = m_robot.drivetrain.getState().Pose.getRotation().getDegrees();
     LimelightHelpers.SetRobotOrientation(RIGHT_CAMERA_NAME, yaw, 0, 0, 0, 0, 0);
     LimelightHelpers.SetRobotOrientation(LEFT_CAMERA_NAME, yaw, 0, 0, 0, 0, 0);
     LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_CAMERA_NAME);
