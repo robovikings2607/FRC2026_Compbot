@@ -12,10 +12,13 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
@@ -36,51 +39,59 @@ public class LimelightSubsystemExp extends SubsystemBase {
   double yaw;
   // AprilTagFieldLayout fieldLayout;
   int hasTargets = 0;
+  String RIGHT_CAMERA_NAME = "limelight-right";
+  String LEFT_CAMERA_NAME = "limelight-left";  
 
   public LimelightSubsystemExp(RobotContainer robot) {
     // Switch to pipeline 0
 
     m_robot = robot;
     //Left
-    LimelightHelpers.setPipelineIndex("limelight-left", 0);
-    LimelightHelpers.SetIMUMode("limelight-left", 0);
+    LimelightHelpers.setPipelineIndex(LEFT_CAMERA_NAME, 0);
+    LimelightHelpers.SetIMUMode(LEFT_CAMERA_NAME, 0);
 
     //Right
-    LimelightHelpers.setPipelineIndex("limelight-right", 0);
-    LimelightHelpers.SetIMUMode("limelight-right", 0);
+    LimelightHelpers.setPipelineIndex(RIGHT_CAMERA_NAME, 0);
+    LimelightHelpers.SetIMUMode(RIGHT_CAMERA_NAME, 0);
   }
 
   @Override
   public void periodic() {
     yaw = m_robot.drivetrain.getState().Pose.getRotation().getDegrees();
 
-    LimelightHelpers.SetRobotOrientation("limelight-right", yaw, 0, 0, 0, 0, 0);
-    LimelightHelpers.SetRobotOrientation("limelight-left", yaw, 0, 0, 0, 0, 0);
-    LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-right");
-    LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left");
+    LimelightHelpers.SetRobotOrientation(RIGHT_CAMERA_NAME, yaw, 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation(LEFT_CAMERA_NAME, yaw, 0, 0, 0, 0, 0);
+    LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_CAMERA_NAME);
+    LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_CAMERA_NAME);
 
     fieldVisionDetections = m_robot.field.getObject("Limelight"+"/visionDetections");
     fieldVisionPose = m_robot.field.getObject("Limelight"+"/fieldVisionPose");
 
     if (isValidVisionMeasurement(rightLL)) {
-      updateFromPoseEstimate(rightLL);
+      Matrix<N3, N1> stdDevs = calculateStdDevs(rightLL);
+      updateRobotPose(rightLL, stdDevs, RIGHT_CAMERA_NAME);
     }
 
     if (isValidVisionMeasurement(leftLL)) {
-      updateFromPoseEstimate(leftLL);    
+      Matrix<N3, N1> stdDevs = calculateStdDevs(leftLL);      
+      updateRobotPose(leftLL, stdDevs, LEFT_CAMERA_NAME);    
     }
   }
 
-  private void updateFromPoseEstimate(LimelightHelpers.PoseEstimate mt2) {
-    m_robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.1,0.1, 999999999));
+  private void updateRobotPose(
+    LimelightHelpers.PoseEstimate mt2, 
+    Matrix<N3, N1> stdDevs,
+    String cameraName) {
+
+    m_robot.drivetrain.setVisionMeasurementStdDevs(stdDevs);
     m_robot.drivetrain.addVisionMeasurement(
       mt2.pose,
       mt2.timestampSeconds
     ); 
 
-    SmartDashboard.putNumber("Limelight/X", mt2.pose.getX());
-    SmartDashboard.putNumber("Limelight/Y", mt2.pose.getY());
-    SmartDashboard.putNumber("Limelight/Rotation", mt2.pose.getRotation().getDegrees()); 
+    SmartDashboard.putNumber("Limelight/" + cameraName + "/X", mt2.pose.getX());
+    SmartDashboard.putNumber("Limelight/" + cameraName + "/Y", mt2.pose.getY());
+    SmartDashboard.putNumber("Limelight/" + cameraName + "/Rotation", mt2.pose.getRotation().getDegrees()); 
 
     drawTargetsOnField(mt2);    
   }
@@ -89,19 +100,37 @@ public class LimelightSubsystemExp extends SubsystemBase {
     return mt2 != null && mt2.tagCount > 0;
   }
 
+/**
+ * Dynamically calculates the standard deviation (trust) matrix based on distance and tag count.
+ */
+private Matrix<N3, N1> calculateStdDevs(LimelightHelpers.PoseEstimate estimate) {
+    double xyStdDev;
+    double thetaStdDev;
+    
+    if (estimate.tagCount >= 2) {
+        // Multi-tag tracking is incredibly stable. We trust X, Y, and Heading heavily.
+        xyStdDev = 0.2; 
+        thetaStdDev = 0.2; 
+    } else {
+        // Single tag: Accuracy drops off exponentially as the robot moves further away.
+        // We scale the X/Y standard deviation proportionally to the distance squared.
+        double distance = estimate.avgTagDist;
+        
+        // Base standard deviation + (distance squared * scaling factor)
+        xyStdDev = 0.5 + (Math.pow(distance, 2) * 0.1);
+        
+        // Single tag heading is notoriously noisy. Setting it to an exceptionally high 
+        // number tells the Kalman filter to completely ignore the vision heading and 
+        // rely purely on the robot's gyroscope.
+        thetaStdDev = 9999999; 
+    }
+    
+    // Returns a 3x1 matrix containing [X standard deviation, Y standard deviation, Theta standard deviation]
+    return VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev);
+}
+
   public void drawTargetsOnField(LimelightHelpers.PoseEstimate mt2)
   {
-      if(mt2 == null){
-          return;
-      }
-
-      if (mt2.pose.equals(new Pose2d()))
-      {
-          fieldVisionDetections.setPoses(Collections.emptyList());
-          fieldVisionPose.setPoses(Collections.emptyList());
-          return;
-      }
-
       fieldVisionDetections.setPoses(mt2.pose);
       fieldVisionPose.setPose(mt2.pose); 
   }
