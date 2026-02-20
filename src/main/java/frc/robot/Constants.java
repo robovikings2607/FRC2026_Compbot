@@ -81,4 +81,22 @@ public final class Constants {
   public static final class ClimberConstants {
     public static final int CLIMBER_ID = 19;
   }
+
+  public static final class LimelightConstants {
+    public static final double RIGHT_LL_FORWARD_OFFSET_METERS = Units.inchesToMeters(10.5); // + is forward from robot center
+    public static final double RIGHT_LL_LEFT_OFFSET_METERS = Units.inchesToMeters(10.5); // + is left, - is right
+    public static final double RIGHT_LL_UP_OFFSET_METERS = Units.inchesToMeters(10.5); // + is up from the floor
+    public static final double RIGHT_LL_ROLL_OFFSET_DEGREES = 0.0; // Tilted left/right
+    public static final double RIGHT_LL_PITCH_OFFSET_DEGREES = 0.0; // Tilted up/down (+ is looking up)
+    public static final double RIGHT_LL_YAW_OFFSET_DEGREES =  127.927226; // Turned left/right (+ is turned left)               
+
+    public static final double LEFT_LL_FORWARD_OFFSET_METERS = Units.inchesToMeters(10.5);
+    public static final double LEFT_LL_LEFT_OFFSET_METERS = Units.inchesToMeters(10.5);
+    public static final double LEFT_LL_UP_OFFSET_METERS = Units.inchesToMeters(10.5);
+    public static final double LEFT_LL_ROLL_OFFSET_DEGREES = 0.0;
+    public static final double LEFT_LL_PITCH_OFFSET_DEGREES = 0.0;
+    public static final double LEFT_LL_YAW_OFFSET_DEGREES = -50.357;                
+
+  }
+
 }
