@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
@@ -137,4 +138,34 @@ private Matrix<N3, N1> calculateStdDevs(LimelightHelpers.PoseEstimate estimate) 
         LimelightConstants.LEFT_LL_YAW_OFFSET_DEGREES);
   }  
 
+  public void analyzeMultipleTargets(String cameraName) {
+      // 1. Fetch the full parsed JSON dump from the Limelight
+      LimelightHelpers.LimelightResults results = LimelightHelpers.getLatestResults(cameraName);
+
+      // 2. Ensure we have valid data by checking the new .valid boolean
+      if (results != null && results.valid && results.targets_Fiducials != null) {
+          
+          // 3. Loop through the array DIRECTLY from the results object
+          for (LimelightHelpers.LimelightTarget_Fiducial tag : results.targets_Fiducials) {
+              
+              int tagID = (int) tag.fiducialID;
+              
+              // --- THE THREE MOST USEFUL POSES ---
+              
+              // A. Where the tag is relative to the center of your robot chassis
+              Pose3d poseInRobotSpace = tag.getTargetPose_RobotSpace();
+              
+              // B. Where the tag is relative to the camera lens itself
+              Pose3d poseInCameraSpace = tag.getTargetPose_CameraSpace();
+              
+              // C. Where your robot is on the field, calculated using ONLY this specific tag
+              Pose3d robotPoseFieldSpace = tag.getRobotPose_FieldSpace();
+              
+              // Example: Calculate the true 3D straight-line distance to this specific tag
+              double distanceToTagMeters = poseInRobotSpace.getTranslation().getNorm();
+              
+              System.out.println("Tag " + tagID + " is " + distanceToTagMeters + " meters away.");
+          }
+      }
+  }
 }
