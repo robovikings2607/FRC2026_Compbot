@@ -120,4 +120,8 @@ public class LimelightSubsystem extends SubsystemBase {
   public boolean isValidUpdate(LimelightHelpers.PoseEstimate mt2){
     return mt2 != null && mt2.tagCount > 0;
   }
+
+  public void configureCameraOffset(){
+    LimelightHelpers.SetFidcuial3DOffset(LEFT_LIMELIGHT_NAME, yaw, yaw, yaw);
+  }
 }

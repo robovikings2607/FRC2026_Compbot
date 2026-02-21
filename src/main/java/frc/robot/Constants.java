@@ -25,10 +25,10 @@ public final class Constants {
   }
 
   public static final class ShooterConstants{
-    public static final double BOT_TO_SHOOTER_DISTANCE = -Math.sqrt(Math.pow(Units.inchesToMeters(5.75), 2) + Math.pow(Units.inchesToMeters(-6.75), 2));
-    public static final double BOT_TO_SHOOTER_ANGLE = Math.atan2(Units.inchesToMeters(-6.75), Units.inchesToMeters(5.75));
+    public static final double BOT_TO_SHOOTER_DISTANCE = -Math.sqrt(Math.pow(Units.inchesToMeters(5.75), 2) + Math.pow(Units.inchesToMeters(-6.75), 2)); //shouldn't be negative
+    public static final double BOT_TO_SHOOTER_ANGLE = Math.atan2(Units.inchesToMeters(5.75), Units.inchesToMeters(-6.75));
 
-    public static final Transform2d  BOT_TO_SHOOTER_TRANSFORM = new Transform2d(5.75, -6.75, new Rotation2d());
+    public static final Transform2d  BOT_TO_SHOOTER_TRANSFORM = new Transform2d(-6.75, 5.75, new Rotation2d());
   }
 
   public static final class TurretConstants {
@@ -77,5 +77,21 @@ public final class Constants {
 
   public static final class ClimberConstants {
     public static final int CLIMBER_ID = 19;
+  }
+
+  public static final class LimelightConstants {
+    public static final double RIGHT_LL_FORWARD_OFFSET_METERS = Units.inchesToMeters(10.5); // + is forward from robot center
+    public static final double RIGHT_LL_LEFT_OFFSET_METERS = Units.inchesToMeters(10.5); // + is left, - is right
+    public static final double RIGHT_LL_UP_OFFSET_METERS = Units.inchesToMeters(10.5); // + is up from the floor
+    public static final double RIGHT_LL_ROLL_OFFSET_DEGREES = 0.0; // Tilted left/right
+    public static final double RIGHT_LL_PITCH_OFFSET_DEGREES = 0.0; // Tilted up/down (+ is looking up)
+    public static final double RIGHT_LL_YAW_OFFSET_DEGREES =  127.927226; // Turned left/right (+ is turned left)               
+
+    public static final double LEFT_LL_FORWARD_OFFSET_METERS = Units.inchesToMeters(10.5);
+    public static final double LEFT_LL_LEFT_OFFSET_METERS = Units.inchesToMeters(10.5);
+    public static final double LEFT_LL_UP_OFFSET_METERS = Units.inchesToMeters(10.5);
+    public static final double LEFT_LL_ROLL_OFFSET_DEGREES = 0.0;
+    public static final double LEFT_LL_PITCH_OFFSET_DEGREES = 0.0;
+    public static final double LEFT_LL_YAW_OFFSET_DEGREES = -50.357;                
   }
 }
