@@ -12,7 +12,7 @@ import frc.robot.Constants.HoodConstants;
 
 
 public class HoodSubsystemExp extends ShooterComponentSubsystemExp {
-  private static final double GEAR_RATIO = 1.0;
+  private static final double GEAR_RATIO = ((350.0/50.0)*(26.0/12.0));
   private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;  
 
   
@@ -53,17 +53,17 @@ public class HoodSubsystemExp extends ShooterComponentSubsystemExp {
         slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 160; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 320; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 10; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 20; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 100; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
-/*     //enable software limits
+     //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     //limits (in rotations)
-    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = rotationsPerDegree * 120;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -rotationsPerDegree * 240; */
+    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = GeometryUtil.getDegreesAsMotorRotations(HoodConstants.MIN_HOOD_ANGLE, GEAR_RATIO);
+    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = GeometryUtil.getDegreesAsMotorRotations(HoodConstants.MAX_HOOD_ANGLE, GEAR_RATIO);
   
     motor.getConfigurator().apply(configs);
     motor.setNeutralMode(NeutralModeValue.Brake);
