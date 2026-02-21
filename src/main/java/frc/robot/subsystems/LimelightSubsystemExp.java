@@ -118,7 +118,7 @@ private Matrix<N3, N1> calculateStdDevs(LimelightHelpers.PoseEstimate estimate) 
       LimelightHelpers.setCameraPose_RobotSpace(
         LimelightConstants.RIGHT_CAMERA_NAME, 
         LimelightConstants.RIGHT_LL_FORWARD_OFFSET_METERS, 
-        LimelightConstants.RIGHT_LL_LEFT_OFFSET_METERS, 
+        LimelightConstants.RIGHT_LL_RIGHT_OFFSET_METERS, 
         LimelightConstants.RIGHT_LL_UP_OFFSET_METERS, 
         LimelightConstants.RIGHT_LL_ROLL_OFFSET_DEGREES, 
         LimelightConstants.RIGHT_LL_PITCH_OFFSET_DEGREES, 
@@ -130,7 +130,7 @@ private Matrix<N3, N1> calculateStdDevs(LimelightHelpers.PoseEstimate estimate) 
       LimelightHelpers.setCameraPose_RobotSpace(
         LimelightConstants.LEFT_CAMERA_NAME, 
         LimelightConstants.LEFT_LL_FORWARD_OFFSET_METERS, 
-        LimelightConstants.LEFT_LL_LEFT_OFFSET_METERS, 
+        LimelightConstants.LEFT_LL_RIGHT_OFFSET_METERS, 
         LimelightConstants.LEFT_LL_UP_OFFSET_METERS, 
         LimelightConstants.LEFT_LL_ROLL_OFFSET_DEGREES, 
         LimelightConstants.LEFT_LL_PITCH_OFFSET_DEGREES, 

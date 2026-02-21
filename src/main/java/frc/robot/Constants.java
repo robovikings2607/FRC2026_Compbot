@@ -86,19 +86,19 @@ public final class Constants {
     public static final String RIGHT_CAMERA_NAME = "limelight-right";
     public static final String LEFT_CAMERA_NAME = "limelight-left";  
 
-    public static final double RIGHT_LL_FORWARD_OFFSET_METERS = Units.inchesToMeters(10.5); // + is forward from robot center
-    public static final double RIGHT_LL_LEFT_OFFSET_METERS = Units.inchesToMeters(10.5); // + is left, - is right
-    public static final double RIGHT_LL_UP_OFFSET_METERS = Units.inchesToMeters(10.5); // + is up from the floor
+    public static final double RIGHT_LL_FORWARD_OFFSET_METERS = -0.32533; // + is forward from robot center
+    public static final double RIGHT_LL_RIGHT_OFFSET_METERS = -0.13152; // + is left, - is right
+    public static final double RIGHT_LL_UP_OFFSET_METERS = 0.49388; // + is up from the floor
     public static final double RIGHT_LL_ROLL_OFFSET_DEGREES = 0.0; // Tilted left/right
     public static final double RIGHT_LL_PITCH_OFFSET_DEGREES = 0.0; // Tilted up/down (+ is looking up)
     public static final double RIGHT_LL_YAW_OFFSET_DEGREES =  127.927226; // Turned left/right (+ is turned left)               
 
-    public static final double LEFT_LL_FORWARD_OFFSET_METERS = Units.inchesToMeters(10.5);
-    public static final double LEFT_LL_LEFT_OFFSET_METERS = Units.inchesToMeters(10.5);
-    public static final double LEFT_LL_UP_OFFSET_METERS = Units.inchesToMeters(10.5);
+    public static final double LEFT_LL_FORWARD_OFFSET_METERS = 0.1133894808;
+    public static final double LEFT_LL_RIGHT_OFFSET_METERS = 0.2967812454;
+    public static final double LEFT_LL_UP_OFFSET_METERS = 0.49388;
     public static final double LEFT_LL_ROLL_OFFSET_DEGREES = 0.0;
     public static final double LEFT_LL_PITCH_OFFSET_DEGREES = 0.0;
-    public static final double LEFT_LL_YAW_OFFSET_DEGREES = -50.357;                
+    public static final double LEFT_LL_YAW_OFFSET_DEGREES = -50.35;                
 
   }
 
