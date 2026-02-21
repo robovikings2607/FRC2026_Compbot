@@ -10,7 +10,17 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 public class GeometryUtilTest {
 
-        @Test
+    // --- A Helper Method for Clean Assertions ---
+    // Because floating point math (doubles) can have tiny rounding errors, 
+    // we use a small delta (0.001) when comparing coordinates.
+    private void assertPoseEquals(Pose2d expected, Pose2d actual, String message) {
+        double delta = 0.001;
+        assertEquals(expected.getX(), actual.getX(), delta, message + " (X mismatch)");
+        assertEquals(expected.getY(), actual.getY(), delta, message + " (Y mismatch)");
+        assertEquals(expected.getRotation().getDegrees(), actual.getRotation().getDegrees(), delta, message + " (Angle mismatch)");
+    }
+
+    @Test
     public void testGetTargetAngle0Degrees() {
         //System.out.println("DEBUGGING TURRET:");        
         double angle = GeometryUtil.getTargetAngleDegrees(
@@ -161,29 +171,33 @@ public class GeometryUtilTest {
         // Translation: 0.5m at 180 deg -> X = -0.5, Y = 0.0
         // Rotation: Start (0) + MotorZero (180) = 180 degrees
         Pose2d expected = new Pose2d(-0.5, 0.0, Rotation2d.fromDegrees(180));
-        assertEquals(expected, result, "Robot at 0 deg, mechanism mounted behind with 180 deg zero");
+        assertPoseEquals(expected, result, "Robot at 0 deg, mechanism mounted behind with 180 deg zero");
     }
 
     @Test
-public void testMotorZeroOffset180_RobotRotated() {
-    // Robot is at (2.0, 2.0) but facing LEFT on the field (90 degrees)
-    Pose2d start = new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90));
+    public void testMotorZeroOffset180_RobotRotated() {
+        // Robot is at (2.0, 2.0) but facing LEFT on the field (90 degrees)
+        Pose2d start = new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90));
 
-    // Mechanism is mounted 1.0 meter to the robot's RIGHT (-90 or 270 degrees relative to robot)
-    // The motor's zero position faces exactly BACKWARDS relative to the robot (180 degrees)
-    Pose2d result = GeometryUtil.getOffsetPose(
-        start, 
-        1.0, 
-        Rotation2d.fromDegrees(-90), 
-        Rotation2d.fromDegrees(180)
-    );
+        // Mechanism is mounted 1.0 meter to the robot's RIGHT (-90 or 270 degrees relative to robot)
+        // The motor's zero position faces exactly BACKWARDS relative to the robot (180 degrees)
+        Pose2d result = GeometryUtil.getOffsetPose(
+            start, 
+            1.0, 
+            Rotation2d.fromDegrees(-90), 
+            Rotation2d.fromDegrees(180)
+        );
 
-    // Expected Math:
-    // 1. Translation: Robot faces North (90). Robot's "Right" (-90 relative) is Field East (0 deg).
-    //    So it translates +1.0 along the Field X axis. -> New Pos: (3.0, 2.0).
-    // 2. Rotation: Robot faces 90. Motor zero adds 180. 
-    //    90 + 180 = 270 degrees (or -90 degrees, facing Field South).
-    Pose2d expected = new Pose2d(3.0, 2.0, Rotation2d.fromDegrees(270));
-    assertEquals(expected, result, "Robot at 90 deg, mechanism on right with 180 deg zero");
-}
+        // Expected Math:
+        // 1. Translation: Robot faces North (90). Robot's "Right" (-90 relative) is Field East (0 deg).
+        //    So it translates +1.0 along the Field X axis. -> New Pos: (3.0, 2.0).
+        // 2. Rotation: Robot faces 90. Motor zero adds 180. 
+        //    90 + 180 = 270 degrees (or -90 degrees, facing Field South).
+        System.out.println("result.x: " + result.getX());
+        System.out.println("result.y: " + result.getY());        
+        System.out.println("result.angle: " + result.getRotation().getDegrees());                
+        Pose2d expected = new Pose2d(3.0, 2.0, Rotation2d.fromDegrees(270));
+        assertPoseEquals(expected, result, "Robot at 90 deg, mechanism on right with 180 deg zero");
+    }
+
 }
