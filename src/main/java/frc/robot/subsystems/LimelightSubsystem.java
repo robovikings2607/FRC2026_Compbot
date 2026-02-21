@@ -28,73 +28,74 @@ import frc.robot.utilities.LimelightHelpers;
 
 public class LimelightSubsystem extends SubsystemBase {
   /** Creates a new LimelightSubsystem. */
-  boolean doRejectUpdate = false;
-  // PiCameraSubsystem photonVision;
-  RobotContainer m_robot;
-  Pigeon2 gyro;
+  RobotContainer robot;
   FieldObject2d fieldVisionDetections, fieldVisionPose;
   double yaw;
-  // AprilTagFieldLayout fieldLayout;
-  int hasTargets = 0;
+  String LEFT_LIMELIGHT_NAME = "limelight-left";
+  String RIGHT_LIMELIGHT_NAME = "limelight-right";
 
   public LimelightSubsystem(RobotContainer robot) {
     // Switch to pipeline 0
 
-    m_robot = robot;
+    this.robot = robot;
     //Left
-    LimelightHelpers.setPipelineIndex("limelight-left", 0);
-    LimelightHelpers.SetIMUMode("limelight-left", 0);
+    LimelightHelpers.setPipelineIndex(LEFT_LIMELIGHT_NAME, 0);
+    LimelightHelpers.SetIMUMode(LEFT_LIMELIGHT_NAME, 0);
 
     //Right
-    LimelightHelpers.setPipelineIndex("limelight-right", 0);
-    LimelightHelpers.SetIMUMode("limelight-right", 0);
+    LimelightHelpers.setPipelineIndex(RIGHT_LIMELIGHT_NAME, 0);
+    LimelightHelpers.SetIMUMode(RIGHT_LIMELIGHT_NAME, 0);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-  yaw = m_robot.drivetrain.getState().Pose.getRotation().getDegrees();
+  yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
 
-  LimelightHelpers.SetRobotOrientation("limelight-right", yaw, 0, 0, 0, 0, 0);
-  LimelightHelpers.SetRobotOrientation("limelight-left", yaw, 0, 0, 0, 0, 0);
-  LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-right");
-  LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left");
-  LimelightHelpers.PoseEstimate mt2 = rightLL;
+  LimelightHelpers.SetRobotOrientation(RIGHT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
+  LimelightHelpers.SetRobotOrientation(LEFT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
+  LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
+  LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
 
-  if(rightLL == null && leftLL != null){
-    mt2 = leftLL;
-  }
-  else if(rightLL != null && leftLL == null){
-    mt2 = rightLL;
-  }
-  else{
-    if(leftLL.avgTagDist < rightLL.avgTagDist){
-      mt2 = leftLL;
-    }
-    else{
-      mt2 = rightLL;
-    }
-  }
   
-  fieldVisionDetections = m_robot.field.getObject("Limelight"+"/visionDetections");
-  fieldVisionPose = m_robot.field.getObject("Limelight"+"/fieldVisionPose");
+  fieldVisionDetections = robot.field.getObject("Limelight"+"/visionDetections");
+  fieldVisionPose = robot.field.getObject("Limelight"+"/fieldVisionPose");
 
     
-   if(mt2 != null && mt2.tagCount > 0){
-       m_robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.1,0.1, 999999999));
-      m_robot.drivetrain.addVisionMeasurement(
+   if(isValidUpdate(leftLL)){
+      LimelightHelpers.PoseEstimate mt2 = leftLL;
+
+      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.1,0.1, 999999999));
+      robot.drivetrain.addVisionMeasurement(
         mt2.pose,
         mt2.timestampSeconds
       ); 
 
-      SmartDashboard.putNumber("Limelight/X", mt2.pose.getX());
-      SmartDashboard.putNumber("Limelight/Y", mt2.pose.getY());
-      SmartDashboard.putNumber("Limelight/Rotation", mt2.pose.getRotation().getDegrees()); 
+      SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
+      SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
+      SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
 
       // System.out.println("has pose");
+      drawTargetsOnField(mt2);
     }
 
-    drawTargetsOnField(mt2);
+    if(isValidUpdate(rightLL)){
+      LimelightHelpers.PoseEstimate mt2 = rightLL;
+
+      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.1,0.1, 999999999));
+      robot.drivetrain.addVisionMeasurement(
+        mt2.pose,
+        mt2.timestampSeconds
+      ); 
+
+      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
+      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
+      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
+
+      // System.out.println("has pose");
+      drawTargetsOnField(mt2);
+    }
+
 
    //  SmartDashboard.putNumber("Limelight/hasTarget", hasTargets);
   }
@@ -114,5 +115,9 @@ public class LimelightSubsystem extends SubsystemBase {
 
       fieldVisionDetections.setPoses(mt2.pose);
       fieldVisionPose.setPose(mt2.pose); 
+  }
+
+  public boolean isValidUpdate(LimelightHelpers.PoseEstimate mt2){
+    return mt2 != null && mt2.tagCount > 0;
   }
 }
