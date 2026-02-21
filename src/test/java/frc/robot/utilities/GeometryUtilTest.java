@@ -142,4 +142,48 @@ public class GeometryUtilTest {
 
     }
 
+    public void testMotorZeroOffset180_RobotAtOrigin() {
+        // Robot is at the center of the field, facing downfield (0 degrees)
+        Pose2d start = new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0));
+
+        // The mechanism is mounted 0.5 meters directly BEHIND the robot's center 
+        // (offsetAngle = 180 degrees relative to robot front)
+        // AND its "zero" position faces backwards 
+        // (motorZero = 180 degrees relative to robot front)
+        Pose2d result = GeometryUtil.getOffsetPose(
+            start, 
+            0.5, 
+            Rotation2d.fromDegrees(180), 
+            Rotation2d.fromDegrees(180)
+        );
+
+        // Expected Math:
+        // Translation: 0.5m at 180 deg -> X = -0.5, Y = 0.0
+        // Rotation: Start (0) + MotorZero (180) = 180 degrees
+        Pose2d expected = new Pose2d(-0.5, 0.0, Rotation2d.fromDegrees(180));
+        assertEquals(expected, result, "Robot at 0 deg, mechanism mounted behind with 180 deg zero");
+    }
+
+    @Test
+public void testMotorZeroOffset180_RobotRotated() {
+    // Robot is at (2.0, 2.0) but facing LEFT on the field (90 degrees)
+    Pose2d start = new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90));
+
+    // Mechanism is mounted 1.0 meter to the robot's RIGHT (-90 or 270 degrees relative to robot)
+    // The motor's zero position faces exactly BACKWARDS relative to the robot (180 degrees)
+    Pose2d result = GeometryUtil.getOffsetPose(
+        start, 
+        1.0, 
+        Rotation2d.fromDegrees(-90), 
+        Rotation2d.fromDegrees(180)
+    );
+
+    // Expected Math:
+    // 1. Translation: Robot faces North (90). Robot's "Right" (-90 relative) is Field East (0 deg).
+    //    So it translates +1.0 along the Field X axis. -> New Pos: (3.0, 2.0).
+    // 2. Rotation: Robot faces 90. Motor zero adds 180. 
+    //    90 + 180 = 270 degrees (or -90 degrees, facing Field South).
+    Pose2d expected = new Pose2d(3.0, 2.0, Rotation2d.fromDegrees(270));
+    assertEquals(expected, result, "Robot at 90 deg, mechanism on right with 180 deg zero");
+}
 }
