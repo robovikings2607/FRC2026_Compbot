@@ -14,31 +14,16 @@ import frc.robot.Constants.HoodConstants;
 
 public class HoodSubsystemExp extends ShooterComponentSubsystemExp {
   private static final double GEAR_RATIO = 1.0;
-  private final InterpolatingDoubleTreeMap distanceToAngleMap = new InterpolatingDoubleTreeMap();
   private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;  
 
   
   public HoodSubsystemExp(RobotContainer robot) {
     super(robot, HoodConstants.HOOD_ID);    
     
-    initializeDistanceToAngleMap();
     configureMotor();
   }
 
-  private void initializeDistanceToAngleMap() {
-      distanceToAngleMap.put(1.0, 15.0);
-      distanceToAngleMap.put(5.0, 55.0);
-  }
-
-  /**
-   * The subsystem decides what angle that requires.
-   */
-  public void setAngleForDistance(double distanceMeters) {
-    double targetAngleDegrees = distanceToAngleMap.get(distanceMeters);
-    setAngle(targetAngleDegrees);
-  }
-
-    /**
+   /**
    * Sets the angle of motor directly assuming the correct angle
    * is already known and does not have to be looked up in the map
    */

@@ -19,7 +19,6 @@ import frc.robot.utilities.ShooterUtils;
 
 public class FlywheelSubsystemExp extends SubsystemBase {
     private static final double GEAR_RATIO = 1.0;
-    private final InterpolatingDoubleTreeMap distanceToRPSMap = new InterpolatingDoubleTreeMap();
     private final double TARGET_ERR_TOLERANCE_RPS = 1.5;  
     protected final TalonFX motor;
     protected final RobotContainer robot;
@@ -34,18 +33,7 @@ public class FlywheelSubsystemExp extends SubsystemBase {
       this.robot = robot;
       this.motor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
 
-      initializeDistanceToAngleMap();    
       configureMotor();
-    }
-
-    private void initializeDistanceToAngleMap() {
-      distanceToRPSMap.put(1.0, 900.0);
-      distanceToRPSMap.put(5.0, 1000.0);
-    }
-
-    public void setRPSForDistance(double distanceMeters) {
-        double targetRPM = distanceToRPSMap.get(distanceMeters);
-        setRPS(targetRPM);
     }
 
     public void setRPS(double targetRPS) {
