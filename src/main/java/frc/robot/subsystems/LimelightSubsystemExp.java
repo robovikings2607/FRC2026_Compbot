@@ -18,8 +18,6 @@ import frc.robot.utilities.LimelightHelpers;
 public class LimelightSubsystemExp extends SubsystemBase {
   RobotContainer m_robot;
   FieldObject2d fieldVisionDetections, fieldVisionPose;
-  public final String RIGHT_CAMERA_NAME = "limelight-right";
-  public final String LEFT_CAMERA_NAME = "limelight-left";  
 
   public LimelightSubsystemExp(RobotContainer robot) {
 
@@ -27,13 +25,13 @@ public class LimelightSubsystemExp extends SubsystemBase {
 
     //Left
     configureLLLeftOffsets();        
-    LimelightHelpers.setPipelineIndex(LEFT_CAMERA_NAME, 0);
-    LimelightHelpers.SetIMUMode(LEFT_CAMERA_NAME, 0);
+    LimelightHelpers.setPipelineIndex(LimelightConstants.LEFT_CAMERA_NAME, 0);
+    LimelightHelpers.SetIMUMode(LimelightConstants.LEFT_CAMERA_NAME, 0);
 
     //Right
     configureLLRightOffsets();    
-    LimelightHelpers.setPipelineIndex(RIGHT_CAMERA_NAME, 0);
-    LimelightHelpers.SetIMUMode(RIGHT_CAMERA_NAME, 0);
+    LimelightHelpers.setPipelineIndex(LimelightConstants.RIGHT_CAMERA_NAME, 0);
+    LimelightHelpers.SetIMUMode(LimelightConstants.RIGHT_CAMERA_NAME, 0);
   }
 
   @Override
@@ -43,19 +41,19 @@ public class LimelightSubsystemExp extends SubsystemBase {
     fieldVisionPose = m_robot.field.getObject("Limelight"+"/fieldVisionPose");
 
     double yaw = m_robot.drivetrain.getState().Pose.getRotation().getDegrees();
-    LimelightHelpers.SetRobotOrientation(RIGHT_CAMERA_NAME, yaw, 0, 0, 0, 0, 0);
-    LimelightHelpers.SetRobotOrientation(LEFT_CAMERA_NAME, yaw, 0, 0, 0, 0, 0);
-    LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_CAMERA_NAME);
-    LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_CAMERA_NAME);
+    LimelightHelpers.SetRobotOrientation(LimelightConstants.RIGHT_CAMERA_NAME, yaw, 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation(LimelightConstants.LEFT_CAMERA_NAME, yaw, 0, 0, 0, 0, 0);
+    LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LimelightConstants.RIGHT_CAMERA_NAME);
+    LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LimelightConstants.LEFT_CAMERA_NAME);
 
     if (isValidVisionMeasurement(rightLL)) {
       Matrix<N3, N1> stdDevs = calculateStdDevs(rightLL);
-      updateRobotPose(rightLL, stdDevs, RIGHT_CAMERA_NAME);
+      updateRobotPose(rightLL, stdDevs, LimelightConstants.RIGHT_CAMERA_NAME);
     }
 
     if (isValidVisionMeasurement(leftLL)) {
       Matrix<N3, N1> stdDevs = calculateStdDevs(leftLL);      
-      updateRobotPose(leftLL, stdDevs, LEFT_CAMERA_NAME);    
+      updateRobotPose(leftLL, stdDevs, LimelightConstants.LEFT_CAMERA_NAME);    
     }
   }
 
@@ -118,7 +116,7 @@ private Matrix<N3, N1> calculateStdDevs(LimelightHelpers.PoseEstimate estimate) 
 
   public void configureLLRightOffsets() {
       LimelightHelpers.setCameraPose_RobotSpace(
-        RIGHT_CAMERA_NAME, 
+        LimelightConstants.RIGHT_CAMERA_NAME, 
         LimelightConstants.RIGHT_LL_FORWARD_OFFSET_METERS, 
         LimelightConstants.RIGHT_LL_LEFT_OFFSET_METERS, 
         LimelightConstants.RIGHT_LL_UP_OFFSET_METERS, 
@@ -130,7 +128,7 @@ private Matrix<N3, N1> calculateStdDevs(LimelightHelpers.PoseEstimate estimate) 
   public void configureLLLeftOffsets() {
 
       LimelightHelpers.setCameraPose_RobotSpace(
-        LEFT_CAMERA_NAME, 
+        LimelightConstants.LEFT_CAMERA_NAME, 
         LimelightConstants.LEFT_LL_FORWARD_OFFSET_METERS, 
         LimelightConstants.LEFT_LL_LEFT_OFFSET_METERS, 
         LimelightConstants.LEFT_LL_UP_OFFSET_METERS, 

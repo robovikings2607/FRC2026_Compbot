@@ -83,6 +83,9 @@ public final class Constants {
   }
 
   public static final class LimelightConstants {
+    public static final String RIGHT_CAMERA_NAME = "limelight-right";
+    public static final String LEFT_CAMERA_NAME = "limelight-left";  
+
     public static final double RIGHT_LL_FORWARD_OFFSET_METERS = Units.inchesToMeters(10.5); // + is forward from robot center
     public static final double RIGHT_LL_LEFT_OFFSET_METERS = Units.inchesToMeters(10.5); // + is left, - is right
     public static final double RIGHT_LL_UP_OFFSET_METERS = Units.inchesToMeters(10.5); // + is up from the floor
