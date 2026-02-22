@@ -59,8 +59,8 @@ public final class Constants {
     public static final int ROLLER_ID = 14;
     public static final int PIVOT_ID = 13;
 
+    public static final double INTAKE_RETRACTED = 3.58; //check these later
     public static final double INTAKE_DEPLOYED = 0.0; //check these later
-    public static final double INTAKE_RETRACTED = 0.5; //check these later
   }
 
   public static final class FeederConstants {
