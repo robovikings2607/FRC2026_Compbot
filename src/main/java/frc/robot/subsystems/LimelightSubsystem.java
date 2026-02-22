@@ -5,7 +5,9 @@
 package frc.robot.subsystems;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -33,6 +35,8 @@ public class LimelightSubsystem extends SubsystemBase {
   double yaw;
   String LEFT_LIMELIGHT_NAME = "limelight-left";
   String RIGHT_LIMELIGHT_NAME = "limelight-right";
+  private AprilTagFieldLayout tagLayout;
+
 
   public LimelightSubsystem(RobotContainer robot) {
     // Switch to pipeline 0
@@ -45,6 +49,19 @@ public class LimelightSubsystem extends SubsystemBase {
     //Right
     LimelightHelpers.setPipelineIndex(RIGHT_LIMELIGHT_NAME, 0);
     LimelightHelpers.SetIMUMode(RIGHT_LIMELIGHT_NAME, 0);
+
+    try {
+        // This automatically loads the layout for the current year's game
+        //tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+
+        java.io.File deployDir = edu.wpi.first.wpilibj.Filesystem.getDeployDirectory();
+        java.io.File fieldJsonFile = new java.io.File(deployDir, "2026-rebuilt-welded.json");
+        tagLayout = new edu.wpi.first.apriltag.AprilTagFieldLayout(fieldJsonFile.toPath());
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+
   }
 
   @Override
@@ -76,7 +93,8 @@ public class LimelightSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
 
       // System.out.println("has pose");
-      drawTargetsOnField(mt2);
+      List<Pose2d> tagPoses = getTagPoses(mt2);     
+      drawTargetsOnField(mt2, tagPoses);
     }
 
     if(isValidUpdate(rightLL)){
@@ -93,14 +111,15 @@ public class LimelightSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
 
       // System.out.println("has pose");
-      drawTargetsOnField(mt2);
+      List<Pose2d> tagPoses = getTagPoses(mt2);     
+      drawTargetsOnField(mt2, tagPoses);
     }
 
 
    //  SmartDashboard.putNumber("Limelight/hasTarget", hasTargets);
   }
 
-  public void drawTargetsOnField(LimelightHelpers.PoseEstimate mt2)
+  public void drawTargetsOnField(LimelightHelpers.PoseEstimate mt2, List<Pose2d> tagPoses)
   {
       if(mt2 == null){
           return;
@@ -113,7 +132,7 @@ public class LimelightSubsystem extends SubsystemBase {
           return;
       }
 
-      fieldVisionDetections.setPoses(mt2.pose);
+      fieldVisionDetections.setPoses(tagPoses);
       fieldVisionPose.setPose(mt2.pose); 
   }
 
@@ -124,4 +143,25 @@ public class LimelightSubsystem extends SubsystemBase {
   public void configureCameraOffset(){
     LimelightHelpers.SetFidcuial3DOffset(LEFT_LIMELIGHT_NAME, yaw, yaw, yaw);
   }
+
+  public List<Pose2d> getTagPoses(LimelightHelpers.PoseEstimate mt2) {
+
+    ArrayList<Pose2d> tagPoses = new ArrayList<Pose2d>();
+    
+    if (tagLayout != null) {
+      
+      for (LimelightHelpers.RawFiducial tag : mt2.rawFiducials) {
+          
+          var pose3d = tagLayout.getTagPose(tag.id);
+          if (pose3d.isPresent()) {
+              tagPoses.add(pose3d.get().toPose2d());
+          } else {
+
+          }
+      }
+    }
+
+    return tagPoses;
+  }
+
 }
