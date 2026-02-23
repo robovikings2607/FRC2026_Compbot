@@ -31,10 +31,11 @@ import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.TurretConstants;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
-import frc.robot.commands.intake.ReverseIntake;
-import frc.robot.commands.intake.RunIntake;
-import frc.robot.commands.intake.StopIntake;
+import frc.robot.commands.intake.ReverseRollers;
+import frc.robot.commands.intake.DeployIntake;
+import frc.robot.commands.intake.RetractIntake;
 import frc.robot.commands.shooter.PrepareShooter;
+import frc.robot.commands.shooter.StopShooter;
 import frc.robot.commands.shooter.TransferPieces;
 import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
 import frc.robot.commands.shooter.TrackHubTargetExp;
@@ -101,15 +102,9 @@ public class RobotContainer {
     public final HoodSubsystem hood = new HoodSubsystem(this);
     public final FeederSubsystem feeder = new FeederSubsystem(this);
     public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
-    public final IntakeSubsystem intake = new IntakeSubsystem(this); 
-    public final LEDSubsystem leds = new LEDSubsystem(this);
-    public final ClimberSubsystem climber = new ClimberSubsystem(this);
-
-    //experimental
-    public final TurretSubsystemExp turretExp = new TurretSubsystemExp(this);
-    public final HoodSubsystemExp hoodExp = new HoodSubsystemExp(this);
-    public final FlywheelSubsystemExp flywheelExp = new FlywheelSubsystemExp(this);
-    public final FeederSubsystemExp feederExp = new FeederSubsystemExp(this);    
+    public final IntakeSubsystem intake = new IntakeSubsystem(this);
+    //public final LEDSubsystem leds = new LEDSubsystem(this);
+    //public final ClimberSubsystem climber = new ClimberSubsystem(this);
 
     public RobotContainer() {
 
@@ -120,25 +115,6 @@ public class RobotContainer {
         
         SmartDashboard.putData("Auto Chooser", autoChooser);
         SmartDashboard.putData("Field!!!", field);
-        SmartDashboard.putNumber("kFrontRightEncoderOffset", drivetrain.getModule(1).getEncoder().getAbsolutePosition().getValueAsDouble());
-    }
-
-    private void configureDefaultCommands() {
-        turretExp.setDefaultCommand(new TrackHubTargetExp(
-            turretExp, 
-            () -> drivetrain.getState().Pose,
-            this::getFieldRelativeVelocity
-        ));
-
-        flywheelExp.setDefaultCommand(new RunCommand(
-            () -> flywheelExp.setRPS(FlywheelConstants.IDLE_RPM), 
-            flywheelExp
-        ));
-
-        hoodExp.setDefaultCommand(new RunCommand(
-            () -> hoodExp.setAngle(HoodConstants.ZERO_POSITION_ANGLE), 
-            hoodExp
-        ));
     }
 
     private void configureBindings() {
@@ -159,15 +135,16 @@ public class RobotContainer {
         driverController.rightStick.onTrue(new ToggleHighLowGear(this));
 
         //Intake
-        driverController.leftBumper.onTrue(new RunIntake(this)); //will be deploy later
-        driverController.leftTriggerButton.onTrue(new StopIntake(this)); //will be retract later
-        // driverController.rightBumper.onTrue(new ReverseIntake(this));
+        driverController.leftBumper.onTrue(new DeployIntake(this)); //will be deploy later
+        driverController.leftTriggerButton.onTrue(new RetractIntake(this)); //will be retract later
+        driverController.buttonA.onTrue(new ReverseRollers(this));
 
         //Feeder + Spindexer
         driverController.rightTriggerButton.whileTrue(new TransferPieces(this));
 
         //Flywheel + Hood
         driverController.rightBumper.onTrue(new PrepareShooter(this));
+        driverController.buttonB.onTrue(new StopShooter(this));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
@@ -175,36 +152,6 @@ public class RobotContainer {
         RobotModeTriggers.disabled().whileTrue(
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
-
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
-        joystick.x().whileTrue(
-            new AutoAimAndShootCommandExp(
-                turretExp, 
-                hoodExp, 
-                flywheelExp, 
-                feederExp,
-                () -> this.drivetrain.getState().Pose,
-                this::getFieldRelativeVelocity
-            )            
-        );        
-        joystick.y().whileTrue(new TuneShooterCommand(flywheelExp, hoodExp));
-
-
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-        // Reset the field-centric heading on left bumper press.
-        joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-
-
-
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

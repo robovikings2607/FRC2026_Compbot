@@ -25,17 +25,17 @@ public final class Constants {
   }
 
   public static final class ShooterConstants{
-    public static final double BOT_TO_SHOOTER_DISTANCE = -Math.sqrt(Math.pow(Units.inchesToMeters(5.75), 2) + Math.pow(Units.inchesToMeters(-6.75), 2));
-    public static final double BOT_TO_SHOOTER_ANGLE = Math.atan2(Units.inchesToMeters(-6.75), Units.inchesToMeters(5.75));
+    public static final double BOT_TO_SHOOTER_DISTANCE = -Math.sqrt(Math.pow(Units.inchesToMeters(5.75), 2) + Math.pow(Units.inchesToMeters(-6.75), 2)); //shouldn't be negative
+    public static final double BOT_TO_SHOOTER_ANGLE = Math.atan2(Units.inchesToMeters(5.75), Units.inchesToMeters(-6.75));
 
-    public static final Transform2d  BOT_TO_SHOOTER_TRANSFORM = new Transform2d(5.75, -6.75, new Rotation2d());
+    public static final Transform2d  BOT_TO_SHOOTER_TRANSFORM = new Transform2d(-6.75, 5.75, new Rotation2d());
   }
 
   public static final class TurretConstants {
     public static final int TURRET_ID = 30;
     
-    public static final double MAX_ANGLE = 249.948;
-    public static final double MIN_ANGLE = -127.125;
+    public static final double MAX_ANGLE = 241.4115;
+    public static final double MIN_ANGLE = -118.5885;
   }
 
   public static final class FlywheelConstants {
@@ -62,8 +62,8 @@ public final class Constants {
     public static final int ROLLER_ID = 14;
     public static final int PIVOT_ID = 13;
 
+    public static final double INTAKE_RETRACTED = 3.58; //check these later
     public static final double INTAKE_DEPLOYED = 0.0; //check these later
-    public static final double INTAKE_RETRACTED = 0.5; //check these later
   }
 
   public static final class FeederConstants {
@@ -83,23 +83,18 @@ public final class Constants {
   }
 
   public static final class LimelightConstants {
-    public static final String RIGHT_CAMERA_NAME = "limelight-right";
-    public static final String LEFT_CAMERA_NAME = "limelight-left";  
-
-    public static final double RIGHT_LL_FORWARD_OFFSET_METERS = -0.32533; // + is forward from robot center
-    public static final double RIGHT_LL_RIGHT_OFFSET_METERS = -0.13152; // + is left, - is right
-    public static final double RIGHT_LL_UP_OFFSET_METERS = 0.49388; // + is up from the floor
+    public static final double RIGHT_LL_FORWARD_OFFSET_METERS = Units.inchesToMeters(10.5); // + is forward from robot center
+    public static final double RIGHT_LL_LEFT_OFFSET_METERS = Units.inchesToMeters(10.5); // + is left, - is right
+    public static final double RIGHT_LL_UP_OFFSET_METERS = Units.inchesToMeters(10.5); // + is up from the floor
     public static final double RIGHT_LL_ROLL_OFFSET_DEGREES = 0.0; // Tilted left/right
     public static final double RIGHT_LL_PITCH_OFFSET_DEGREES = 0.0; // Tilted up/down (+ is looking up)
     public static final double RIGHT_LL_YAW_OFFSET_DEGREES =  127.927226; // Turned left/right (+ is turned left)               
 
-    public static final double LEFT_LL_FORWARD_OFFSET_METERS = 0.1133894808;
-    public static final double LEFT_LL_RIGHT_OFFSET_METERS = 0.2967812454;
-    public static final double LEFT_LL_UP_OFFSET_METERS = 0.49388;
+    public static final double LEFT_LL_FORWARD_OFFSET_METERS = Units.inchesToMeters(10.5);
+    public static final double LEFT_LL_LEFT_OFFSET_METERS = Units.inchesToMeters(10.5);
+    public static final double LEFT_LL_UP_OFFSET_METERS = Units.inchesToMeters(10.5);
     public static final double LEFT_LL_ROLL_OFFSET_DEGREES = 0.0;
     public static final double LEFT_LL_PITCH_OFFSET_DEGREES = 0.0;
-    public static final double LEFT_LL_YAW_OFFSET_DEGREES = -50.35;                
-
+    public static final double LEFT_LL_YAW_OFFSET_DEGREES = -50.357;                
   }
-
 }

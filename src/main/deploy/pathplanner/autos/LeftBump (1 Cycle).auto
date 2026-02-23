@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AllianceToNeutral1 (LeftBump)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CollectFuel (LeftBump)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NeutralToAlliance1 (LeftBump)"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

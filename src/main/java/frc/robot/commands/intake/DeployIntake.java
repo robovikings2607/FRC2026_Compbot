@@ -13,14 +13,14 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.IntakeSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class RunIntake extends Command {
+public class DeployIntake extends Command {
   /** Creates a new RunIntake. */
 
   RobotContainer robot;
   IntakeSubsystem intake;
   Timer timer = new Timer();
 
-  public RunIntake(RobotContainer robot) {
+  public DeployIntake(RobotContainer robot) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.robot = robot;
     intake = robot.intake;
@@ -31,6 +31,7 @@ public class RunIntake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    intake.deployIntake();
     intake.runRollersUnjammed();
   }
 

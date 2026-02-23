@@ -1,8 +1,12 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -13,12 +17,12 @@ import frc.robot.Constants.IntakeConstants;
 public class IntakeSubsystem extends SubsystemBase {
 
   private final TalonFX rollerMotor;
-  // private final TalonFX pivotMotor;
+  private final TalonFX pivotMotor;
 
-  private final PositionVoltage positionVoltage = new PositionVoltage(0);
+  private MotionMagicVoltage control  = new MotionMagicVoltage(0);
 
-  private double intakePosition = IntakeConstants.INTAKE_RETRACTED;
-  private double desiredVoltage;
+  private double intakePosition;
+  private boolean isDeployed;
 
   private RobotContainer robot;
 
@@ -26,7 +30,10 @@ public class IntakeSubsystem extends SubsystemBase {
     this.robot = robot;
 
     rollerMotor = new TalonFX(IntakeConstants.ROLLER_ID);
-    // pivotMotor = new TalonFX(IntakeConstants.PIVOT_ID);
+    pivotMotor = new TalonFX(IntakeConstants.PIVOT_ID);
+
+    intakePosition = IntakeConstants.INTAKE_RETRACTED;
+    isDeployed = false;
 
     configurePivotMotor();
     // zeroIntake();
@@ -34,23 +41,30 @@ public class IntakeSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // pivotMotor.setControl(positionVoltage.withPosition(intakePosition));
+
+    pivotMotor.setControl(control.withPosition(intakePosition));
     SmartDashboard.putBoolean("Intake/IsJammed", isJammed());
-    SmartDashboard.putNumber("Intake/Voltage", desiredVoltage);
   }
 
   public void configurePivotMotor(){
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
-    var slot0Configs = configs.Slot0;
-        slot0Configs.kS = 0.0; // Voltage output to overcome static friction
-        slot0Configs.kV = 0.0; // A velocity target of 1 rps requires this voltage output.
-        slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
-        slot0Configs.kP = 0.0; // A position error of 2.5 rotations requires this voltage output
+     var slot0Configs = configs.Slot0;
+        slot0Configs.kS = 0.25; // Voltage output to overcome static friction
+        slot0Configs.kV = 3.0; // A velocity target of 1 rps requires this voltage output.
+        slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
+        slot0Configs.kP = 4.8; // A position error of 2.5 rotations requires this voltage output
         slot0Configs.kI = 0; // no output for integrated error
-        slot0Configs.kD = 0.0; // A velocity error of 1 rps requires this voltage output
+        slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
+
+    var motionMagicConfigs = configs.MotionMagic;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 80; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 160; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds)
     
-    // pivotMotor.getConfigurator().apply(slot0Configs);
+    pivotMotor.setNeutralMode(NeutralModeValue.Brake);
+    pivotMotor.getConfigurator().apply(slot0Configs);
+    pivotMotor.setPosition(0.0);
   }
 
   public void runRollersUnjammed(){
@@ -75,10 +89,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public void deployIntake(){
     intakePosition = IntakeConstants.INTAKE_DEPLOYED;
+    isDeployed = true;
   }
 
   public void retractIntake(){
     intakePosition = IntakeConstants.INTAKE_RETRACTED;
+    isDeployed = false;
   }
 
  /*  public void zeroIntake(){

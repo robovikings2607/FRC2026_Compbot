@@ -67,7 +67,7 @@ public class FlywheelSubsystem extends SubsystemBase {
       setGoal(distance);
     }
 
-    flywheelMotor.setControl(velocityControl.withVelocity(rps)); //should be constant, but not entirely sure
+    flywheelMotor.setControl(velocityControl.withVelocity(rps));
   }
 
   public void configureMotor(){ 
@@ -77,7 +77,7 @@ public class FlywheelSubsystem extends SubsystemBase {
           // slot0Configs.kS = 0.0; // Voltage output to overcome static friction
           slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
           // slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
-          slot0Configs.kP = 0.62; // A position error of 2.5 rotations requires this voltage output
+          slot0Configs.kP = 0.6; // A position error of 2.5 rotations requires this voltage output
           slot0Configs.kI = 0; // no output for integrated error
           slot0Configs.kD = 0.000; // A velocity error of 1 rps requires this voltage output
 
