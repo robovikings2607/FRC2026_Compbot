@@ -10,25 +10,27 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FieldElements;
 import frc.robot.subsystems.TurretSubsystemExp;
+import frc.robot.utilities.AimingCalculator;
+import frc.robot.utilities.AimingSolution;
 
 public class TrackHubTargetExp extends Command {
 
-  private final TurretSubsystemExp turretSubsystem;
+  private final TurretSubsystemExp turret;
   private final Supplier<Pose2d> robotPoseProvider;  
   private final Supplier<ChassisSpeeds> robotVelocityProvider;    
+  private final AimingCalculator aimingMap = new AimingCalculator();  
 
 
   public TrackHubTargetExp(
-    TurretSubsystemExp turretSubsystem, 
+    TurretSubsystemExp turret, 
     Supplier<Pose2d> robotPoseProvider,
     Supplier<ChassisSpeeds> robotVelocityProvider
   ) {
-    this.turretSubsystem = turretSubsystem;
+    this.turret = turret;
     this.robotPoseProvider = robotPoseProvider;    
     this.robotVelocityProvider = robotVelocityProvider;        
     
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(turretSubsystem);
+    addRequirements(turret);
   }
 
   // Called when the command is initially scheduled.
@@ -41,12 +43,23 @@ public class TrackHubTargetExp extends Command {
   @Override
   public void execute() {
 
+    Pose2d robotPose = robotPoseProvider.get();
+    ChassisSpeeds robotVelocity = robotVelocityProvider.get();
+
     if (DriverStation.getAlliance().isPresent()) {
       Translation2d hubCoordinates = DriverStation.getAlliance().get() == Alliance.Blue ? 
         FieldElements.BLUE_HUB : FieldElements.RED_HUB;
         
         
-        turretSubsystem.trackTarget(robotPoseProvider.get(), hubCoordinates, robotVelocityProvider.get());
+            Translation2d turretCoordinates = turret.getTurretFieldPosition(robotPose); 
+
+            AimingSolution solution = aimingMap.calculateMovingAimingSolution(
+                turretCoordinates, 
+                hubCoordinates, 
+                robotVelocity
+            );
+
+            turret.trackTarget(solution.virtualTarget(), robotPose);
     }
   }
 

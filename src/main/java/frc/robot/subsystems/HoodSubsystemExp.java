@@ -12,7 +12,7 @@ import frc.robot.Constants.HoodConstants;
 
 
 public class HoodSubsystemExp extends ShooterComponentSubsystemExp {
-  private static final double GEAR_RATIO = ((350.0/50.0)*(26.0/12.0));
+  public static final double GEAR_RATIO = ((350.0/50.0)*(26.0/12.0));
   private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;  
 
   

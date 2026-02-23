@@ -40,6 +40,10 @@ public abstract class ShooterComponentSubsystemExp extends SubsystemBase {
         this.currentTargetRotations = motorSetpointRotations;
     }
 
+    public TalonFX getMotor() {
+      return motor;
+    }
+
     public void setCurrentRotations(double currentTargetRotations) {
         this.currentTargetRotations = currentTargetRotations;
     }

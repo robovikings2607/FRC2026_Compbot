@@ -40,6 +40,7 @@ import frc.robot.commands.shooter.TransferPieces;
 import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
 import frc.robot.commands.shooter.TrackHubTargetExp;
 import frc.robot.commands.shooter.TuneShooterCommand;
+import frc.robot.commands.shooter.ZeroHoodCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -151,6 +152,7 @@ public class RobotContainer {
         //Flywheel + Hood
         driverController.rightBumper.onTrue(new PrepareShooter(this));
         driverController.buttonB.onTrue(new StopShooter(this));
+        driverController.buttonY.onTrue(new ZeroHoodCommand(this).withTimeout(2.0));        
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.

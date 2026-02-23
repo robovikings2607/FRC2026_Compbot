@@ -6,10 +6,12 @@ import edu.wpi.first.math.interpolation.Interpolatable;
 public class ShooterState implements Interpolatable<ShooterState> {
     public final double rps;
     public final double hoodAngle;
+    public final double timeOfFlightSeconds;    
 
-    public ShooterState(double rps, double hoodAngle) {
+    public ShooterState(double rps, double hoodAngle, double timeOfFlightSeconds) {
         this.rps = rps;
         this.hoodAngle = hoodAngle;
+        this.timeOfFlightSeconds = timeOfFlightSeconds;        
     }
 
     @Override
@@ -18,7 +20,8 @@ public class ShooterState implements Interpolatable<ShooterState> {
         // MathUtil handles the linear interpolation for both variables automatically.
         return new ShooterState(
             MathUtil.interpolate(this.rps, endValue.rps, t),
-            MathUtil.interpolate(this.hoodAngle, endValue.hoodAngle, t)
+            MathUtil.interpolate(this.hoodAngle, endValue.hoodAngle, t),
+            MathUtil.interpolate(this.timeOfFlightSeconds, endValue.timeOfFlightSeconds, t)            
         );
     }
 }

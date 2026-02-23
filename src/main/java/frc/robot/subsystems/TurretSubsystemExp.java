@@ -19,10 +19,11 @@ import frc.robot.utilities.GeometryUtil;
 
 public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
   private static final double GEAR_RATIO = 10.0; // 10 motor turns = 1 turret turn  
-  private static final  double BOT_TO_TURRET_DISTANCE_INCHES = Math.sqrt(Math.pow(0, 2) + Math.pow(7, 2));
+  private static final double BOT_TO_TURRET_DISTANCE_INCHES = Math.sqrt(Math.pow(0, 2) + Math.pow(7, 2));
   private static final double BOT_TO_TURRET_ANGLE_DEGREES = Math.toDegrees(Math.atan2(7, 0));
-
+  private static final double ZERO_MOTOR_POSITION_ANGLE_DEGREES = 0;  
   private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;    
+  private double lastTargetAngleDegrees = 0.0;
   
   public TurretSubsystemExp(RobotContainer robot) {
     super(robot, TurretConstants.TURRET_ID);    
@@ -38,76 +39,55 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
 
   }
 
-  public void trackTarget(
-    Pose2d robotPose, 
-    Translation2d targetCoordinates,
-    ChassisSpeeds robotVelocity) {
+  /**
+   * Aims the physical turret at a specific coordinate on the field.
+   * @param fieldRelativeTarget The X/Y field coordinates of the target (Real or Virtual)
+   * @param robotPose           The current field pose of the drivetrain
+   */
+  public void trackTarget(Translation2d fieldRelativeTarget, Pose2d robotPose) {
+      
+    Translation2d turretFieldPosition = getTurretFieldPosition(robotPose);
 
-    double idealTurretTargetAngleDegrees = getTurretAngleToTarget(robotPose, targetCoordinates, robotVelocity);
-    SmartDashboard.putNumber("Turret/newTurretAngleToTargetDegrees", idealTurretTargetAngleDegrees);
+    // 2. Vector Math: Calculate the line from the Turret to the Target
+    Translation2d turretToTargetVector = fieldRelativeTarget.minus(turretFieldPosition);
 
-    //no longer need to clamp the value between soft limits because those soft limits are
-    //being set in the motor configuration.
-    
-    double finalMotorSetpointRotations = GeometryUtil.getDegreesAsMotorRotations(idealTurretTargetAngleDegrees, GEAR_RATIO);
+    Rotation2d fieldAngleToTarget = turretToTargetVector.getAngle();
+
+    Rotation2d robotRelativeAngle = fieldAngleToTarget.minus(robotPose.getRotation());
+
+    Rotation2d motorTargetAngle = robotRelativeAngle.minus(Rotation2d.fromDegrees(ZERO_MOTOR_POSITION_ANGLE_DEGREES));
+
+    double optimizedTargetDegrees = MathUtil.inputModulus(
+        motorTargetAngle.getDegrees(), 
+        -180.0, 
+        180.0
+    );
+
+    lastTargetAngleDegrees = optimizedTargetDegrees; 
+
+    // Clamp the setpoint to your physical soft limits 
+    double safelyClampedDegrees = MathUtil.clamp(optimizedTargetDegrees, TurretConstants.MIN_ANGLE, TurretConstants.MAX_ANGLE);
+
+    double targetRotations = GeometryUtil.getDegreesAsMotorRotations(safelyClampedDegrees, GEAR_RATIO);      
    
-    SetAgressiveMotorPosition(finalMotorSetpointRotations, "Turret/newSetPointRotations");
-  }  
+    SetAgressiveMotorPosition(targetRotations, "Turret/newSetPointRotations");
+  }
 
+  public double getLastTargetAngleDegrees() {
+    return lastTargetAngleDegrees;
+  }
 
-    private double getTurretAngleToTarget(
-      Pose2d robotPose, 
-      Translation2d targetCoordinates, 
-      ChassisSpeeds robotVelocity) {
-    
-      Translation2d targetTranslation = getTurretTranslationToTarget(
-          robotPose,
-          targetCoordinates, 
-          robotVelocity);
+  public Translation2d getTurretFieldPosition(Pose2d robotPose) {
 
-      return targetTranslation.getAngle().getDegrees();
-    }
+    Pose2d turretPose = GeometryUtil.getOffsetPose(
+      robotPose,
+      Units.inchesToMeters(BOT_TO_TURRET_DISTANCE_INCHES),
+      Rotation2d.fromDegrees(BOT_TO_TURRET_ANGLE_DEGREES)
+    );    
 
-    public Translation2d getTurretTranslationToTarget(
-      Pose2d robotPose, 
-      Translation2d targetCoordinates, 
-      ChassisSpeeds robotVelocity) {
-    
-      final double SHOT_VELOCITY_MPS = 8.0; // Speed of ball leaving shooter (Tune this!)
+    return turretPose.getTranslation();
+  }
 
-      Pose2d turretPose = GeometryUtil.getOffsetPose(
-        robotPose,
-        Units.inchesToMeters(BOT_TO_TURRET_DISTANCE_INCHES),
-        Rotation2d.fromDegrees(BOT_TO_TURRET_ANGLE_DEGREES)
-      );    
-
-      // 2. Calculate Distance & Time of Flight (ToF)
-      double distance = turretPose.getTranslation().getDistance(targetCoordinates);
-      double timeOfFlight = distance / SHOT_VELOCITY_MPS;
-
-      // 3. Calculate the "Virtual Target"
-      // Concept: Aim at where the goal would be if it were moving opposite to us.
-      // Formula: Target - (RobotVel * ToF)
-      double robotVx = robotVelocity.vxMetersPerSecond;
-      double robotVy = robotVelocity.vyMetersPerSecond;
-
-      Translation2d driftAdjustment = new Translation2d(robotVx * timeOfFlight, robotVy * timeOfFlight);
-      Translation2d virtualTarget = turretPose.getTranslation().minus(driftAdjustment);
-      double virtualDistance = virtualTarget.getDistance(turretPose.getTranslation());
-
-      //calculate the angle from the turret center to the target center
-      double turretTargetAngleDegrees = GeometryUtil.getTargetAngleDegrees(
-        turretPose.getTranslation(), 
-        virtualTarget);
-
-      //adjust the target angle by the current rotation of the robot chassis 
-      double robotRotationDegrees = MathUtil.inputModulus(robot.drivetrain.getState().Pose.getRotation().getDegrees(),-180, 180);
-      double adjustedTurretTargetAngleDegrees = GeometryUtil.getAdjustedMechanismAngleDegrees(
-        turretTargetAngleDegrees, 
-        robotRotationDegrees);
-
-      return new Translation2d(virtualDistance, Rotation2d.fromDegrees(adjustedTurretTargetAngleDegrees));
-    }
 
   /**
    * Checks if the turret is ready to fire.
@@ -116,9 +96,7 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
    * @param robotVelocity The current speed of the chassis (Linear + Angular).
    * @return True if safe to fire, False if aiming or unstable.
    */
-  public boolean isReadyToShoot(
-    double idealTargetDegrees, 
-    ChassisSpeeds robotVelocity) {
+  public boolean isReadyToShoot(double idealTargetDegrees, ChassisSpeeds robotVelocity) {
       
       // --- 2. THE REALITY (Actual Turret State) ---
       // Get the current position and velocity from the motor.

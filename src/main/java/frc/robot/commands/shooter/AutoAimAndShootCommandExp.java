@@ -18,6 +18,7 @@ import frc.robot.subsystems.HoodSubsystemExp;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TurretSubsystemExp;
 import frc.robot.utilities.AimingCalculator;
+import frc.robot.utilities.AimingSolution;
 import frc.robot.utilities.ShooterState;
 
 public class AutoAimAndShootCommandExp extends Command {
@@ -58,24 +59,19 @@ public class AutoAimAndShootCommandExp extends Command {
             Translation2d hubCoordinates = DriverStation.getAlliance().get() == Alliance.Blue ? 
             FieldElements.BLUE_HUB : FieldElements.RED_HUB;
         
-            Translation2d targetTranslation = this.turret.getTurretTranslationToTarget(
-                robotPose,
+            Translation2d turretCoordinates = turret.getTurretFieldPosition(robotPose); 
+
+            AimingSolution solution = aimingMap.calculateMovingAimingSolution(
+                turretCoordinates, 
                 hubCoordinates, 
-                robotVelocity);
-        
-            turret.trackTarget(
-                robotPose, 
-                hubCoordinates, 
-                robotVelocity); //Turret handles horizontal angle mapping
+                robotVelocity
+            );
 
-            double dist = targetTranslation.getNorm();
-            
-            ShooterState state = aimingMap.getTargetState(dist);
+            turret.trackTarget(solution.virtualTarget(), robotPose);
+            hood.setAngle(solution.shooterState().hoodAngle);
+            flywheel.setRPS(solution.shooterState().rps);
 
-            flywheel.setRPS(state.rps);
-            hood.setAngle(state.hoodAngle);            
-
-            if (turret.isReadyToShoot(targetTranslation.getAngle().getDegrees(), robotVelocity) && 
+            if (turret.isReadyToShoot(solution.virtualTarget().getAngle().getDegrees(), robotVelocity) && 
                 hood.isReadyToShoot() && flywheel.isReadyToShoot()) {
                 feeder.run(1.0); // Pass 1.0 (Full Speed)
             }
@@ -84,9 +80,6 @@ public class AutoAimAndShootCommandExp extends Command {
             }
 
         }
-
-
-
 
     }
 }
