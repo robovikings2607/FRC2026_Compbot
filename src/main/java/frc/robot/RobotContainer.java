@@ -106,6 +106,12 @@ public class RobotContainer {
     //public final LEDSubsystem leds = new LEDSubsystem(this);
     //public final ClimberSubsystem climber = new ClimberSubsystem(this);
 
+    //experimental
+    public final TurretSubsystemExp turretExp = new TurretSubsystemExp(this);
+    public final HoodSubsystemExp hoodExp = new HoodSubsystemExp(this);
+    public final FlywheelSubsystemExp flywheelExp = new FlywheelSubsystemExp(this);
+    public final FeederSubsystemExp feederExp = new FeederSubsystemExp(this);    
+
     public RobotContainer() {
 
         configureBindings();
@@ -116,7 +122,7 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Chooser", autoChooser);
         SmartDashboard.putData("Field!!!", field);
     }
-
+    
     private void configureBindings() {
  
         SmartDashboard.putBoolean("FieldCentricMode", fieldCentricDrive);
@@ -154,6 +160,24 @@ public class RobotContainer {
         );
 
         drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    private void configureDefaultCommands() {
+        turretExp.setDefaultCommand(new TrackHubTargetExp(
+            turretExp, 
+            () -> drivetrain.getState().Pose,
+            this::getFieldRelativeVelocity
+        ));
+
+        flywheelExp.setDefaultCommand(new RunCommand(
+            () -> flywheelExp.setRPS(FlywheelConstants.IDLE_RPM), 
+            flywheelExp
+        ));
+
+        hoodExp.setDefaultCommand(new RunCommand(
+            () -> hoodExp.setAngle(HoodConstants.ZERO_POSITION_ANGLE), 
+            hoodExp
+        ));
     }
 
     // Toggle low gear and high gear speeds
