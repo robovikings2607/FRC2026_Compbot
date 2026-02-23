@@ -23,7 +23,7 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
   private static final double BOT_TO_TURRET_ANGLE_DEGREES = Math.toDegrees(Math.atan2(7, 0));
   private static final double ZERO_MOTOR_POSITION_ANGLE_DEGREES = 0;  
   private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;    
-  private double lastTargetAngleDegrees = 0.0;
+  private double unclampedTargetAngleDegrees = 0.0;
   
   public TurretSubsystemExp(RobotContainer robot) {
     super(robot, TurretConstants.TURRET_ID);    
@@ -63,7 +63,7 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
         180.0
     );
 
-    lastTargetAngleDegrees = optimizedTargetDegrees; 
+    unclampedTargetAngleDegrees = optimizedTargetDegrees; 
 
     // Clamp the setpoint to your physical soft limits 
     double safelyClampedDegrees = MathUtil.clamp(optimizedTargetDegrees, TurretConstants.MIN_ANGLE, TurretConstants.MAX_ANGLE);
@@ -73,8 +73,8 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
     SetAgressiveMotorPosition(targetRotations, "Turret/newSetPointRotations");
   }
 
-  public double getLastTargetAngleDegrees() {
-    return lastTargetAngleDegrees;
+  public double getUnclampedTargetAngleDegrees() {
+    return unclampedTargetAngleDegrees;
   }
 
   public Translation2d getTurretFieldPosition(Pose2d robotPose) {
