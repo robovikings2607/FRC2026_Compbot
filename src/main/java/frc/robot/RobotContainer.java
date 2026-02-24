@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.commands.drivetrain.AimAssistDriveCommand;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseRollers;
@@ -65,8 +66,8 @@ import frc.robot.utilities.AxisButton;
 public class RobotContainer {
     public Field2d field = new Field2d();
 
-    private double MaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    public final double MaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    public final double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric driveFieldCentric = new SwerveRequest.FieldCentric()
@@ -87,7 +88,7 @@ public class RobotContainer {
     private boolean lowGear = true;
     private double highGear = 1.0; // 0.6 or 60% (max speed) for competition
     private double slowGear = 0.3; // 0.2 or 20% of max speed for competition
-    private double driveSpeedScale = (lowGear ? slowGear : highGear);
+    public double driveSpeedScale = (lowGear ? slowGear : highGear);
     public OI driverController = new OI(OI.kDriverControllerPort);
     
     public boolean safeToMove = false;
@@ -150,7 +151,18 @@ public class RobotContainer {
         driverController.rightTriggerButton.whileTrue(new TransferPieces(this));
 
         //Flywheel + Hood
-        driverController.rightBumper.onTrue(new PrepareShooter(this));
+        //driverController.rightBumper.onTrue(new PrepareShooter(this));
+
+        driverController.rightBumper.whileTrue(
+            new AutoAimAndShootCommandExp(
+                turretExp, 
+                hoodExp, 
+                flywheelExp, 
+                feederExp,() -> drivetrain.getState().Pose,
+                this::getFieldRelativeVelocity)
+            .alongWith(new AimAssistDriveCommand(drivetrain, turretExp, driverController))
+    );
+
         driverController.buttonB.onTrue(new StopShooter(this));
         driverController.buttonY.onTrue(new ZeroHoodCommand(this).withTimeout(2.0));        
 
