@@ -4,10 +4,10 @@ import static edu.wpi.first.units.Units.*;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import edu.wpi.first.math.MathUtil;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import frc.robot.utilities.GeometryUtil;
 
 public class GeometryUtilTest {
 
@@ -215,6 +215,79 @@ public class GeometryUtilTest {
         System.out.println("result.angle: " + result.getRotation().getDegrees());                
         Pose2d expected = new Pose2d(3.0, 2.0, Rotation2d.fromDegrees(270));
         assertPoseEquals(expected, result, "Robot at 90 deg, mechanism on right with 180 deg zero");
+    }
+
+    @Test
+    public void testZeroOffset_ReturnsStartingPoint() {
+        Pose2d start = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
+        
+        Pose2d result = GeometryUtil.getOffsetPose(start, 0.0, Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0));
+        
+        Pose2d expected = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
+        assertPoseEquals(expected, result, "Zero offset should return the origin exactly");
+    }
+    
+    @Test
+    public void testPureForwardTranslation_NoRotations() {
+        Pose2d start = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
+        
+        // 1 meter forward (0 degrees), motor at 0 degrees
+        Pose2d result = GeometryUtil.getOffsetPose(start, 1.0, Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0));
+        
+        Pose2d expected = new Pose2d(1.0, 0.0, Rotation2d.fromDegrees(0));
+        assertPoseEquals(expected, result, "Should move 1 meter directly on the X axis");
+    }
+
+    @Test
+    public void testPureSidewaysTranslation_UsingPolarAngle() {
+        Pose2d start = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
+        
+        // 1 meter left (90 degrees), motor at 0 degrees
+        Pose2d result = GeometryUtil.getOffsetPose(start, 1.0, Rotation2d.fromDegrees(90), Rotation2d.fromDegrees(0));
+        
+        Pose2d expected = new Pose2d(0.0, 1.0, Rotation2d.fromDegrees(0));
+        assertPoseEquals(expected, result, "Should move 1 meter directly on the Y axis");
+    }
+
+    @Test
+    public void testMotorRotationOnly_TranslatesZero() {
+        Pose2d start = new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(0));
+        
+        // 0 meters away, but motor is zeroed at 45 degrees
+        Pose2d result = GeometryUtil.getOffsetPose(start, 0.0, Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(45));
+        
+        Pose2d expected = new Pose2d(5.0, 5.0, Rotation2d.fromDegrees(45));
+        assertPoseEquals(expected, result, "Should stay at (5,5) but rotate to 45 degrees");
+    }
+
+    @Test
+    public void testRelativeTranslation_WhenRobotIsRotated() {
+        // Robot is at (0,0) but facing LEFT (90 degrees)
+        Pose2d start = new Pose2d(0, 0, Rotation2d.fromDegrees(90));
+        
+        // Offset is 1 meter "forward" relative to the robot (0 degrees)
+        Pose2d result = GeometryUtil.getOffsetPose(start, 1.0, Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0));
+        
+        // Because the robot is facing 90 deg, "forward" means moving along the field's Y axis
+        Pose2d expected = new Pose2d(0.0, 1.0, Rotation2d.fromDegrees(90));
+        assertPoseEquals(expected, result, "Translation must respect the starting point's rotation");
+    }
+
+        @Test
+    public void testComplexCombination() {
+        // Robot is at (2, 2) facing LEFT (90 degrees)
+        Pose2d start = new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90));
+        
+        // Mechanism is 1 meter to the "left" of the robot (90 degrees relative to robot)
+        // Mechanism's zero position is also rotated 90 degrees relative to the robot
+        Pose2d result = GeometryUtil.getOffsetPose(start, 1.0, Rotation2d.fromDegrees(90), Rotation2d.fromDegrees(90));
+        
+        // Math breakdown:
+        // Robot faces 90. Left of robot is 180 degrees on the field.
+        // Translation: (2, 2) + 1m at 180 deg = (1, 2)
+        // Rotation: Robot 90 + Motor 90 = 180 degrees
+        Pose2d expected = new Pose2d(1.0, 2.0, Rotation2d.fromDegrees(180));
+        assertPoseEquals(expected, result, "Complex combo of translated start, rotated start, rotated offset, and motor offset");
     }
 
 }
