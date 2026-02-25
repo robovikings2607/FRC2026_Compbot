@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.RobotContainer;
 import frc.robot.RobotContainer.OI;
@@ -20,17 +21,12 @@ public class AimAssistDriveCommand extends Command {
     private final TurretSubsystemExp turret;
     private final OI driverController;
 
-    // The CTRE Swerve Request object we will modify each loop
     private final SwerveRequest.FieldCentric driveRequest = new SwerveRequest.FieldCentric();
 
     // The Automated Unwind Logic
     private final PIDController unwindPID = new PIDController(0.05, 0.0, 0.0);
     private static final double ASSIST_THRESHOLD_DEGREES = 120.0;
     
-    // (Assuming you have access to these constants or pass them in)
-    private final double MAX_SPEED = 4.5; 
-    private final double MAX_ANGULAR_RATE = 2.0 * Math.PI;
-
 
   /** Creates a new ToggleFieldCentric. */
     public AimAssistDriveCommand(
@@ -52,7 +48,6 @@ public class AimAssistDriveCommand extends Command {
 
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
         // 1. Keep the driver's X/Y translation exacty the same
@@ -66,12 +61,14 @@ public class AimAssistDriveCommand extends Command {
         // 3. Does the Turret need help?
         if (Math.abs(turretTarget) > ASSIST_THRESHOLD_DEGREES) {
             // Push the chassis to unwind the turret back to 0
-            automatedRotationalRate = unwindPID.calculate(turretTarget, 0.0);
+            double pidOutput = unwindPID.calculate(turretTarget, 0.0);
+            automatedRotationalRate = MathUtil.clamp(pidOutput, -robot.MaxAngularRate, robot.MaxAngularRate);
         } else {
             // Turret is safe. Force chassis rotation to 0 to keep it stable.
-            // (Or you could read m_driverController.getRightX() here if you want 
+            // (Or you could read driverController.getRightX() here if you want 
             // the driver to still be able to spin manually while aiming).
-            automatedRotationalRate = 0.0;
+            //automatedRotationalRate = 0.0;
+            automatedRotationalRate = -driverController.controller.getRightX() * robot.MaxAngularRate;
         }
 
         driveRequest

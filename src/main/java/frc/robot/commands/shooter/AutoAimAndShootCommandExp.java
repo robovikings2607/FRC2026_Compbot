@@ -25,7 +25,6 @@ public class AutoAimAndShootCommandExp extends Command {
     private final TurretSubsystemExp turret;
     private final HoodSubsystemExp hood;
     private final FlywheelSubsystemExp flywheel;
-    private final FeederSubsystemExp feeder;
     private final Supplier<Pose2d> robotPoseProvider;  
     private final Supplier<ChassisSpeeds> robotVelocityProvider;    
     private final AimingCalculator aimingMap = new AimingCalculator();
@@ -34,19 +33,17 @@ public class AutoAimAndShootCommandExp extends Command {
         TurretSubsystemExp turret, 
         HoodSubsystemExp hood, 
         FlywheelSubsystemExp flywheel, 
-        FeederSubsystemExp feeder,
         Supplier<Pose2d> robotPoseProvider,
         Supplier<ChassisSpeeds> robotVelocityProvider) {
 
         this.turret = turret;
         this.hood = hood;
         this.flywheel = flywheel;
-        this.feeder = feeder;
         this.robotPoseProvider = robotPoseProvider;    
         this.robotVelocityProvider = robotVelocityProvider;        
         
         // Command requires all these subsystems
-        addRequirements(turret, hood, flywheel, feeder);
+        addRequirements(turret, hood, flywheel);
     }
 
     @Override
@@ -70,16 +67,6 @@ public class AutoAimAndShootCommandExp extends Command {
             turret.trackTarget(solution.virtualTarget(), robotPose);
             hood.setAngle(solution.shooterState().hoodAngle);
             flywheel.setRPS(solution.shooterState().rps);
-
-            if (turret.isReadyToShoot(solution.virtualTarget().getAngle().getDegrees(), robotVelocity) && 
-                hood.isReadyToShoot() && flywheel.isReadyToShoot()) {
-                feeder.run(1.0); // Pass 1.0 (Full Speed)
-            }
-            else {
-                feeder.stop();
-            }
-
         }
-
     }
 }

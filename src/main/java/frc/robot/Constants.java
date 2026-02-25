@@ -70,12 +70,21 @@ public final class Constants {
     public static final int FEEDER_ID = 16;
 
     public static final double FEEDER_SPEED = 11.7; //check this later
+
+    //for use with FeederSubsystemExp
+    public static final double SHOOT_SPEED = 1.0;   // 100% for shooting
+    public static final double INTAKE_SPEED = 0.4;  // 40% for gentle intaking
+    public static final double REVERSE_SPEED = -0.3;// -30% for unjamming    
   }
 
   public static final class SpindexerConstants {
     public static final int SPINDEXER_ID = 15;
 
     public static final double SPINDEXER_SPEED = 12.0; //check this later
+
+    //for use with SpindexerSubsystemExp
+    public static final double SHOOT_SPEED = 1.0;   // 100% for shooting    
+    public static final double REVERSE_SPEED = -0.4; // 40% reverse    
   }
 
   public static final class ClimberConstants {

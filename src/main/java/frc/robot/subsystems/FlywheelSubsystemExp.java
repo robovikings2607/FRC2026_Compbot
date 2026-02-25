@@ -18,19 +18,18 @@ import frc.robot.utilities.ShooterUtils;
 
 public class FlywheelSubsystemExp extends SubsystemBase {
     private static final double GEAR_RATIO = 1.0;
-    private final double TARGET_ERR_TOLERANCE_RPS = 1.5;  
+    private final double TARGET_ERR_TOLERANCE_RPS = 2.0;  
     protected final TalonFX motor;
     protected final RobotContainer robot;
     private VelocityDutyCycle velocityControl = new VelocityDutyCycle(0);   
-    // Create a Debouncer: RPS must be true for 0.1 seconds continuously
-    private final Debouncer readyDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
+    private final Debouncer readyDebouncer = new Debouncer(0.05, Debouncer.DebounceType.kRising);
 
     private double targetRPS = 0.0;    
 
 
     public FlywheelSubsystemExp(RobotContainer robot) {
       this.robot = robot;
-      this.motor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
+      this.motor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);      
 
       configureMotor();
     }

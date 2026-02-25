@@ -11,19 +11,15 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.FlywheelConstants;
 
 
 
 public class FeederSubsystemExp extends SubsystemBase {
-    private static final double GEAR_RATIO = 10.0; // 10 motor turns = 1 turret turn  
-    private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
-    private TalonFX feederMotor;
-
-    // Control Request (Reusable object to save RAM)
+    private TalonFX motor;
     private final DutyCycleOut driveRequest = new DutyCycleOut(0);    
-
-
+    
     public FeederSubsystemExp(RobotContainer robot) {
       configureMotor();
     }
@@ -33,22 +29,17 @@ public class FeederSubsystemExp extends SubsystemBase {
      * @param percent -1.0 to 1.0
      */
     public void run(double percent) {
-        feederMotor.setControl(driveRequest.withOutput(percent));
+        motor.setControl(driveRequest.withOutput(percent));
     }
 
     public void stop() {
-        feederMotor.setControl(driveRequest.withOutput(0));
+        motor.setControl(driveRequest.withOutput(0));
     }
 
-    public void configureMotor(){
-      feederMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
+  public void configureMotor(){
+    motor = new TalonFX(FeederConstants.FEEDER_ID);
 
     TalonFXConfiguration configs = new TalonFXConfiguration();
-
-    //If you set the then the Pheonix does the math to convert
-    //to motor rotations but you must then se everything inclduing
-    //the pid values below in terms of mechanism rotations
-    //configsFeedback.SensorToMechanismRatio = GEAR_RATIO;
 
 
     var slot0Configs = configs.Slot0;
@@ -72,10 +63,10 @@ public class FeederSubsystemExp extends SubsystemBase {
     configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = rotationsPerDegree * 120;
     configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -rotationsPerDegree * 240; */
   
-    feederMotor.getConfigurator().apply(configs);
-    feederMotor.setNeutralMode(NeutralModeValue.Brake);
+    motor.getConfigurator().apply(configs);
+    motor.setNeutralMode(NeutralModeValue.Brake);
 
-    feederMotor.setPosition(0); //
+    motor.setPosition(0); //
   }
 
 }

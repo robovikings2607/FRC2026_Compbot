@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -33,11 +34,13 @@ import frc.robot.commands.intake.ReverseRollers;
 import frc.robot.commands.intake.DeployIntake;
 import frc.robot.commands.intake.RetractIntake;
 import frc.robot.commands.shooter.PrepareShooter;
+import frc.robot.commands.shooter.SpindexerShootCommandExp;
 import frc.robot.commands.shooter.StopShooter;
 import frc.robot.commands.shooter.TransferPieces;
 import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
 import frc.robot.commands.shooter.TrackHubTargetExp;
 import frc.robot.commands.shooter.TuneShooterCommand;
+import frc.robot.commands.shooter.UnjamShooterCommandExp;
 import frc.robot.commands.shooter.ZeroHoodCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -52,6 +55,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
+import frc.robot.subsystems.SpindexerSubsystemExp;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TurretSubsystemExp;
 import edu.wpi.first.wpilibj.XboxController;
@@ -110,6 +114,7 @@ public class RobotContainer {
     public final HoodSubsystemExp hoodExp = new HoodSubsystemExp(this);
     public final FlywheelSubsystemExp flywheelExp = new FlywheelSubsystemExp(this);
     public final FeederSubsystemExp feederExp = new FeederSubsystemExp(this);    
+    public final SpindexerSubsystemExp spindexerExp = new SpindexerSubsystemExp(this);        
 
     public RobotContainer() {
 
@@ -150,18 +155,26 @@ public class RobotContainer {
         //Flywheel + Hood
         //driverController.rightBumper.onTrue(new PrepareShooter(this));
 
+        BooleanSupplier isReadyToShoot = () -> 
+            flywheelExp.isReadyToShoot() && 
+            turretExp.isReadyToShoot() && 
+            hoodExp.isReadyToShoot();
+
         driverController.rightBumper.whileTrue(
             new AutoAimAndShootCommandExp(
                 turretExp, 
                 hoodExp, 
                 flywheelExp, 
-                feederExp,() -> drivetrain.getState().Pose,
+                () -> drivetrain.getState().Pose,
                 this::getFieldRelativeVelocity)
             .alongWith(new AimAssistDriveCommand(drivetrain, turretExp, driverController))
+            .alongWith(new SpindexerShootCommandExp(spindexerExp, feederExp, isReadyToShoot))            
     );
 
         driverController.buttonB.onTrue(new StopShooter(this));
-        driverController.buttonY.onTrue(new ZeroHoodCommand(this).withTimeout(2.0));        
+        driverController.buttonY.onTrue(new ZeroHoodCommand(this).withTimeout(2.0));    
+        driverController.buttonX.whileTrue(new UnjamShooterCommandExp(spindexerExp, feederExp)
+);            
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
