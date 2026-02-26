@@ -61,11 +61,10 @@ public class LimelightSubsystem extends SubsystemBase {
   fieldVisionDetections = robot.field.getObject("Limelight"+"/visionDetections");
   fieldVisionPose = robot.field.getObject("Limelight"+"/fieldVisionPose");
 
-    
    if(isValidUpdate(leftLL)){
       LimelightHelpers.PoseEstimate mt2 = leftLL;
 
-      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.1,0.1, 999999999));
+      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
       robot.drivetrain.addVisionMeasurement(
         mt2.pose,
         mt2.timestampSeconds
@@ -76,13 +75,13 @@ public class LimelightSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
 
       // System.out.println("has pose");
-      drawTargetsOnField(mt2);
+      drawTargetsOnField(leftLL);
     }
 
     if(isValidUpdate(rightLL)){
       LimelightHelpers.PoseEstimate mt2 = rightLL;
 
-      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.1,0.1, 999999999));
+      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
       robot.drivetrain.addVisionMeasurement(
         mt2.pose,
         mt2.timestampSeconds
@@ -93,7 +92,7 @@ public class LimelightSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
 
       // System.out.println("has pose");
-      drawTargetsOnField(mt2);
+      drawTargetsOnField(rightLL);
     }
 
 

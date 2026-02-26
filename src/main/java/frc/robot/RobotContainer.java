@@ -9,8 +9,10 @@ import static edu.wpi.first.units.Units.*;
 import java.util.Optional;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -94,6 +97,7 @@ public class RobotContainer {
     public RobotContainer() {
 
         configureBindings();
+        configureNamedCommands();
 
         autoChooser = AutoBuilder.buildAutoChooser();
         
@@ -137,6 +141,14 @@ public class RobotContainer {
         );
 
         drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    public void configureNamedCommands(){
+        //PathPlanner Commands
+        NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
+        NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
+        NamedCommands.registerCommand("PrepareShooter", new PrepareShooter(this));
+        NamedCommands.registerCommand("ShootPieces", new TransferPieces(this).andThen(new WaitCommand(0.0)));
     }
 
     // Toggle low gear and high gear speeds

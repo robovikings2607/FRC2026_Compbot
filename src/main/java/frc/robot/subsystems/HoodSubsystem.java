@@ -34,6 +34,7 @@ public class HoodSubsystem extends SubsystemBase {
   private double setPoint, goal;
   private InterpolatingDoubleTreeMap hoodInterp = new InterpolatingDoubleTreeMap();
   private boolean readyToShoot = false;
+  private boolean fixedShot = false;
 
 
   public HoodSubsystem(RobotContainer robot) {
@@ -64,11 +65,17 @@ public class HoodSubsystem extends SubsystemBase {
     
     if(!readyToShoot){}
     else{
-      setGoal(distance);
-      hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
+      if(fixedShot){
+        hoodMotor.setControl(magicMotionRequest.withPosition(0));
+      }
+      else{
+        setGoal(distance);
+        hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
+      }
     }
 
     // setPoint = SmartDashboard.getNumber("Hood/SetPoint", 0) * rotationsPerDegree;
+    // hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
   }
 
 
@@ -78,7 +85,7 @@ public class HoodSubsystem extends SubsystemBase {
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
     var slot0Configs = configs.Slot0;
-        slot0Configs.kS = 0.25; // Voltage output to overcome static friction
+        slot0Configs.kS = 1.0; // Voltage output to overcome static friction
         slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
         slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
         slot0Configs.kP = 4.8; // A position error of 2.5 rotations requires this voltage output
@@ -86,9 +93,9 @@ public class HoodSubsystem extends SubsystemBase {
         slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 10; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 20; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 100; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 80; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 160; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
      //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
@@ -108,11 +115,14 @@ public class HoodSubsystem extends SubsystemBase {
     //key = distance from goal
     //value = position of hood in desired shot angle
     hoodInterp.put(0.0, 0.0);
-    hoodInterp.put(2.4, -3.0);
-    hoodInterp.put(3.03, -3.0);
-    hoodInterp.put(3.51, -4.0);
-    hoodInterp.put(4.03, 0.0);
-    hoodInterp.put(5.5, -3.0);
+    hoodInterp.put(2.53, 0.0);
+    hoodInterp.put(3.1, 0.0);
+    hoodInterp.put(3.5, -1.0);
+    hoodInterp.put(4.0, -1.0);
+    hoodInterp.put(4.5, -2.0);
+    hoodInterp.put(5.0, -4.0);
+    hoodInterp.put(5.5, -5.0);
+    hoodInterp.put(6.0, -7.0);
   }
 
   public void setGoal(double distance){
@@ -139,5 +149,9 @@ public class HoodSubsystem extends SubsystemBase {
 
   public void readyShot(boolean ready){
     readyToShoot = ready;
+  }
+
+  public void fixedShot(boolean fixed){
+    fixedShot = fixed;
   }
 }
