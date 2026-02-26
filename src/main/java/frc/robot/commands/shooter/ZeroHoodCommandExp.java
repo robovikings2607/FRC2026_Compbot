@@ -11,7 +11,7 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.HoodSubsystemExp;
 import frc.robot.utilities.GeometryUtil;
 
-public class ZeroHoodCommand extends Command {
+public class ZeroHoodCommandExp extends Command {
 
   RobotContainer robot;
   HoodSubsystemExp hood;
@@ -31,7 +31,7 @@ public class ZeroHoodCommand extends Command {
     private final VoltageOut voltageRequest = new VoltageOut(HOMING_VOLTAGE);
 
 
-  public ZeroHoodCommand(RobotContainer robot) {
+  public ZeroHoodCommandExp(RobotContainer robot) {
     this.robot = robot;
     hood = robot.hoodExp;
 

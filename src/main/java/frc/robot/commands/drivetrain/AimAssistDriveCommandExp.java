@@ -15,7 +15,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TurretSubsystemExp;
 
-public class AimAssistDriveCommand extends Command {
+public class AimAssistDriveCommandExp extends Command {
 
     private final RobotContainer robot;    
     private final CommandSwerveDrivetrain drivetrain;
@@ -32,7 +32,7 @@ public class AimAssistDriveCommand extends Command {
     private static final double SAFE_CENTER_DEGREES = 0.0;
     
 
-    public AimAssistDriveCommand(
+    public AimAssistDriveCommandExp(
             RobotContainer robot,
             CommandSwerveDrivetrain drivetrain, 
             TurretSubsystemExp turret, 

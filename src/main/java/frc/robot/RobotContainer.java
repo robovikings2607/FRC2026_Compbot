@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.TurretConstants;
-import frc.robot.commands.drivetrain.AimAssistDriveCommand;
+import frc.robot.commands.drivetrain.AimAssistDriveCommandExp;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseRollers;
@@ -39,9 +39,9 @@ import frc.robot.commands.shooter.StopShooter;
 import frc.robot.commands.shooter.TransferPieces;
 import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
 import frc.robot.commands.shooter.TrackHubTargetExp;
-import frc.robot.commands.shooter.TuneShooterCommand;
+import frc.robot.commands.shooter.TuneShooterCommandExp;
 import frc.robot.commands.shooter.UnjamShooterCommandExp;
-import frc.robot.commands.shooter.ZeroHoodCommand;
+import frc.robot.commands.shooter.ZeroHoodCommandExp;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -167,12 +167,12 @@ public class RobotContainer {
                 flywheelExp, 
                 () -> drivetrain.getState().Pose,
                 this::getFieldRelativeVelocity)
-            .alongWith(new AimAssistDriveCommand(this, drivetrain, turretExp, driverController))
+            .alongWith(new AimAssistDriveCommandExp(this, drivetrain, turretExp, driverController))
             .alongWith(new SpindexerShootCommandExp(spindexerExp, feederExp, isReadyToShoot))            
     );
 
         driverController.buttonB.onTrue(new StopShooter(this));
-        driverController.buttonY.onTrue(new ZeroHoodCommand(this).withTimeout(2.0));    
+        driverController.buttonY.onTrue(new ZeroHoodCommandExp(this).withTimeout(2.0));    
         driverController.buttonX.whileTrue(new UnjamShooterCommandExp(spindexerExp, feederExp)
 );            
 

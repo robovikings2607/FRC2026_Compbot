@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.FlywheelSubsystemExp;
 import frc.robot.subsystems.HoodSubsystemExp;
 
-public class TuneShooterCommand extends Command {
+public class TuneShooterCommandExp extends Command {
     private final FlywheelSubsystemExp flywheel;
     private final HoodSubsystemExp hood;    
     
@@ -13,7 +13,7 @@ public class TuneShooterCommand extends Command {
     private final String flywheelTuningKey = "Tuning/TargetRPS";
     private final String hoodTuningKey = "Tuning/HoodAngle";    
 
-    public TuneShooterCommand(
+    public TuneShooterCommandExp(
         FlywheelSubsystemExp flywheel,
         HoodSubsystemExp hood) {
         this.flywheel = flywheel;
