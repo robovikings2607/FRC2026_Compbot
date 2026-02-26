@@ -35,4 +35,31 @@ public final class GeometryUtil {
     
     return offsetPose;    
   }  
+
+  public static double getTargetAngleDegrees(Translation2d source, Translation2d target) {
+      Translation2d offset = target.minus(source);
+      return Math.toDegrees(Math.atan2(offset.getY(), offset.getX()));
+  }
+
+  public static double getTargetDistance(Translation2d source, Translation2d target) {
+      Translation2d offset = target.minus(source);
+      return Math.hypot(offset.getX(), offset.getY());
+  }
+
+    public static double getShortestPathToTargetDegrees(double targetDegrees, double currentDegrees) {
+    return Math.IEEEremainder(targetDegrees - currentDegrees, 360.0);
+  }
+
+  public static double getMotorRotationsAsDegrees(double motorRotations, double gearRatio) {
+    return (motorRotations / gearRatio) * 360.0;    
+  }
+
+  public static double getDegreesAsMotorRotations(double degrees , double gearRatio) {
+    return (degrees / 360.0) * gearRatio;
+  }
+
+  public static double getAdjustedMechanismAngleDegrees(double mechanismAngleDegrees, double robotAngleDegrees) {
+    return mechanismAngleDegrees - robotAngleDegrees;
+  }
+
 }
