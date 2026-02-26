@@ -167,7 +167,7 @@ public class RobotContainer {
                 flywheelExp, 
                 () -> drivetrain.getState().Pose,
                 this::getFieldRelativeVelocity)
-            .alongWith(new AimAssistDriveCommand(drivetrain, turretExp, driverController))
+            .alongWith(new AimAssistDriveCommand(this, drivetrain, turretExp, driverController))
             .alongWith(new SpindexerShootCommandExp(spindexerExp, feederExp, isReadyToShoot))            
     );
 

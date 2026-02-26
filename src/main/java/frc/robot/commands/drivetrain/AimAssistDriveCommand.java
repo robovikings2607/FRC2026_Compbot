@@ -9,6 +9,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.RobotContainer.OI;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.TurretSubsystem;
@@ -16,7 +17,7 @@ import frc.robot.subsystems.TurretSubsystemExp;
 
 public class AimAssistDriveCommand extends Command {
 
-  private RobotContainer robot;
+    private final RobotContainer robot;    
     private final CommandSwerveDrivetrain drivetrain;
     private final TurretSubsystemExp turret;
     private final OI driverController;
@@ -25,24 +26,26 @@ public class AimAssistDriveCommand extends Command {
 
     // The Automated Unwind Logic
     private final PIDController unwindPID = new PIDController(0.05, 0.0, 0.0);
-    private static final double ASSIST_THRESHOLD_DEGREES = 120.0;
+    private static final double LEFT_ASSIST_THRESHOLD = TurretConstants.MAX_ANGLE;   // Trigger point for Left/Positive
+    private static final double RIGHT_ASSIST_THRESHOLD = TurretConstants.MIN_ANGLE; // Trigger point for Right/Negative
+    // The safe center where the turret prefers to rest
+    private static final double SAFE_CENTER_DEGREES = 0.0;
     
 
-  /** Creates a new ToggleFieldCentric. */
     public AimAssistDriveCommand(
+            RobotContainer robot,
             CommandSwerveDrivetrain drivetrain, 
             TurretSubsystemExp turret, 
             OI driverController) {
         
+        this.robot = robot;
         this.drivetrain = drivetrain;
         this.turret = turret;
         this.driverController = driverController;
 
-        // CRITICAL: This tells WPILib to interrupt the default drive command!
         addRequirements(this.drivetrain); 
     }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {
 
@@ -51,17 +54,19 @@ public class AimAssistDriveCommand extends Command {
   @Override
   public void execute() {
         // 1. Keep the driver's X/Y translation exacty the same
-        double translationX = -robot.driverController.controller.getLeftY() * robot.MaxSpeed * robot.driveSpeedScale;
-        double translationY = -robot.driverController.controller.getLeftX() * robot.MaxSpeed * robot.driveSpeedScale;
+        double translationX = -driverController.controller.getLeftY() * robot.MaxSpeed * robot.driveSpeedScale;
+        double translationY = -driverController.controller.getLeftX() * robot.MaxSpeed * robot.driveSpeedScale;
         
         // 2. Calculate the automated rotation
         double automatedRotationalRate = 0.0;
-        double turretTarget = robot.turretExp.getUnclampedTargetAngleDegrees();
+        double turretTarget = turret.getUnclampedTargetAngleDegrees();
 
         // 3. Does the Turret need help?
-        if (Math.abs(turretTarget) > ASSIST_THRESHOLD_DEGREES) {
+        if (turretTarget > LEFT_ASSIST_THRESHOLD || turretTarget < RIGHT_ASSIST_THRESHOLD) {
+
             // Push the chassis to unwind the turret back to 0
-            double pidOutput = unwindPID.calculate(turretTarget, 0.0);
+            double pidOutput = unwindPID.calculate(turretTarget, SAFE_CENTER_DEGREES);
+
             automatedRotationalRate = MathUtil.clamp(pidOutput, -robot.MaxAngularRate, robot.MaxAngularRate);
         } else {
             // Turret is safe. Force chassis rotation to 0 to keep it stable.
