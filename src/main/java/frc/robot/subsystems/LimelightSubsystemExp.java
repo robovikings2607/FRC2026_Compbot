@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -41,19 +42,23 @@ public class LimelightSubsystemExp extends SubsystemBase {
     fieldVisionDetections = m_robot.field.getObject("Limelight"+"/visionDetections");
     fieldVisionPose = m_robot.field.getObject("Limelight"+"/fieldVisionPose");
 
-    double yaw = m_robot.drivetrain.getState().Pose.getRotation().getDegrees();
+    Pose2d currentOdometryPose = m_robot.drivetrain.getState().Pose;
+    double currentSpinRate = Math.abs(m_robot.drivetrain.getState().Speeds.omegaRadiansPerSecond);
+
+    double yaw = currentOdometryPose.getRotation().getDegrees();
+
     LimelightHelpers.SetRobotOrientation(LimelightConstants.RIGHT_CAMERA_NAME, yaw, 0, 0, 0, 0, 0);
     LimelightHelpers.SetRobotOrientation(LimelightConstants.LEFT_CAMERA_NAME, yaw, 0, 0, 0, 0, 0);
     LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LimelightConstants.RIGHT_CAMERA_NAME);
     LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LimelightConstants.LEFT_CAMERA_NAME);
 
     if (isValidVisionMeasurement(rightLL)) {
-      Matrix<N3, N1> stdDevs = calculateStdDevs(rightLL);
+      Matrix<N3, N1> stdDevs = calculateStdDevs(rightLL, currentOdometryPose, currentSpinRate );
       updateRobotPose(rightLL, stdDevs, LimelightConstants.RIGHT_CAMERA_NAME);
     }
 
     if (isValidVisionMeasurement(leftLL)) {
-      Matrix<N3, N1> stdDevs = calculateStdDevs(leftLL);      
+      Matrix<N3, N1> stdDevs = calculateStdDevs(leftLL, currentOdometryPose, currentSpinRate );      
       updateRobotPose(leftLL, stdDevs, LimelightConstants.LEFT_CAMERA_NAME);    
     }
   }
@@ -83,28 +88,38 @@ public class LimelightSubsystemExp extends SubsystemBase {
 /**
  * Dynamically calculates the standard deviation (trust) matrix based on distance and tag count.
  */
-private Matrix<N3, N1> calculateStdDevs(LimelightHelpers.PoseEstimate estimate) {
-    double xyStdDev;
-    double thetaStdDev;
+private Matrix<N3, N1> calculateStdDevs(
+    LimelightHelpers.PoseEstimate estimate, 
+    Pose2d currentOdometryPose,
+    double currentSpinRate) {
+
+    double xyStdDev = 9999999;
+    double thetaStdDev = 9999999;
     
-    if (estimate.tagCount >= 2) {
-        // Multi-tag tracking is incredibly stable. We trust X, Y, and Heading heavily.
-        xyStdDev = 0.2; 
-        thetaStdDev = 0.2; 
-    } else {
-        // Single tag: Accuracy drops off exponentially as the robot moves further away.
-        // We scale the X/Y standard deviation proportionally to the distance squared.
-        double distance = estimate.avgTagDist;
-        
-        // Base standard deviation + (distance squared * scaling factor)
-        xyStdDev = 0.5 + (Math.pow(distance, 2) * 0.1);
-        
-        // Single tag heading is notoriously noisy. Setting it to an exceptionally high 
-        // number tells the Kalman filter to completely ignore the vision heading and 
-        // rely purely on the robot's gyroscope.
-        thetaStdDev = 9999999; 
-    }
+    double jumpDistance = currentOdometryPose.getTranslation().getDistance(estimate.pose.getTranslation());
     
+      if (estimate.tagCount >= 2) {
+          // Multi-tag tracking is incredibly stable. We trust X, Y, and Heading heavily.
+          xyStdDev = 0.2; 
+          thetaStdDev = 0.2; 
+      } else {
+        // If we have jumped more than a meter or 
+        // are spinning faster than 720 degrees per second, the camera is blurred. Ignore it!
+        if (jumpDistance <= 1.0 && currentSpinRate < (4.0 * Math.PI)) {
+          // Single tag: Accuracy drops off exponentially as the robot moves further away.
+          // We scale the X/Y standard deviation proportionally to the distance squared.
+          double distance = estimate.avgTagDist;
+          
+          // Base standard deviation + (distance squared * scaling factor)
+          xyStdDev = 0.5 + (Math.pow(distance, 2) * 0.1);
+          
+          // Single tag heading is notoriously noisy. Setting it to an exceptionally high 
+          // number tells the Kalman filter to completely ignore the vision heading and 
+          // rely purely on the robot's gyroscope.
+          thetaStdDev = 9999999; 
+        }
+      }
+
     // Returns a 3x1 matrix containing [X standard deviation, Y standard deviation, Theta standard deviation]
     return VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev);
 }
