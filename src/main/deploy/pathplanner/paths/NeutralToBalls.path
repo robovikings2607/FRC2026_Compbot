@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 6.420544217687075,
+        "y": 2.0587670068027206
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.4496768707482985,
+        "y": 1.8499574829931964
+      },
+      "isLocked": false,
+      "linkedName": "ShootToNeutralEnd"
+    },
+    {
+      "anchor": {
+        "x": 7.777806122448979,
+        "y": 4.549566326530612
+      },
+      "prevControl": {
+        "x": 7.949328231292517,
+        "y": 1.775382653061223
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "NeutralToBallsEnd"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.91665425638537
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
