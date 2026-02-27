@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -26,17 +27,22 @@ import frc.robot.utilities.ShooterUtils;
 
 public class FlywheelSubsystem extends SubsystemBase {
   /** Creates a new ShooterHoodSubsystem. */
-  private final TalonFX flywheelMotor;
+  public final TalonFX flywheelMotor;
   private final RobotContainer robot;
   private VelocityVoltage velocityControl = new VelocityVoltage(0);
+  private CoastOut coastOut = new CoastOut();
   private double rps;
   private InterpolatingDoubleTreeMap flywheelInterp = new InterpolatingDoubleTreeMap();
+  private boolean readyToShoot = false;
+  private boolean fixedShot = false;
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
     flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
     configureMotor();
-    // createInterpMap();
+    createInterpMap();
+
+    SmartDashboard.putNumber("Flywheel/Speed", 0);
   }
 
   @Override
@@ -55,15 +61,21 @@ public class FlywheelSubsystem extends SubsystemBase {
     }
 
     double distance = shooterPose.getDistance(goalPose);
-
-    SmartDashboard.putNumber("Flywheel/Speed", rps);
     
-    rps = 60.0;
-    // setGoal(distance);
+    // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
+    if(!readyToShoot){
+      flywheelMotor.setControl(coastOut);
+    }
 
-    flywheelMotor.setControl(velocityControl.withVelocity(rps)
-                                            .withAcceleration(rps)
-                                            .withFeedForward(rps * 0.114)); //should be constant, but not entirely sure
+    else{
+      if(fixedShot){
+        flywheelMotor.setControl(velocityControl.withVelocity(50));
+      }
+      else{
+        setGoal(distance);
+        flywheelMotor.setControl(velocityControl.withVelocity(rps));
+      }
+    }
   }
 
   public void configureMotor(){ 
@@ -71,11 +83,11 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     var slot0Configs = configs.Slot0;
           // slot0Configs.kS = 0.0; // Voltage output to overcome static friction
-          // slot0Configs.kV = 0.0; // A velocity target of 1 rps requires this voltage output.
+          slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
           // slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
-          slot0Configs.kP = 0.07; // A position error of 2.5 rotations requires this voltage output
+          slot0Configs.kP = 0.6; // A position error of 2.5 rotations requires this voltage output
           slot0Configs.kI = 0; // no output for integrated error
-          slot0Configs.kD = 0.007; // A velocity error of 1 rps requires this voltage output
+          slot0Configs.kD = 0.000; // A velocity error of 1 rps requires this voltage output
 
     flywheelMotor.setNeutralMode(NeutralModeValue.Coast);
     flywheelMotor.getConfigurator().apply(configs);
@@ -84,7 +96,15 @@ public class FlywheelSubsystem extends SubsystemBase {
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, 0.0);
+    flywheelInterp.put(0.0, -48.5);
+    flywheelInterp.put(2.53, -48.5);
+    flywheelInterp.put(3.1, -51.0);
+    flywheelInterp.put(3.5, -53.5);
+    flywheelInterp.put(4.0, -56.0);
+    flywheelInterp.put(4.5, -60.0);
+    flywheelInterp.put(5.0, -63.0);
+    flywheelInterp.put(5.5, -66.0);
+    flywheelInterp.put(6.0, -67.0);
   }
 
   public void setGoal(double distance){
@@ -97,5 +117,17 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   public double getSpeed(){
     return flywheelMotor.getVelocity().getValueAsDouble();
+  }
+
+  public boolean goodToShoot(){
+    return getSpeed() < -45.0;
+  }
+
+  public void readyShot(boolean ready){
+    readyToShoot = ready;
+  }
+
+  public void fixedShot(boolean fixed){
+    fixedShot = fixed;
   }
 }

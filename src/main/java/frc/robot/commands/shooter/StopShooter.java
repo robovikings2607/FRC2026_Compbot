@@ -13,13 +13,13 @@ import frc.robot.subsystems.HoodSubsystem;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class PrepareShooter extends InstantCommand {
+public class StopShooter extends InstantCommand {
 
   RobotContainer robot;
   FlywheelSubsystem flywheel;
   HoodSubsystem hood;
 
-  public PrepareShooter(RobotContainer robot) {
+  public StopShooter(RobotContainer robot) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.robot = robot;
     flywheel = robot.flywheel;
@@ -31,7 +31,7 @@ public class PrepareShooter extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    hood.readyShot(true);
-    flywheel.readyShot(true);
+    hood.readyShot(false);
+    flywheel.readyShot(false);
   }
 }

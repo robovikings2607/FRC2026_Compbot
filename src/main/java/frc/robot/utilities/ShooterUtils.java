@@ -26,7 +26,7 @@ public final class ShooterUtils {
               * Math.sin(Math.PI + ShooterConstants.BOT_TO_SHOOTER_ANGLE + Math.toRadians(robotRotation)); 
     return new Translation2d(shooterX, shooterY);
 
-   /*  return GeometryUtil.getOffsetPose(robotPose, 
+/*    return GeometryUtil.getOffsetPose(robotPose, 
                                       ShooterConstants.BOT_TO_SHOOTER_DISTANCE, 
                                       new Rotation2d(ShooterConstants.BOT_TO_SHOOTER_ANGLE)
                                       ).getTranslation(); */
