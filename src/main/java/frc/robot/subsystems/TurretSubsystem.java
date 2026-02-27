@@ -41,7 +41,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
   private double previousSetPoint, previousEncoderPos;
   private boolean fixedShot = false;
-  private double offset = .475098;
+  private double offset = .452148;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;

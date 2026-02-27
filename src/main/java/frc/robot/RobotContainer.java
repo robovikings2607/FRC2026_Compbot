@@ -31,9 +31,8 @@ import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseRollers;
 import frc.robot.commands.intake.DeployIntake;
 import frc.robot.commands.intake.RetractIntake;
-import frc.robot.commands.shooter.PrepareShooter;
 import frc.robot.commands.shooter.StopShooter;
-import frc.robot.commands.shooter.TransferPieces;
+import frc.robot.commands.shooter.Shoot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -126,11 +125,8 @@ public class RobotContainer {
         driverController.leftTriggerButton.onTrue(new RetractIntake(this)); //will be retract later
         driverController.buttonA.onTrue(new ReverseRollers(this));
 
-        //Feeder + Spindexer
-        driverController.rightTriggerButton.whileTrue(new TransferPieces(this));
-
-        //Flywheel + Hood
-        driverController.rightBumper.onTrue(new PrepareShooter(this));
+        //Shooter
+        driverController.rightTriggerButton.whileTrue(new Shoot(this));
         driverController.buttonB.onTrue(new StopShooter(this));
 
         // Idle while the robot is disabled. This ensures the configured
@@ -147,8 +143,7 @@ public class RobotContainer {
         //PathPlanner Commands
         NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
         NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
-        NamedCommands.registerCommand("PrepareShooter", new PrepareShooter(this));
-        NamedCommands.registerCommand("ShootPieces", new TransferPieces(this).andThen(new WaitCommand(0.0)));
+        NamedCommands.registerCommand("Shoot", new Shoot(this).andThen(new WaitCommand(0.0)));
     }
 
     // Toggle low gear and high gear speeds
