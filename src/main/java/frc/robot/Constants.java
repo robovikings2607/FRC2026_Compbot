@@ -34,8 +34,8 @@ public final class Constants {
   public static final class TurretConstants {
     public static final int TURRET_ID = 30;
     
-    public static final double MAX_ANGLE = 241.4115;
-    public static final double MIN_ANGLE = -118.5885;
+    public static final double MAX_ANGLE = 246.4115;
+    public static final double MIN_ANGLE = -113.5885;
   }
 
   public static final class FlywheelConstants {
@@ -62,19 +62,19 @@ public final class Constants {
     public static final int ROLLER_ID = 14;
     public static final int PIVOT_ID = 13;
 
-    public static final double INTAKE_RETRACTED = 3.58; //check these later
+    public static final double INTAKE_RETRACTED = 3.7; //check these later
     public static final double INTAKE_DEPLOYED = 0.0; //check these later
   }
 
   public static final class FeederConstants {
     public static final int FEEDER_ID = 16;
 
-    public static final double FEEDER_SPEED = 11.7; //check this later
+    public static final double FEEDER_SPEED = 10.5; //check this later
 
-    //for use with FeederSubsystemExp
-    public static final double SHOOT_SPEED = 1.0;   // 100% for shooting
-    public static final double INTAKE_SPEED = 0.4;  // 40% for gentle intaking
-    public static final double REVERSE_SPEED = -0.3;// -30% for unjamming    
+
+    public static final double SHOOT_SPEED = 1.0;   // 100% for shooting    
+    //for use with UnjamShooterCommandExp
+    public static final double REVERSE_SPEED = -0.4; // 40% reverse    
   }
 
   public static final class SpindexerConstants {

@@ -39,10 +39,9 @@ public class TurretSubsystem extends SubsystemBase {
   private final TalonFX turretMotor;
   private final RobotContainer robot;
   private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
-  private final DigitalInput limitSwitch;
   private double previousSetPoint, previousEncoderPos;
-  private boolean isPressed, isZeroed;
-  private double offset = .433;
+  private boolean fixedShot = false;
+  private double offset = .475098;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -50,11 +49,6 @@ public class TurretSubsystem extends SubsystemBase {
     turretMotor = new TalonFX(TurretConstants.TURRET_ID);
 
     //turretMotor.setPosition(0);
-
-    limitSwitch = new DigitalInput(0);
-    isPressed = !limitSwitch.get(); //get() returns false when pressed/switched
-    isZeroed = true;
-
     previousSetPoint = 0;
     previousEncoderPos = 0;
         
@@ -77,9 +71,9 @@ public class TurretSubsystem extends SubsystemBase {
         slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 10; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 20; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 100; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 20; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 40; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 200; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
 /*     //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
@@ -97,8 +91,6 @@ public class TurretSubsystem extends SubsystemBase {
   public void periodic() {
 
     // This method will be called once per scheduler run
-
-    isPressed = !limitSwitch.get();
 
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
@@ -124,7 +116,12 @@ public class TurretSubsystem extends SubsystemBase {
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
-    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - offset));
+    if(fixedShot){
+      turretMotor.setControl(magicMotionRequest.withPosition(offset));
+    }
+    else{
+      turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - offset));
+    }
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);
@@ -134,8 +131,7 @@ public class TurretSubsystem extends SubsystemBase {
     previousEncoderPos = newEncoderPos;
 
     SmartDashboard.putNumber("Turret/NewSetPoint", newSetPoint);
-    SmartDashboard.putNumber("Turret/NewPosition", newEncoderPos);
-    SmartDashboard.putBoolean("Turret/SwitchIsPressed", isPressed);
+    SmartDashboard.putNumber("Turret/NewPosition", newEncoderPos - offset);
     SmartDashboard.putNumber("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());
   }
 
@@ -163,8 +159,8 @@ public class TurretSubsystem extends SubsystemBase {
     return delta;
   }
 
-  public void isZeroed(){
-    isZeroed = true;
+  public void fixedShot(boolean fixed){
+    fixedShot = fixed;
   }
 
   public void setTurretToZero(){
@@ -178,17 +174,6 @@ public class TurretSubsystem extends SubsystemBase {
            .andThen(() -> isZeroed())
            .andThen(() -> setTurretToZero());
   } */
-
-  public void zeroTurret(){
-    if(!isZeroed){
-      turretMotor.set(0.1375);
-    }
-    if(isPressed){
-      turretMotor.set(0.0);
-      isZeroed = true;
-      turretMotor.setPosition(-1.39);
-    }
-  }
 
   public boolean inTolerance(double pose){
     return turretMotor.getPosition().getValueAsDouble() > pose - 0.5 ||

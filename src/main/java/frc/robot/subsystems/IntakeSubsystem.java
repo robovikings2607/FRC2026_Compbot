@@ -19,7 +19,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private final TalonFX rollerMotor;
   private final TalonFX pivotMotor;
 
-  private MotionMagicVoltage control  = new MotionMagicVoltage(0);
+  private PositionVoltage control  = new PositionVoltage(0);
 
   private double intakePosition;
   private boolean isDeployed;
@@ -43,32 +43,26 @@ public class IntakeSubsystem extends SubsystemBase {
   public void periodic() {
 
     pivotMotor.setControl(control.withPosition(intakePosition));
+
     SmartDashboard.putBoolean("Intake/IsJammed", isJammed());
+    SmartDashboard.putNumber("Intake/Position", intakePosition);
   }
 
   public void configurePivotMotor(){
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
      var slot0Configs = configs.Slot0;
-        slot0Configs.kS = 0.25; // Voltage output to overcome static friction
-        slot0Configs.kV = 3.0; // A velocity target of 1 rps requires this voltage output.
-        slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
-        slot0Configs.kP = 4.8; // A position error of 2.5 rotations requires this voltage output
-        slot0Configs.kI = 0; // no output for integrated error
-        slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
+          configs.Slot0.kP = 2.4; // An error of 1 rotation results in 2.4 V output
+          configs.Slot0.kI = 0; // No output for integrated error
+          configs.Slot0.kD = 0.1; // A velocity of 1 rps results in 0.1 V output
 
-    var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 80; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 160; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds)
-    
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
     pivotMotor.getConfigurator().apply(slot0Configs);
     pivotMotor.setPosition(0.0);
   }
 
   public void runRollersUnjammed(){
-    rollerMotor.setVoltage(8.0);
+    rollerMotor.setVoltage(10.0);
   }
 
   public void runRollersJammed(){

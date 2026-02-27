@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -26,12 +27,14 @@ import frc.robot.utilities.ShooterUtils;
 
 public class FlywheelSubsystem extends SubsystemBase {
   /** Creates a new ShooterHoodSubsystem. */
-  private final TalonFX flywheelMotor;
+  public final TalonFX flywheelMotor;
   private final RobotContainer robot;
   private VelocityVoltage velocityControl = new VelocityVoltage(0);
+  private CoastOut coastOut = new CoastOut();
   private double rps;
   private InterpolatingDoubleTreeMap flywheelInterp = new InterpolatingDoubleTreeMap();
   private boolean readyToShoot = false;
+  private boolean fixedShot = false;
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -59,15 +62,20 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     double distance = shooterPose.getDistance(goalPose);
     
-    // rps = SmartDashboard.getNumber("Flywheel/Speed", distance);
+    // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
     if(!readyToShoot){
-      rps = 0;
-    }
-    else{
-      setGoal(distance);
+      flywheelMotor.setControl(coastOut);
     }
 
-    flywheelMotor.setControl(velocityControl.withVelocity(rps));
+    else{
+      if(fixedShot){
+        flywheelMotor.setControl(velocityControl.withVelocity(50));
+      }
+      else{
+        setGoal(distance);
+        flywheelMotor.setControl(velocityControl.withVelocity(rps));
+      }
+    }
   }
 
   public void configureMotor(){ 
@@ -88,12 +96,15 @@ public class FlywheelSubsystem extends SubsystemBase {
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, -45.0);
-    flywheelInterp.put(2.4, -45.0);
-    flywheelInterp.put(3.03, -50.0);
-    flywheelInterp.put(3.51, -52.0);
-    flywheelInterp.put(4.01, -56.0);
+    flywheelInterp.put(0.0, -48.5);
+    flywheelInterp.put(2.53, -48.5);
+    flywheelInterp.put(3.1, -51.0);
+    flywheelInterp.put(3.5, -53.5);
+    flywheelInterp.put(4.0, -56.0);
     flywheelInterp.put(4.5, -60.0);
+    flywheelInterp.put(5.0, -63.0);
+    flywheelInterp.put(5.5, -66.0);
+    flywheelInterp.put(6.0, -67.0);
   }
 
   public void setGoal(double distance){
@@ -108,7 +119,15 @@ public class FlywheelSubsystem extends SubsystemBase {
     return flywheelMotor.getVelocity().getValueAsDouble();
   }
 
+  public boolean goodToShoot(){
+    return getSpeed() < -45.0;
+  }
+
   public void readyShot(boolean ready){
     readyToShoot = ready;
+  }
+
+  public void fixedShot(boolean fixed){
+    fixedShot = fixed;
   }
 }

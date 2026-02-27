@@ -35,13 +35,18 @@ public class TransferPieces extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    feeder.runMotor();
-    spindexer.runMotor();
+    hood.readyShot(true);
+    flywheel.readyShot(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    if(flywheel.goodToShoot()){
+    feeder.runMotor();
+    spindexer.runMotor();
+    }
+  }
 
   // Called once the command ends or is interrupted.
   @Override
