@@ -28,9 +28,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
-import frc.robot.Constants.FieldElements;
+import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.ShooterUtils;
 
@@ -41,7 +42,6 @@ public class TurretSubsystem extends SubsystemBase {
   private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
   private double previousSetPoint, previousEncoderPos;
   private boolean fixedShot = false;
-  private double offset = .452148;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -98,14 +98,7 @@ public class TurretSubsystem extends SubsystemBase {
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
 
     //checks alliance and aims at corresponding hub
-    double newSetPoint = 0;
-
-    if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){
-      newSetPoint = getTurretSetPoint(shooterPose, FieldElements.BLUE_HUB, robotRotation);      
-    }
-    else {
-      newSetPoint = getTurretSetPoint(shooterPose, FieldElements.RED_HUB, robotRotation);      
-    }
+    double newSetPoint = getTurretSetPoint(shooterPose, ShooterUtils.determineShootingGoal(robotPose), robotRotation);
 
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
 
@@ -117,10 +110,10 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     if(fixedShot){
-      turretMotor.setControl(magicMotionRequest.withPosition(offset));
+      turretMotor.setControl(magicMotionRequest.withPosition(TurretConstants.OFFSET));
     }
     else{
-      turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - offset));
+      turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - TurretConstants.OFFSET));
     }
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
@@ -131,7 +124,7 @@ public class TurretSubsystem extends SubsystemBase {
     previousEncoderPos = newEncoderPos;
 
     SmartDashboard.putNumber("Turret/NewSetPoint", newSetPoint);
-    SmartDashboard.putNumber("Turret/NewPosition", newEncoderPos - offset);
+    SmartDashboard.putNumber("Turret/NewPosition", newEncoderPos - TurretConstants.OFFSET);
     SmartDashboard.putNumber("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());
   }
 

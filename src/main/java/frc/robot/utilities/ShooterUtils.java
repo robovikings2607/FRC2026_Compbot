@@ -9,6 +9,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.RobotContainer;
 
@@ -30,5 +33,44 @@ public final class ShooterUtils {
                                       ShooterConstants.BOT_TO_SHOOTER_DISTANCE, 
                                       new Rotation2d(ShooterConstants.BOT_TO_SHOOTER_ANGLE)
                                       ).getTranslation(); */
+  }
+
+  public static boolean inNeutralZone(Pose2d robotPose){
+    return robotPose.getX() > 5.0 || robotPose.getY() < 10.0;
+  }
+
+  public static Translation2d determineShootingGoal(Pose2d robotPose){
+    Translation2d goalPose;
+
+    if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){ //Blue/No Alliance
+      if(ShooterUtils.inNeutralZone(robotPose)){ //Ferry Mode
+        if(robotPose.getTranslation().getDistance(FieldLocations.BLUE_LEFT_FERRY_POINT) 
+           < robotPose.getTranslation().getDistance(FieldLocations.BLUE_RIGHT_FERRY_POINT)){
+            goalPose = FieldLocations.BLUE_LEFT_FERRY_POINT;
+          }
+        else{
+            goalPose = FieldLocations.BLUE_RIGHT_FERRY_POINT;
+        }
+      }
+      else{ //Shooting Mode
+        goalPose = FieldLocations.BLUE_HUB;
+      }
+    }
+    else { //Red Alliance
+      if(ShooterUtils.inNeutralZone(robotPose)){ //Ferry Mode
+        if(robotPose.getTranslation().getDistance(FieldLocations.RED_LEFT_FERRY_POINT) 
+           < robotPose.getTranslation().getDistance(FieldLocations.RED_RIGHT_FERRY_POINT)){
+            goalPose = FieldLocations.RED_LEFT_FERRY_POINT;
+          }
+        else{
+            goalPose = FieldLocations.RED_RIGHT_FERRY_POINT;
+        }
+      }
+      else{ //Shooting Mode
+        goalPose = FieldLocations.RED_HUB;
+      }    
+    }
+
+    return goalPose;
   }
 }

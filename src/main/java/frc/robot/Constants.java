@@ -19,9 +19,16 @@ public final class Constants {
     public static final int simAlliance = 1; // 1 for Red Alliance and -1 for Blue Alliance
   }
 
-  public static final class FieldElements{
+  public static final class FieldLocations{
+    //Shooting   
     public static final Translation2d BLUE_HUB = new Translation2d(Units.inchesToMeters(182), Units.inchesToMeters(158.5));
     public static final Translation2d RED_HUB = new Translation2d(Units.inchesToMeters(469), Units.inchesToMeters(158.5));
+
+    //Ferrying
+    public static final Translation2d BLUE_LEFT_FERRY_POINT = new Translation2d(Units.inchesToMeters(91.055), Units.inchesToMeters(79.4225));
+    public static final Translation2d BLUE_RIGHT_FERRY_POINT = new Translation2d(Units.inchesToMeters(91.055), Units.inchesToMeters(238.2675));
+    public static final Translation2d RED_LEFT_FERRY_POINT = new Translation2d(Units.inchesToMeters(560.165), Units.inchesToMeters(238.2675));
+    public static final Translation2d RED_RIGHT_FERRY_POINT = new Translation2d(Units.inchesToMeters(560.165), Units.inchesToMeters(79.4225));
   }
 
   public static final class ShooterConstants{
@@ -36,6 +43,8 @@ public final class Constants {
     
     public static final double MAX_ANGLE = 246.4115;
     public static final double MIN_ANGLE = -113.5885;
+
+    public static final double OFFSET = .452148;  
   }
 
   public static final class FlywheelConstants {
