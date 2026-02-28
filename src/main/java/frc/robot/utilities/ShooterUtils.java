@@ -36,11 +36,11 @@ public final class ShooterUtils {
   }
 
   public static boolean inNeutralZone(Pose2d robotPose){
-    return robotPose.getX() > 5.0 || robotPose.getY() < 10.0;
+    return robotPose.getX() > Units.inchesToMeters(182.11) && robotPose.getX() < Units.inchesToMeters(469.11);
   }
 
   public static Translation2d determineShootingGoal(Pose2d robotPose){
-    Translation2d goalPose;
+    Translation2d goalPose = new Translation2d();
 
     if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){ //Blue/No Alliance
       if(ShooterUtils.inNeutralZone(robotPose)){ //Ferry Mode

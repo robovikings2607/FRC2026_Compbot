@@ -77,7 +77,7 @@ public class LimelightSubsystem extends SubsystemBase {
   fieldVisionDetections = robot.field.getObject("Limelight"+"/visionDetections");
   fieldVisionPose = robot.field.getObject("Limelight"+"/fieldVisionPose");
 
-   if(isValidUpdate(rightLL)){
+   if(isValidUpdate(leftLL)){
       LimelightHelpers.PoseEstimate mt2 = leftLL;
 
       robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
@@ -95,7 +95,7 @@ public class LimelightSubsystem extends SubsystemBase {
       drawTargetsOnField(mt2, tagPoses);
     }
 
-    if(isValidUpdate(leftLL)){
+    if(isValidUpdate(rightLL)){
       LimelightHelpers.PoseEstimate mt2 = rightLL;
 
       robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
