@@ -5,45 +5,65 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "AllianceToNeutral1 (LeftBump)"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "CollectFuel (LeftBump)"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "NeutralToAlliance1 (LeftBump)"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AllianceToNeutral2 (LeftBump)"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "NeutralToAlliance2 (LeftBump)"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntake"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "AllianceToNeutral1 (LeftBump)"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "CollectFuel (LeftBump)"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "NeutralToAlliance1 (LeftBump)"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "AllianceToNeutral2 (LeftBump)"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "NeutralToAlliance2 (LeftBump)"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         }
       ]
