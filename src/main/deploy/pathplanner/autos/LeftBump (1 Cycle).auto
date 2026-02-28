@@ -5,21 +5,47 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "AllianceToNeutral1 (LeftBump)"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "CollectFuel (LeftBump)"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "NeutralToAlliance1 (LeftBump)"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntake"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "AllianceToNeutral1 (LeftBump)"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "CollectFuel (LeftBump)"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "NeutralToAlliance1 (LeftBump)"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         }
       ]
