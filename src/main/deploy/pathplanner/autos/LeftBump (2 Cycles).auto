@@ -23,6 +23,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "AllianceToNeutral2 (LeftBump)"
@@ -32,6 +38,12 @@
           "type": "path",
           "data": {
             "pathName": "NeutralToAlliance2 (LeftBump)"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
           }
         }
       ]

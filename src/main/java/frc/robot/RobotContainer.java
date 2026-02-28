@@ -143,7 +143,7 @@ public class RobotContainer {
         //PathPlanner Commands
         NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
         NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
-        NamedCommands.registerCommand("Shoot", new Shoot(this).andThen(new WaitCommand(0.0)));
+        NamedCommands.registerCommand("Shoot", new Shoot(this).raceWith(new WaitCommand(5.0)));
     }
 
     // Toggle low gear and high gear speeds
