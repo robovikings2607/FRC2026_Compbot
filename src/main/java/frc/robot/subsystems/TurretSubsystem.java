@@ -55,7 +55,7 @@ public class TurretSubsystem extends SubsystemBase {
     previousSetPoint = 0;
     previousEncoderPos = 0;
         
-    // turretMotor.setPosition(0.0);
+    turretMotor.setPosition(0.0);
 
     configureMotor();
 
@@ -85,14 +85,14 @@ public class TurretSubsystem extends SubsystemBase {
     //limits (in rotations)
     configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = rotationsPerDegree * 120;
     configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -rotationsPerDegree * 240; */
-
+/* 
     configs.withCurrentLimits(
             new CurrentLimitsConfigs()
                 // Swerve azimuth does not require much torque output, so we can set a relatively low
                 // stator current limit to help avoid brownouts without impacting performance.
-                .withStatorCurrentLimit(Amps.of(20))
+                .withStatorCurrentLimit(Amps.of(30))
                 .withStatorCurrentLimitEnable(true)
-        );
+        ); */
   
     turretMotor.getConfigurator().apply(configs);
     turretMotor.setNeutralMode(NeutralModeValue.Brake);    
@@ -120,12 +120,7 @@ public class TurretSubsystem extends SubsystemBase {
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
-    if(fixedShot){
-      turretMotor.setControl(magicMotionRequest.withPosition(TurretConstants.OFFSET));
-    }
-    else{
-      turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - TurretConstants.OFFSET));
-    }
+    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - TurretConstants.OFFSET));
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);
@@ -135,8 +130,10 @@ public class TurretSubsystem extends SubsystemBase {
     previousEncoderPos = newEncoderPos;
 
     SmartDashboard.putNumber("Turret/NewSetPoint", newSetPoint);
-    SmartDashboard.putNumber("Turret/NewPosition", newEncoderPos - TurretConstants.OFFSET);
+    SmartDashboard.putNumber("Turret/NewPosition", newEncoderPos);
     SmartDashboard.putNumber("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());
+
+    SmartDashboard.putBoolean("Turret/HasResetOccured", turretMotor.hasResetOccurred());
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {

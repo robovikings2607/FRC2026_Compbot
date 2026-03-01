@@ -44,7 +44,7 @@ public final class Constants {
     public static final double MAX_ANGLE = 246.4115;
     public static final double MIN_ANGLE = -113.5885;
 
-    public static final double OFFSET = .65;  
+    public static final double OFFSET = -.249;  
   }
 
   public static final class FlywheelConstants {
