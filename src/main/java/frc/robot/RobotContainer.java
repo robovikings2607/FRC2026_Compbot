@@ -176,12 +176,6 @@ public class RobotContainer {
         NamedCommands.registerCommand("Shoot", new Shoot(this).raceWith(new WaitCommand(5.0)));
     }
 
-    // Toggle low gear and high gear speeds
-    public void toggleHiLoGear() {
-        lowGear = !lowGear;
-        driveSpeedScale = (lowGear ? slowGear : highGear);
-        SmartDashboard.putBoolean("HighGear", !lowGear);
-    }
     private void configureDefaultCommands() {
         turretExp.setDefaultCommand(new TrackHubTargetExp(
             turretExp, 
@@ -200,23 +194,6 @@ public class RobotContainer {
         ));
     }
 
-    private void configureDefaultCommands() {
-        turretExp.setDefaultCommand(new TrackHubTargetExp(
-            turretExp, 
-            () -> drivetrain.getState().Pose,
-            this::getFieldRelativeVelocity
-        ));
-
-        flywheelExp.setDefaultCommand(new RunCommand(
-            () -> flywheelExp.setRPS(FlywheelConstants.IDLE_RPM), 
-            flywheelExp
-        ));
-
-        hoodExp.setDefaultCommand(new RunCommand(
-            () -> hoodExp.setAngle(HoodConstants.ZERO_POSITION_ANGLE), 
-            hoodExp
-        ));
-    }
 
     // Toggle low gear and high gear speeds
     public void toggleHiLoGear() {
