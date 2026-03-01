@@ -8,6 +8,7 @@ import java.security.AllPermission;
 
 import org.opencv.core.Mat;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -34,6 +35,8 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.ShooterUtils;
+
+import static edu.wpi.first.units.Units.*;
 
 public class TurretSubsystem extends SubsystemBase {
   private static final double rotationsPerDegree = 10.0/360.0;
@@ -82,6 +85,14 @@ public class TurretSubsystem extends SubsystemBase {
     //limits (in rotations)
     configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = rotationsPerDegree * 120;
     configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -rotationsPerDegree * 240; */
+
+    configs.withCurrentLimits(
+            new CurrentLimitsConfigs()
+                // Swerve azimuth does not require much torque output, so we can set a relatively low
+                // stator current limit to help avoid brownouts without impacting performance.
+                .withStatorCurrentLimit(Amps.of(10))
+                .withStatorCurrentLimitEnable(true)
+        );
   
     turretMotor.getConfigurator().apply(configs);
     turretMotor.setNeutralMode(NeutralModeValue.Brake);    

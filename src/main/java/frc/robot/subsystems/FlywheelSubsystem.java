@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
@@ -24,6 +25,8 @@ import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.ShooterUtils;
+
+import static edu.wpi.first.units.Units.*;
 
 public class FlywheelSubsystem extends SubsystemBase {
   /** Creates a new ShooterHoodSubsystem. */
@@ -64,7 +67,7 @@ public class FlywheelSubsystem extends SubsystemBase {
         flywheelMotor.setControl(velocityControl.withVelocity(50));
       }*/
       if(ShooterUtils.inNeutralZone(robotPose)){
-        flywheelMotor.setControl(velocityControl.withVelocity(80.0));
+        flywheelMotor.setControl(velocityControl.withVelocity(-80.0));
       }
       else{
         setGoal(distance);
@@ -83,6 +86,12 @@ public class FlywheelSubsystem extends SubsystemBase {
           slot0Configs.kP = 0.6; // A position error of 2.5 rotations requires this voltage output
           slot0Configs.kI = 0; // no output for integrated error
           slot0Configs.kD = 0.000; // A velocity error of 1 rps requires this voltage output
+
+    configs.withCurrentLimits(
+            new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(Amps.of(120))
+                .withStatorCurrentLimitEnable(true)
+        );
 
     flywheelMotor.setNeutralMode(NeutralModeValue.Coast);
     flywheelMotor.getConfigurator().apply(configs);

@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityDutyCycle;
@@ -13,6 +14,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.IntakeConstants;
+
+import static edu.wpi.first.units.Units.*;
 
 public class IntakeSubsystem extends SubsystemBase {
 
@@ -56,13 +59,31 @@ public class IntakeSubsystem extends SubsystemBase {
           configs.Slot0.kI = 0; // No output for integrated error
           configs.Slot0.kD = 0.1; // A velocity of 1 rps results in 0.1 V output
 
+    configs.withCurrentLimits(
+        new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(Amps.of(120))
+            .withStatorCurrentLimitEnable(true)
+    );
+
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
     pivotMotor.getConfigurator().apply(slot0Configs);
     pivotMotor.setPosition(0.0);
   }
 
+  public void configureRollerMotor(){
+    TalonFXConfiguration configs = new TalonFXConfiguration();
+
+    configs.withCurrentLimits(
+        new CurrentLimitsConfigs()
+            // Swerve azimuth does not require much torque output, so we can set a relatively low
+            // stator current limit to help avoid brownouts without impacting performance.
+            .withStatorCurrentLimit(Amps.of(120))
+            .withStatorCurrentLimitEnable(true)
+    );
+  }
+
   public void runRollersUnjammed(){
-    rollerMotor.setVoltage(12.0);
+    rollerMotor.setVoltage(8.0);
   }
 
   public void runRollersJammed(){

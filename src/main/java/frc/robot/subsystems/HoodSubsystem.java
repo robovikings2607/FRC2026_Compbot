@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.Dictionary;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -23,6 +24,9 @@ import frc.robot.RobotContainer;
 import frc.robot.utilities.ShooterUtils;
 import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.HoodConstants;
+
+import static edu.wpi.first.units.Units.*;
+
 
 public class HoodSubsystem extends SubsystemBase {
   /** Creates a new HoodSubsystem. */
@@ -105,6 +109,12 @@ public class HoodSubsystem extends SubsystemBase {
     configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = HoodConstants.MIN_HOOD_ANGLE * rotationsPerDegree;
     configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = HoodConstants.MAX_HOOD_ANGLE * rotationsPerDegree; 
   
+    configs.withCurrentLimits(
+            new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(Amps.of(10))
+                .withStatorCurrentLimitEnable(true)
+        );
+
     hoodMotor.getConfigurator().apply(configs);
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
