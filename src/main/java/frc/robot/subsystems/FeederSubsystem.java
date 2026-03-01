@@ -41,6 +41,8 @@ public class FeederSubsystem extends SubsystemBase {
             .withStatorCurrentLimit(Amps.of(45))
             .withStatorCurrentLimitEnable(true)
     );
+
+    feederMotor.getConfigurator().apply(configs);
   }
 
   public void runMotor() {

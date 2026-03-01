@@ -54,10 +54,10 @@ public class IntakeSubsystem extends SubsystemBase {
   public void configurePivotMotor(){
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
-     var slot0Configs = configs.Slot0;
+   /*   var slot0Configs = configs.Slot0;
           configs.Slot0.kP = 2.4; // An error of 1 rotation results in 2.4 V output
           configs.Slot0.kI = 0; // No output for integrated error
-          configs.Slot0.kD = 0.1; // A velocity of 1 rps results in 0.1 V output
+          configs.Slot0.kD = 0.1; // A velocity of 1 rps results in 0.1 V output */
 
     configs.withCurrentLimits(
         new CurrentLimitsConfigs()
@@ -66,8 +66,8 @@ public class IntakeSubsystem extends SubsystemBase {
     );
 
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
-    pivotMotor.getConfigurator().apply(slot0Configs);
-    pivotMotor.setPosition(0.0);
+    pivotMotor.getConfigurator().apply(configs);
+    // pivotMotor.setPosition(0.0);
   }
 
   public void configureRollerMotor(){

@@ -40,6 +40,8 @@ public class SpindexerSubsystem extends SubsystemBase {
             .withStatorCurrentLimit(Amps.of(30))
             .withStatorCurrentLimitEnable(true)
     );
+
+    spindexerMotor.getConfigurator().apply(configs);
   }
 
   public void runMotor() {
