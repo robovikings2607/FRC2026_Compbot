@@ -38,7 +38,7 @@ public class FeederSubsystem extends SubsystemBase {
 
     configs.withCurrentLimits(
         new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(Amps.of(45))
+            .withStatorCurrentLimit(Amps.of(85))
             .withStatorCurrentLimitEnable(true)
     );
 

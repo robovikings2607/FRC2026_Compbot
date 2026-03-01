@@ -90,7 +90,7 @@ public class TurretSubsystem extends SubsystemBase {
             new CurrentLimitsConfigs()
                 // Swerve azimuth does not require much torque output, so we can set a relatively low
                 // stator current limit to help avoid brownouts without impacting performance.
-                .withStatorCurrentLimit(Amps.of(10))
+                .withStatorCurrentLimit(Amps.of(20))
                 .withStatorCurrentLimitEnable(true)
         );
   

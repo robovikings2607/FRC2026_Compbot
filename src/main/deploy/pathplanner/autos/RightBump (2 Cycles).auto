@@ -53,6 +53,12 @@
                       "data": {
                         "pathName": "NeutralToAlliance2 (RightBump)"
                       }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot"
+                      }
                     }
                   ]
                 }
