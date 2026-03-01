@@ -12,7 +12,7 @@ import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class TransferPieces extends Command {
+public class Shoot extends Command {
   /** Creates a new TransferPieces. */
 
   RobotContainer robot;
@@ -21,7 +21,7 @@ public class TransferPieces extends Command {
   HoodSubsystem hood;
   FlywheelSubsystem flywheel;
 
-  public TransferPieces(RobotContainer robot) {
+  public Shoot(RobotContainer robot) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.robot = robot;
     feeder = robot.feeder;
@@ -43,8 +43,8 @@ public class TransferPieces extends Command {
   @Override
   public void execute() {
     if(flywheel.goodToShoot()){
-    feeder.runMotor();
-    spindexer.runMotor();
+      feeder.runMotor();
+      spindexer.runMotor();
     }
   }
 

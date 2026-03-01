@@ -36,10 +36,9 @@ import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseRollers;
 import frc.robot.commands.intake.DeployIntake;
 import frc.robot.commands.intake.RetractIntake;
-import frc.robot.commands.shooter.PrepareShooter;
 import frc.robot.commands.shooter.SpindexerShootCommandExp;
 import frc.robot.commands.shooter.StopShooter;
-import frc.robot.commands.shooter.TransferPieces;
+import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
 import frc.robot.commands.shooter.TrackHubTargetExp;
 import frc.robot.commands.shooter.TuneShooterCommandExp;
@@ -153,28 +152,8 @@ public class RobotContainer {
         driverController.leftTriggerButton.onTrue(new RetractIntake(this)); //will be retract later
         driverController.buttonA.onTrue(new ReverseRollers(this));
 
-        //Feeder + Spindexer
-        driverController.rightTriggerButton.whileTrue(new TransferPieces(this));
-
-        //Flywheel + Hood
-        //driverController.rightBumper.onTrue(new PrepareShooter(this));
-
-        BooleanSupplier isReadyToShoot = () -> 
-            flywheelExp.isReadyToShoot() && 
-            turretExp.isReadyToShoot() && 
-            hoodExp.isReadyToShoot();
-
-        driverController.rightBumper.whileTrue(
-            new AutoAimAndShootCommandExp(
-                turretExp, 
-                hoodExp, 
-                flywheelExp, 
-                () -> drivetrain.getState().Pose,
-                this::getFieldRelativeVelocity)
-            .alongWith(new AimAssistDriveCommandExp(this, drivetrain, turretExp, driverController))
-            .alongWith(new SpindexerShootCommandExp(spindexerExp, feederExp, isReadyToShoot))            
-    );
-
+        //Shooter
+        driverController.rightTriggerButton.whileTrue(new Shoot(this));
         driverController.buttonB.onTrue(new StopShooter(this));
         driverController.buttonY.onTrue(new ZeroHoodCommandExp(this).withTimeout(2.0));    
         driverController.buttonX.whileTrue(new UnjamShooterCommandExp(spindexerExp, feederExp)
@@ -194,8 +173,31 @@ public class RobotContainer {
         //PathPlanner Commands
         NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
         NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
-        NamedCommands.registerCommand("PrepareShooter", new PrepareShooter(this));
-        NamedCommands.registerCommand("ShootPieces", new TransferPieces(this).andThen(new WaitCommand(0.0)));
+        NamedCommands.registerCommand("Shoot", new Shoot(this).raceWith(new WaitCommand(5.0)));
+    }
+
+    // Toggle low gear and high gear speeds
+    public void toggleHiLoGear() {
+        lowGear = !lowGear;
+        driveSpeedScale = (lowGear ? slowGear : highGear);
+        SmartDashboard.putBoolean("HighGear", !lowGear);
+    }
+    private void configureDefaultCommands() {
+        turretExp.setDefaultCommand(new TrackHubTargetExp(
+            turretExp, 
+            () -> drivetrain.getState().Pose,
+            this::getFieldRelativeVelocity
+        ));
+
+        flywheelExp.setDefaultCommand(new RunCommand(
+            () -> flywheelExp.setRPS(FlywheelConstants.IDLE_RPM), 
+            flywheelExp
+        ));
+
+        hoodExp.setDefaultCommand(new RunCommand(
+            () -> hoodExp.setAngle(HoodConstants.ZERO_POSITION_ANGLE), 
+            hoodExp
+        ));
     }
 
     private void configureDefaultCommands() {

@@ -73,7 +73,6 @@ public class LimelightSubsystem extends SubsystemBase {
   LimelightHelpers.SetRobotOrientation(LEFT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
   LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
   LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
-
   
   fieldVisionDetections = robot.field.getObject("Limelight"+"/visionDetections");
   fieldVisionPose = robot.field.getObject("Limelight"+"/fieldVisionPose");

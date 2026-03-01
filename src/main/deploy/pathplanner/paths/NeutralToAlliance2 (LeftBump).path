@@ -36,7 +36,7 @@
   ],
   "constraintZones": [
     {
-      "name": "Constraints Zone",
+      "name": "Over Bump",
       "minWaypointRelativePos": 0.41025641025641707,
       "maxWaypointRelativePos": 0.7018315018315082,
       "constraints": {
@@ -52,8 +52,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 5.12,
-    "maxAcceleration": 5.12,
+    "maxVelocity": 5.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
