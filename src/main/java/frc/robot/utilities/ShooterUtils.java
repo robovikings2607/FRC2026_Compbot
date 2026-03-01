@@ -8,11 +8,13 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.RobotContainer;
 
 /** Add your docs here. */
@@ -44,12 +46,11 @@ public final class ShooterUtils {
 
     if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){ //Blue/No Alliance
       if(ShooterUtils.inNeutralZone(robotPose)){ //Ferry Mode
-        if(robotPose.getTranslation().getDistance(FieldLocations.BLUE_LEFT_FERRY_POINT) 
-           < robotPose.getTranslation().getDistance(FieldLocations.BLUE_RIGHT_FERRY_POINT)){
-            goalPose = FieldLocations.BLUE_LEFT_FERRY_POINT;
+        if(robotPose.getY() < Units.inchesToMeters(158.845)){
+            goalPose = FieldLocations.BLUE_RIGHT_FERRY_POINT;
           }
         else{
-            goalPose = FieldLocations.BLUE_RIGHT_FERRY_POINT;
+            goalPose = FieldLocations.BLUE_LEFT_FERRY_POINT;
         }
       }
       else{ //Shooting Mode
@@ -58,8 +59,7 @@ public final class ShooterUtils {
     }
     else { //Red Alliance
       if(ShooterUtils.inNeutralZone(robotPose)){ //Ferry Mode
-        if(robotPose.getTranslation().getDistance(FieldLocations.RED_LEFT_FERRY_POINT) 
-           < robotPose.getTranslation().getDistance(FieldLocations.RED_RIGHT_FERRY_POINT)){
+        if(robotPose.getY() < Units.inchesToMeters(159.845)){
             goalPose = FieldLocations.RED_LEFT_FERRY_POINT;
           }
         else{
@@ -72,5 +72,37 @@ public final class ShooterUtils {
     }
 
     return goalPose;
+  }
+
+  public static InterpolatingDoubleTreeMap timeOfFlightInterp(){
+    InterpolatingDoubleTreeMap interp = new InterpolatingDoubleTreeMap();
+    
+    interp.put(0.0, null);
+    interp.put(2.53, null);
+    interp.put(3.1, null);
+    interp.put(3.5, null);
+    interp.put(4.0, null);
+    interp.put(4.5, null);
+    interp.put(5.0, null);
+    interp.put(5.5, null);
+    interp.put(6.0, null);
+
+    return interp;
+  }
+
+  public static Translation2d virtualTarget(RobotContainer robot){
+    CommandSwerveDrivetrain drivetrain = robot.drivetrain;
+
+    Pose2d robotPose = drivetrain.getState().Pose;
+    Translation2d goalPose = determineShootingGoal(robotPose);
+
+    double distance = GeometryUtil.getTargetDistance(robotPose.getTranslation(), goalPose);
+    double timeOfFlight = timeOfFlightInterp().get(distance);
+
+    double virtualTargetX = goalPose.getX() - (drivetrain.getState().Speeds.vxMetersPerSecond * timeOfFlight);
+    double virtualTargetY = goalPose.getY() - (drivetrain.getState().Speeds.vyMetersPerSecond * timeOfFlight);
+    Translation2d virtualTarget = new Translation2d(virtualTargetX, virtualTargetY);
+
+    return virtualTarget;
   }
 }
