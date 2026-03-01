@@ -25,7 +25,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private PositionVoltage control  = new PositionVoltage(0);
 
   private double intakePosition;
-  private boolean isDeployed;
+  private boolean isDeployed, isUp;
 
   private RobotContainer robot;
 
@@ -37,16 +37,40 @@ public class IntakeSubsystem extends SubsystemBase {
 
     intakePosition = IntakeConstants.INTAKE_RETRACTED;
     isDeployed = false;
+    isUp = false;
 
     configurePivotMotor();
+    configureRollerMotor();
     // zeroIntake();
   }
 
   @Override
   public void periodic() {
 
-    pivotMotor.setControl(control.withPosition(intakePosition));
+/*     if(isDeployed){
+      pivotMotor.setVoltage(-0.2);
+      pivotMotor.setNeutralMode(NeutralModeValue.Coast);
+      isUp = false;
+    }
+    else{
+      if(isUp){
+        pivotMotor.setVoltage(0.5);
+      }
+      else{
+        pivotMotor.setVoltage(4.0);
+        isUp = pivotMotor.getStatorCurrent().getValueAsDouble() > 60;
+      }      
+    }
+     */
 
+     if(isDeployed){
+      pivotMotor.setNeutralMode(NeutralModeValue.Coast);
+     }
+     else{
+      pivotMotor.setNeutralMode(NeutralModeValue.Brake);
+     }
+
+    pivotMotor.setControl(control.withPosition(intakePosition));
     SmartDashboard.putBoolean("Intake/IsJammed", isJammed());
     SmartDashboard.putNumber("Intake/Position", intakePosition);
   }
@@ -54,10 +78,9 @@ public class IntakeSubsystem extends SubsystemBase {
   public void configurePivotMotor(){
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
-   /*   var slot0Configs = configs.Slot0;
-          configs.Slot0.kP = 2.4; // An error of 1 rotation results in 2.4 V output
-          configs.Slot0.kI = 0; // No output for integrated error
-          configs.Slot0.kD = 0.1; // A velocity of 1 rps results in 0.1 V output */
+        configs.Slot0.kP = 2.4; // An error of 1 rotation results in 2.4 V output
+        configs.Slot0.kI = 0; // No output for integrated error
+        configs.Slot0.kD = 0.1; // A velocity of 1 rps results in 0.1 V output 
 
     configs.withCurrentLimits(
         new CurrentLimitsConfigs()
@@ -65,9 +88,8 @@ public class IntakeSubsystem extends SubsystemBase {
             .withStatorCurrentLimitEnable(true)
     );
 
-    pivotMotor.setNeutralMode(NeutralModeValue.Brake);
     pivotMotor.getConfigurator().apply(configs);
-    // pivotMotor.setPosition(0.0);
+    pivotMotor.setPosition(0.0);
   }
 
   public void configureRollerMotor(){
