@@ -44,7 +44,7 @@ public final class ShooterUtils {
   public static Translation2d determineShootingGoal(Pose2d robotPose){
     Translation2d goalPose = new Translation2d();
 
-   /*  if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){ //Blue/No Alliance
+   if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){ //Blue/No Alliance
       if(ShooterUtils.inNeutralZone(robotPose)){ //Ferry Mode
         if(robotPose.getY() < Units.inchesToMeters(158.845)){
             goalPose = FieldLocations.BLUE_RIGHT_FERRY_POINT;
@@ -69,7 +69,7 @@ public final class ShooterUtils {
       else{ //Shooting Mode
         goalPose = FieldLocations.RED_HUB;
       }    
-    } */
+    }
 
     goalPose = FieldLocations.RED_HUB;
 
