@@ -41,6 +41,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     configurePivotMotor();
     configureRollerMotor();
+    pivotMotor.setPosition(IntakeConstants.INTAKE_DEPLOYED);
     // zeroIntake();
   }
 
@@ -78,7 +79,7 @@ public class IntakeSubsystem extends SubsystemBase {
   public void configurePivotMotor(){
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
-        configs.Slot0.kP = 2.4; // An error of 1 rotation results in 2.4 V output
+        configs.Slot0.kP = 2.5; // An error of 1 rotation results in 2.4 V output
         configs.Slot0.kI = 0; // No output for integrated error
         configs.Slot0.kD = 0.1; // A velocity of 1 rps results in 0.1 V output 
 

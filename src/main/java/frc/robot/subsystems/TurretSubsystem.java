@@ -5,6 +5,8 @@
 package frc.robot.subsystems;
 
 import java.security.AllPermission;
+import java.util.Collections;
+import java.util.List;
 
 import org.opencv.core.Mat;
 
@@ -25,6 +27,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -34,6 +37,7 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.GeometryUtil;
+import frc.robot.utilities.LimelightHelpers;
 import frc.robot.utilities.ShooterUtils;
 
 import static edu.wpi.first.units.Units.*;
@@ -42,7 +46,7 @@ public class TurretSubsystem extends SubsystemBase {
   private static final double rotationsPerDegree = 10.0/360.0;
   private final TalonFX turretMotor;
   private final RobotContainer robot;
-  private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
+  private MotionMagicVoltage magicMotionRequest;
   private double previousSetPoint, previousEncoderPos;
   private boolean fixedShot = false;
 
@@ -58,6 +62,7 @@ public class TurretSubsystem extends SubsystemBase {
     turretMotor.setPosition(0.0);
 
     configureMotor();
+    magicMotionRequest = new MotionMagicVoltage(0.0);
 
     SmartDashboard.putNumber("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());
   }
@@ -120,7 +125,7 @@ public class TurretSubsystem extends SubsystemBase {
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
-    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos - TurretConstants.OFFSET));
+    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos));
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);
@@ -140,7 +145,7 @@ public class TurretSubsystem extends SubsystemBase {
     double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
     double robotRotationAdjustedAngle = angle - robotRotation;   
 
-    return -robotRotationAdjustedAngle * rotationsPerDegree + (30 * rotationsPerDegree);
+    return -robotRotationAdjustedAngle * rotationsPerDegree;
   }
 
   private static double getDelta(double previousSetPoint, double newSetPoint){

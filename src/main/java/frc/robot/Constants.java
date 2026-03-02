@@ -44,7 +44,7 @@ public final class Constants {
     public static final double MAX_ANGLE = 246.4115;
     public static final double MIN_ANGLE = -113.5885;
 
-    public static final double OFFSET = -.249;  
+    public static final double OFFSET = -.265;  
   }
 
   public static final class FlywheelConstants {
@@ -68,7 +68,7 @@ public final class Constants {
     public static final int ROLLER_ID = 14;
     public static final int PIVOT_ID = 13;
 
-    public static final double INTAKE_RETRACTED = 4.5; //check these later
+    public static final double INTAKE_RETRACTED = 4.7; //check these later
     public static final double INTAKE_DEPLOYED = 0.0; //check these later
   }
 
