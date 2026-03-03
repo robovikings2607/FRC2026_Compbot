@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import java.net.PortUnreachableException;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -14,6 +16,8 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.FeederConstants;
 
+import static edu.wpi.first.units.Units.*;
+
 public class FeederSubsystem extends SubsystemBase {
   /** Creates a new FeederSubsystem. */
   //private int reverse;
@@ -21,11 +25,24 @@ public class FeederSubsystem extends SubsystemBase {
 
   public FeederSubsystem(RobotContainer robot) {
     feederMotor = new TalonFX(FeederConstants.FEEDER_ID);
+    configureMotor();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  public void configureMotor(){
+    TalonFXConfiguration configs = new TalonFXConfiguration();
+
+    configs.withCurrentLimits(
+        new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(Amps.of(85))
+            .withStatorCurrentLimitEnable(true)
+    );
+
+    feederMotor.getConfigurator().apply(configs);
   }
 
   public void runMotor() {

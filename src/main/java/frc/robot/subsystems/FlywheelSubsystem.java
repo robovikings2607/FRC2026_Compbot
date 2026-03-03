@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
@@ -20,10 +21,12 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
-import frc.robot.Constants.FieldElements;
+import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.ShooterUtils;
+
+import static edu.wpi.first.units.Units.*;
 
 public class FlywheelSubsystem extends SubsystemBase {
   /** Creates a new ShooterHoodSubsystem. */
@@ -51,14 +54,7 @@ public class FlywheelSubsystem extends SubsystemBase {
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
-    Translation2d goalPose = new Translation2d();
-
-    if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){
-      goalPose = FieldElements.BLUE_HUB;
-    }
-    else {
-      goalPose = FieldElements.RED_HUB;            
-    }
+    Translation2d goalPose = ShooterUtils.determineShootingGoal(robotPose);
 
     double distance = shooterPose.getDistance(goalPose);
     
@@ -66,10 +62,12 @@ public class FlywheelSubsystem extends SubsystemBase {
     if(!readyToShoot){
       flywheelMotor.setControl(coastOut);
     }
-
     else{
-      if(fixedShot){
+/*       if(fixedShot){
         flywheelMotor.setControl(velocityControl.withVelocity(50));
+      }*/
+      if(ShooterUtils.inNeutralZone(robotPose)){
+        flywheelMotor.setControl(velocityControl.withVelocity(-80.0));
       }
       else{
         setGoal(distance);
@@ -89,6 +87,12 @@ public class FlywheelSubsystem extends SubsystemBase {
           slot0Configs.kI = 0; // no output for integrated error
           slot0Configs.kD = 0.000; // A velocity error of 1 rps requires this voltage output
 
+    configs.withCurrentLimits(
+            new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(Amps.of(120))
+                .withStatorCurrentLimitEnable(true)
+        );
+
     flywheelMotor.setNeutralMode(NeutralModeValue.Coast);
     flywheelMotor.getConfigurator().apply(configs);
   }
@@ -96,15 +100,15 @@ public class FlywheelSubsystem extends SubsystemBase {
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, -48.5);
-    flywheelInterp.put(2.53, -48.5);
-    flywheelInterp.put(3.1, -51.0);
-    flywheelInterp.put(3.5, -53.5);
-    flywheelInterp.put(4.0, -56.0);
-    flywheelInterp.put(4.5, -60.0);
-    flywheelInterp.put(5.0, -63.0);
-    flywheelInterp.put(5.5, -66.0);
-    flywheelInterp.put(6.0, -67.0);
+    flywheelInterp.put(0.0, -47.5);
+    flywheelInterp.put(2.53, -47.5);
+    flywheelInterp.put(3.1, -50.0);
+    flywheelInterp.put(3.5, -52.5);
+    flywheelInterp.put(4.0, -55.0);
+    flywheelInterp.put(4.5, -59.0);
+    flywheelInterp.put(5.0, -62.0);
+    flywheelInterp.put(5.5, -65.0);
+    flywheelInterp.put(6.0, -66.0);
   }
 
   public void setGoal(double distance){

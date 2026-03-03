@@ -12,7 +12,7 @@
         "y": 5.548869047619047
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "DepotToShootStart"
     },
     {
       "anchor": {
@@ -62,7 +62,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.30459653705364
+    "rotation": -179.78087773081583
   },
   "useDefaultConstraints": true
 }

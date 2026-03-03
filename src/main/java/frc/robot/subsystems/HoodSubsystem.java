@@ -6,7 +6,9 @@ package frc.robot.subsystems;
 
 import java.util.Dictionary;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -20,8 +22,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.ShooterUtils;
-import frc.robot.Constants.FieldElements;
+import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.HoodConstants;
+
+import static edu.wpi.first.units.Units.*;
+
 
 public class HoodSubsystem extends SubsystemBase {
   /** Creates a new HoodSubsystem. */
@@ -29,6 +34,7 @@ public class HoodSubsystem extends SubsystemBase {
   private RobotContainer robot;
 
   private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
+  private final CoastOut coastOut = new CoastOut();
   private static final double gearRatio = ((350.0/50.0)*(26.0/12.0));
   private static final double rotationsPerDegree = gearRatio/360.0;
   private double setPoint, goal;
@@ -51,22 +57,20 @@ public class HoodSubsystem extends SubsystemBase {
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
-    Translation2d goalPose = new Translation2d();
-
-    if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){
-      goalPose = FieldElements.BLUE_HUB;
-    }
-    else {
-      goalPose = FieldElements.RED_HUB;            
-    }
+    Translation2d goalPose = ShooterUtils.determineShootingGoal(robotPose);
 
     double distance = shooterPose.getDistance(goalPose);
     SmartDashboard.putNumber("Hood/Distance", distance);
     
-    if(!readyToShoot){}
+    if(!readyToShoot){
+      hoodMotor.setControl(coastOut);
+    }
     else{
-      if(fixedShot){
+ /*      if(fixedShot){
         hoodMotor.setControl(magicMotionRequest.withPosition(0));
+      }*/
+      if(ShooterUtils.inNeutralZone(robotPose)){
+        hoodMotor.setControl(magicMotionRequest.withPosition(HoodConstants.MAX_HOOD_POSITION));
       }
       else{
         setGoal(distance);
@@ -105,6 +109,12 @@ public class HoodSubsystem extends SubsystemBase {
     configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = HoodConstants.MIN_HOOD_ANGLE * rotationsPerDegree;
     configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = HoodConstants.MAX_HOOD_ANGLE * rotationsPerDegree; 
   
+    configs.withCurrentLimits(
+            new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(Amps.of(10))
+                .withStatorCurrentLimitEnable(true)
+        );
+
     hoodMotor.getConfigurator().apply(configs);
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 

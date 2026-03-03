@@ -31,6 +31,7 @@ import frc.robot.Constants.FlywheelConstants;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.drivetrain.AimAssistDriveCommandExp;
+import frc.robot.commands.DoNothing;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseRollers;
@@ -171,6 +172,7 @@ public class RobotContainer {
 
     public void configureNamedCommands(){
         //PathPlanner Commands
+        NamedCommands.registerCommand("DoNothing", new DoNothing());
         NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
         NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
         NamedCommands.registerCommand("Shoot", new Shoot(this).raceWith(new WaitCommand(5.0)));

@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.893009985734665,
-        "y": 5.322396576319543
+        "x": 4.854472789115646,
+        "y": 5.630901360544217
       },
       "isLocked": false,
       "linkedName": "LeftStartPoint"
@@ -17,11 +17,11 @@
     {
       "anchor": {
         "x": 6.7039285714285715,
-        "y": 6.339362244897959
+        "y": 5.9
       },
       "prevControl": {
-        "x": 5.0612125534950065,
-        "y": 5.4517831669044226
+        "x": 4.854472789115646,
+        "y": 5.653273809523809
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.3920099875156041,
-      "rotationDegrees": 45.0
+      "rotationDegrees": -39.359752380942595
     }
   ],
   "constraintZones": [
@@ -50,14 +50,7 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "DeployIntake",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 5.0,
     "maxAcceleration": 5.0,
@@ -74,7 +67,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -90.1629202438701
   },
   "useDefaultConstraints": true
 }
