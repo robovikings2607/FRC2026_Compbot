@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.FieldElements;
+import frc.robot.Constants.FieldLocations;
 import frc.robot.subsystems.TurretSubsystemExp;
 import frc.robot.utilities.AimingCalculator;
 import frc.robot.utilities.AimingSolution;
@@ -48,7 +48,7 @@ public class TrackHubTargetExp extends Command {
 
     if (DriverStation.getAlliance().isPresent()) {
       Translation2d hubCoordinates = DriverStation.getAlliance().get() == Alliance.Blue ? 
-        FieldElements.BLUE_HUB : FieldElements.RED_HUB;
+        FieldLocations.BLUE_HUB : FieldLocations.RED_HUB;
         
         
             Translation2d turretCoordinates = turret.getTurretFieldPosition(robotPose); 
