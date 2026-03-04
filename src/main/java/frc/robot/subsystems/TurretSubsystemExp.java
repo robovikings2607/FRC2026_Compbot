@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.utilities.GeometryUtil;
+import com.ctre.phoenix6.controls.VoltageOut;
+
 
 public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
   private static final double GEAR_RATIO = 10.0; // 10 motor turns = 1 turret turn  
@@ -24,6 +26,9 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
   private static final double ZERO_MOTOR_POSITION_ANGLE_DEGREES = 0;  
   private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;    
   private double unclampedTargetAngleDegrees = 0.0;
+  private final VoltageOut voltageRequest = new VoltageOut(0.0);
+
+  
   
   public TurretSubsystemExp(RobotContainer robot) {
     super(robot, TurretConstants.TURRET_ID);    
@@ -183,5 +188,20 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
   public double getTargetTolerance() {
     return TARGET_ERR_TOLERANCE_ROTATIONS;
   }
+
+public void applyRawVoltage(double volts) {
+    motor.setControl(voltageRequest.withOutput(volts));
+}
+
+public double getTurretStatorCurrent() {
+    return motor.getStatorCurrent().getValueAsDouble();
+}
+
+public void setEncoderToAngle(double degrees) {
+    double targetMechanismRotations = degrees / 360.0;
+    double motorRotations = targetMechanismRotations * GEAR_RATIO;
+    
+    motor.setPosition(motorRotations);
+}
 
 }
