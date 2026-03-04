@@ -198,8 +198,7 @@ public double getTurretStatorCurrent() {
 }
 
 public void setEncoderToAngle(double degrees) {
-    double targetMechanismRotations = degrees / 360.0;
-    double motorRotations = targetMechanismRotations * GEAR_RATIO;
+    double motorRotations = GeometryUtil.getDegreesAsMotorRotations(degrees,GEAR_RATIO);
     
     motor.setPosition(motorRotations);
 }
