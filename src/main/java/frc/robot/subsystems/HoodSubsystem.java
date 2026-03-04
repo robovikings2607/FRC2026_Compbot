@@ -57,18 +57,18 @@ public class HoodSubsystem extends SubsystemBase {
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
-    Translation2d goalPose = ShooterUtils.determineShootingGoal(robotPose);
+    Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
     double distance = shooterPose.getDistance(goalPose);
     SmartDashboard.putNumber("Hood/Distance", distance);
     
-    if(!readyToShoot){
+/*     if(!readyToShoot){
       hoodMotor.setControl(coastOut);
     }
     else{
  /*      if(fixedShot){
         hoodMotor.setControl(magicMotionRequest.withPosition(0));
-      }*/
+      }
       if(ShooterUtils.inNeutralZone(robotPose)){
         hoodMotor.setControl(magicMotionRequest.withPosition(HoodConstants.MAX_HOOD_POSITION));
       }
@@ -76,7 +76,7 @@ public class HoodSubsystem extends SubsystemBase {
         setGoal(distance);
         hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
       }
-    }
+    } */
 
     // setPoint = SmartDashboard.getNumber("Hood/SetPoint", 0) * rotationsPerDegree;
     // hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
@@ -111,7 +111,7 @@ public class HoodSubsystem extends SubsystemBase {
   
     configs.withCurrentLimits(
             new CurrentLimitsConfigs()
-                .withStatorCurrentLimit(Amps.of(10))
+                .withStatorCurrentLimit(Amps.of(30))
                 .withStatorCurrentLimitEnable(true)
         );
 
@@ -135,9 +135,16 @@ public class HoodSubsystem extends SubsystemBase {
     hoodInterp.put(6.0, -7.0);
   }
 
-  public void setGoal(double distance){
-    goal = 90.0 - hoodInterp.get(distance);
-    setPoint = goal * rotationsPerDegree;
+  public void setGoal(double distance){ 
+    setPoint = hoodInterp.get(distance) * rotationsPerDegree;
+  }
+
+  public void positionControl(double angle){
+    hoodMotor.setControl(magicMotionRequest.withPosition(angle));
+  }
+
+  public void coastOut(){
+    hoodMotor.setControl(new CoastOut());
   }
 
   public void zeroMotor(){
@@ -149,8 +156,8 @@ public class HoodSubsystem extends SubsystemBase {
     }
   }
 
-  public double getGoal(){
-    return goal;
+  public double getGoal(double distance){
+    return hoodInterp.get(distance) * rotationsPerDegree;
   }
 
   public double getSetPoint(){

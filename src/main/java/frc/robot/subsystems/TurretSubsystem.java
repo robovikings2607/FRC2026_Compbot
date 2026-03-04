@@ -59,7 +59,7 @@ public class TurretSubsystem extends SubsystemBase {
     previousSetPoint = 0;
     previousEncoderPos = 0;
         
-    turretMotor.setPosition(0.0);
+    // turretMotor.setPosition(0.0);
 
     configureMotor();
     magicMotionRequest = new MotionMagicVoltage(0.0);
@@ -79,25 +79,25 @@ public class TurretSubsystem extends SubsystemBase {
         slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 20; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 40; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 200; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 40; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 80; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 400; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
-/*     //enable software limits
+    //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     //limits (in rotations)
-    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = rotationsPerDegree * 120;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -rotationsPerDegree * 240; */
-/* 
+    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = rotationsPerDegree * TurretConstants.MAX_ANGLE;
+    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = rotationsPerDegree * TurretConstants.MIN_ANGLE; 
+  
     configs.withCurrentLimits(
             new CurrentLimitsConfigs()
                 // Swerve azimuth does not require much torque output, so we can set a relatively low
                 // stator current limit to help avoid brownouts without impacting performance.
-                .withStatorCurrentLimit(Amps.of(30))
+                .withStatorCurrentLimit(Amps.of(60))
                 .withStatorCurrentLimitEnable(true)
-        ); */
+        );
   
     turretMotor.getConfigurator().apply(configs);
     turretMotor.setNeutralMode(NeutralModeValue.Brake);    
@@ -112,9 +112,10 @@ public class TurretSubsystem extends SubsystemBase {
 
     double robotRotation = robotPose.getRotation().getDegrees();
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
+    Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
     //checks alliance and aims at corresponding hub
-    double newSetPoint = getTurretSetPoint(shooterPose, ShooterUtils.determineShootingGoal(robotPose), robotRotation);
+    double newSetPoint = getTurretSetPoint(shooterPose, goalPose, robotRotation);
 
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
 
@@ -125,7 +126,7 @@ public class TurretSubsystem extends SubsystemBase {
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
-    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos));
+    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + TurretConstants.OFFSET));
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);
@@ -137,8 +138,6 @@ public class TurretSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Turret/NewSetPoint", newSetPoint);
     SmartDashboard.putNumber("Turret/NewPosition", newEncoderPos);
     SmartDashboard.putNumber("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());
-
-    SmartDashboard.putBoolean("Turret/HasResetOccured", turretMotor.hasResetOccurred());
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {

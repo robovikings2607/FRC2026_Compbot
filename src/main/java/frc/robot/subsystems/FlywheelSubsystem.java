@@ -54,18 +54,18 @@ public class FlywheelSubsystem extends SubsystemBase {
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
-    Translation2d goalPose = ShooterUtils.determineShootingGoal(robotPose);
+    Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
     double distance = shooterPose.getDistance(goalPose);
     
-    // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
+/*     // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
     if(!readyToShoot){
       flywheelMotor.setControl(coastOut);
     }
     else{
-/*       if(fixedShot){
+/*        if(fixedShot){
         flywheelMotor.setControl(velocityControl.withVelocity(50));
-      }*/
+      } 
       if(ShooterUtils.inNeutralZone(robotPose)){
         flywheelMotor.setControl(velocityControl.withVelocity(-80.0));
       }
@@ -73,7 +73,7 @@ public class FlywheelSubsystem extends SubsystemBase {
         setGoal(distance);
         flywheelMotor.setControl(velocityControl.withVelocity(rps));
       }
-    }
+    }  */
   }
 
   public void configureMotor(){ 
@@ -100,22 +100,31 @@ public class FlywheelSubsystem extends SubsystemBase {
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, -47.5);
-    flywheelInterp.put(2.53, -47.5);
-    flywheelInterp.put(3.1, -50.0);
-    flywheelInterp.put(3.5, -52.5);
-    flywheelInterp.put(4.0, -55.0);
-    flywheelInterp.put(4.5, -59.0);
-    flywheelInterp.put(5.0, -62.0);
-    flywheelInterp.put(5.5, -65.0);
-    flywheelInterp.put(6.0, -66.0);
+    flywheelInterp.put(0.0, -45.5);
+    flywheelInterp.put(2.53, -45.5);
+    flywheelInterp.put(3.1, -48.0);
+    flywheelInterp.put(3.5, -50.5);
+    flywheelInterp.put(4.0, -53.0);
+    flywheelInterp.put(4.5, -57.0);
+    flywheelInterp.put(5.0, -60.0);
+    flywheelInterp.put(5.5, -63.0);
+    flywheelInterp.put(6.0, -64.0);
   }
 
   public void setGoal(double distance){
     rps = flywheelInterp.get(distance);
   }
 
-  public double getGoal(){
+  public void coastOut(){
+    flywheelMotor.setControl(new CoastOut());
+  }
+
+  public void velocityControl(double rps){
+    flywheelMotor.setControl(velocityControl.withVelocity(rps));
+  }
+
+  public double getGoal(double distance){
+    rps = flywheelInterp.get(distance);
     return rps;
   }
 
@@ -129,6 +138,10 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   public void readyShot(boolean ready){
     readyToShoot = ready;
+  }
+
+  public boolean isReady(){
+    return readyToShoot;
   }
 
   public void fixedShot(boolean fixed){
