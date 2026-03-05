@@ -12,6 +12,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -44,9 +45,9 @@ public final class ShooterUtils {
   public static Translation2d determineShootingGoal(Pose2d robotPose){
     Translation2d goalPose = new Translation2d();
 
-    if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){ //Blue/No Alliance
+   if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){ //Blue/No Alliance
       if(ShooterUtils.inNeutralZone(robotPose)){ //Ferry Mode
-        if(robotPose.getY() < Units.inchesToMeters(158.845)){
+        if(robotPose.getY() > Units.inchesToMeters(158.845)){
             goalPose = FieldLocations.BLUE_RIGHT_FERRY_POINT;
           }
         else{
@@ -59,7 +60,7 @@ public final class ShooterUtils {
     }
     else { //Red Alliance
       if(ShooterUtils.inNeutralZone(robotPose)){ //Ferry Mode
-        if(robotPose.getY() < Units.inchesToMeters(159.845)){
+        if(robotPose.getY() > Units.inchesToMeters(158.845)){
             goalPose = FieldLocations.RED_LEFT_FERRY_POINT;
           }
         else{
@@ -77,23 +78,20 @@ public final class ShooterUtils {
   public static InterpolatingDoubleTreeMap timeOfFlightInterp(){
     InterpolatingDoubleTreeMap interp = new InterpolatingDoubleTreeMap();
     
-    interp.put(0.0, null);
-    interp.put(2.53, null);
-    interp.put(3.1, null);
-    interp.put(3.5, null);
-    interp.put(4.0, null);
-    interp.put(4.5, null);
-    interp.put(5.0, null);
-    interp.put(5.5, null);
-    interp.put(6.0, null);
+    interp.put(0.0, 0.7);
+    interp.put(2.5, 0.7);
+    interp.put(3.0, 0.8);
+    interp.put(3.5, 0.9);
+    interp.put(4.0, 1.0);
+    interp.put(4.5, 1.1);
+    interp.put(5.0, 1.2);
+    interp.put(5.5, 1.3);
+    interp.put(6.0, 1.4);
 
     return interp;
   }
 
-  public static Translation2d virtualTarget(RobotContainer robot){
-    CommandSwerveDrivetrain drivetrain = robot.drivetrain;
-
-    Pose2d robotPose = drivetrain.getState().Pose;
+  public static Translation2d virtualTarget(CommandSwerveDrivetrain drivetrain, Pose2d robotPose){
     Translation2d goalPose = determineShootingGoal(robotPose);
 
     double distance = GeometryUtil.getTargetDistance(robotPose.getTranslation(), goalPose);

@@ -63,14 +63,6 @@ public class IntakeSubsystem extends SubsystemBase {
     }
      */
 
-     if(isDeployed){
-      pivotMotor.setNeutralMode(NeutralModeValue.Coast);
-     }
-     else{
-      pivotMotor.setNeutralMode(NeutralModeValue.Brake);
-     }
-
-    pivotMotor.setControl(control.withPosition(intakePosition));
     SmartDashboard.putBoolean("Intake/IsJammed", isJammed());
     SmartDashboard.putNumber("Intake/Position", intakePosition);
   }
@@ -78,7 +70,7 @@ public class IntakeSubsystem extends SubsystemBase {
   public void configurePivotMotor(){
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
-        configs.Slot0.kP = 2.4; // An error of 1 rotation results in 2.4 V output
+        configs.Slot0.kP = 2.5; // An error of 1 rotation results in 2.4 V output
         configs.Slot0.kI = 0; // No output for integrated error
         configs.Slot0.kD = 0.1; // A velocity of 1 rps results in 0.1 V output 
 
@@ -90,6 +82,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
     pivotMotor.getConfigurator().apply(configs);
     pivotMotor.setPosition(0.0);
+    pivotMotor.setNeutralMode(NeutralModeValue.Brake);
+    pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_RETRACTED));
   }
 
   public void configureRollerMotor(){
@@ -125,13 +119,13 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void deployIntake(){
-    intakePosition = IntakeConstants.INTAKE_DEPLOYED;
-    isDeployed = true;
+    pivotMotor.setNeutralMode(NeutralModeValue.Coast);
+    pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_DEPLOYED));
   }
 
   public void retractIntake(){
-    intakePosition = IntakeConstants.INTAKE_RETRACTED;
-    isDeployed = false;
+    pivotMotor.setNeutralMode(NeutralModeValue.Brake);
+    pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_RETRACTED));
   }
 
  /*  public void zeroIntake(){

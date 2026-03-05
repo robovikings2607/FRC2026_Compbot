@@ -92,6 +92,7 @@ public class RobotContainer {
     private double slowGear = 0.3; // 0.2 or 20% of max speed for competition
     public double driveSpeedScale = (lowGear ? slowGear : highGear);
     public OI driverController = new OI(OI.kDriverControllerPort);
+    public OI operatorController = new OI(OI.kOperatorControllerPort);
     
     public boolean safeToMove = false;
     private SendableChooser<Command> autoChooser;
@@ -147,9 +148,9 @@ public class RobotContainer {
         driverController.rightStick.onTrue(new ToggleHighLowGear(this));
 
         //Intake
-        driverController.leftBumper.onTrue(new DeployIntake(this)); //will be deploy later
-        driverController.leftTriggerButton.onTrue(new RetractIntake(this)); //will be retract later
-        driverController.buttonA.onTrue(new ReverseRollers(this));
+        driverController.leftTriggerButton.onTrue(new DeployIntake(this)); //will be deploy later
+        driverController.leftBumper.onTrue(new RetractIntake(this)); //will be retract later
+        driverController.rightBumper.onTrue(new ReverseRollers(this));
 
         //Shooter
         driverController.rightTriggerButton.whileTrue(new Shoot(this));
@@ -157,6 +158,11 @@ public class RobotContainer {
         driverController.buttonY.onTrue(new ZeroHoodCommandExp(this).withTimeout(2.0));    
         driverController.buttonX.whileTrue(new UnjamShooterCommandExp(spindexerExp, feederExp)
 );            
+
+        //Operator/Emergency
+        operatorController.buttonY.onTrue(new RetractIntake(this));
+        operatorController.buttonA.onTrue(new DeployIntake(this));
+
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
