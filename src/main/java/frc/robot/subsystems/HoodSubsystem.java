@@ -48,19 +48,13 @@ public class HoodSubsystem extends SubsystemBase {
 
     configureMotor();
     createInterpMap();
+    // zeroMotor();
     SmartDashboard.putNumber("Hood/SetPoint", 0);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    Pose2d robotPose = robot.drivetrain.getState().Pose;
-
-    Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
-    Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
-
-    double distance = shooterPose.getDistance(goalPose);
-    SmartDashboard.putNumber("Hood/Distance", distance);
     
 /*     if(!readyToShoot){
       hoodMotor.setControl(coastOut);
@@ -150,7 +144,7 @@ public class HoodSubsystem extends SubsystemBase {
   public void zeroMotor(){
     hoodMotor.set(0.2);
 
-    if(hoodMotor.getStatorCurrent().getValueAsDouble() > 20){
+    if(hoodMotor.getStatorCurrent().getValueAsDouble() > 25){
       hoodMotor.set(0);
       hoodMotor.setPosition(HoodConstants.MIN_HOOD_ANGLE * rotationsPerDegree);
     }

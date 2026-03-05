@@ -8,6 +8,7 @@ import java.net.PortUnreachableException;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,6 +23,7 @@ public class FeederSubsystem extends SubsystemBase {
   /** Creates a new FeederSubsystem. */
   //private int reverse;
   private TalonFX feederMotor;
+  private VelocityVoltage control = new VelocityVoltage(0.0);
 
   public FeederSubsystem(RobotContainer robot) {
     feederMotor = new TalonFX(FeederConstants.FEEDER_ID);
@@ -42,11 +44,22 @@ public class FeederSubsystem extends SubsystemBase {
             .withStatorCurrentLimitEnable(true)
     );
 
+    var slot0Configs = configs.Slot0;
+          // slot0Configs.kS = 0.0; // Voltage output to overcome static friction
+          slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
+          // slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
+          slot0Configs.kP = 0.6; // A position error of 2.5 rotations requires this voltage output
+          slot0Configs.kI = 0; // no output for integrated error
+          slot0Configs.kD = 0.000; // A velocity error of 1 rps requires this voltage output
+
+    configs.withSlot0(slot0Configs);
+
     feederMotor.getConfigurator().apply(configs);
   }
 
   public void runMotor() {
-    feederMotor.setVoltage(FeederConstants.FEEDER_SPEED);
+    // feederMotor.setVoltage(FeederConstants.FEEDER_SPEED);
+    feederMotor.setControl(control.withVelocity(83.33));
   }
 
   public void stopMotor() {

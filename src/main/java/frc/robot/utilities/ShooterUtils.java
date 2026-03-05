@@ -93,8 +93,9 @@ public final class ShooterUtils {
 
   public static Translation2d virtualTarget(CommandSwerveDrivetrain drivetrain, Pose2d robotPose){
     Translation2d goalPose = determineShootingGoal(robotPose);
+    Translation2d shooterPose = getShooterPose(robotPose);
 
-    double distance = GeometryUtil.getTargetDistance(robotPose.getTranslation(), goalPose);
+    double distance = GeometryUtil.getTargetDistance(shooterPose, goalPose);
     double timeOfFlight = timeOfFlightInterp().get(distance);
 
     double virtualTargetX = goalPose.getX() - (drivetrain.getState().Speeds.vxMetersPerSecond * timeOfFlight);

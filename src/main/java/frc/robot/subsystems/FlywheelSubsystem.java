@@ -100,15 +100,15 @@ public class FlywheelSubsystem extends SubsystemBase {
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, -45.5);
-    flywheelInterp.put(2.53, -45.5);
-    flywheelInterp.put(3.1, -48.0);
-    flywheelInterp.put(3.5, -50.5);
-    flywheelInterp.put(4.0, -53.0);
-    flywheelInterp.put(4.5, -57.0);
-    flywheelInterp.put(5.0, -60.0);
-    flywheelInterp.put(5.5, -63.0);
-    flywheelInterp.put(6.0, -64.0);
+    flywheelInterp.put(0.0, -48.5);
+    flywheelInterp.put(2.53, -48.5);
+    flywheelInterp.put(3.1, -51.0);
+    flywheelInterp.put(3.5, -53.5);
+    flywheelInterp.put(4.0, -56.0);
+    flywheelInterp.put(4.5, -60.0);
+    flywheelInterp.put(5.0, -63.0);
+    flywheelInterp.put(5.5, -66.0);
+    flywheelInterp.put(6.0, -67.0);
   }
 
   public void setGoal(double distance){
