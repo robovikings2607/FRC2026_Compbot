@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.*;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -23,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -171,7 +173,44 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
+        configureShotCategorizationButtons();        
+
         drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    private void configureShotCategorizationButtons() {
+        // Y Button: Perfect Make
+        driverController.buttonY.onTrue(
+            new InstantCommand(() -> {
+                SignalLogger.writeString("Scouting/ShotResult", "MAKE");
+                System.out.println("Logged to Hoot: MAKE"); 
+            })
+        );
+
+        // A Button: Missed Short
+        driverController.buttonA.onTrue(
+            new InstantCommand(() -> {
+                SignalLogger.writeString("Scouting/ShotResult", "MISS_SHORT");
+                System.out.println("Logged to Hoot: MISS_SHORT");
+            })
+        );
+
+        // B Button: Missed Long
+        driverController.buttonB.onTrue(
+            new InstantCommand(() -> {
+                SignalLogger.writeString("Scouting/ShotResult", "MISS_LONG");
+                System.out.println("Logged to Hoot: MISS_LONG");
+            })
+        );
+        
+        // X Button: Missed Left/Right
+        driverController.buttonX.onTrue(
+            new InstantCommand(() -> {
+                SignalLogger.writeString("Scouting/ShotResult", "MISS_WIDE");
+                System.out.println("Logged to Hoot: MISS_WIDE");
+            })
+        );
+
     }
 
     public void configureNamedCommands(){

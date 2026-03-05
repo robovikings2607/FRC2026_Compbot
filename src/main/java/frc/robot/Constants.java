@@ -79,6 +79,10 @@ public final class Constants {
     public static final int FEEDER_ID = 16;
 
     public static final double FEEDER_SPEED = 10.0; //check this later
+
+    public static final double SHOOT_SPEED = 1.0;   // 100% for shooting    
+    //for use with UnjamShooterCommandExp
+    public static final double REVERSE_SPEED = -0.4; // 40% reverse        
   }
 
   public static final class SpindexerConstants {
