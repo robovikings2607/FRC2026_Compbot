@@ -47,7 +47,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final TalonFX turretMotor;
   private final RobotContainer robot;
   private MotionMagicVoltage magicMotionRequest;
-  private double previousSetPoint, previousEncoderPos;
+  private double previousSetPoint, previousEncoderPos, offset;
   private boolean fixedShot = false;
 
   public TurretSubsystem(RobotContainer robot) {
@@ -64,7 +64,9 @@ public class TurretSubsystem extends SubsystemBase {
     configureMotor();
     magicMotionRequest = new MotionMagicVoltage(0.0);
 
-    SmartDashboard.putNumber("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("Turret/BootUpPose", turretMotor.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("SetOffset", 0.0);
+    //SmartDashboard.putNumber("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());
   }
 
   private void configureMotor() {
@@ -119,14 +121,16 @@ public class TurretSubsystem extends SubsystemBase {
 
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
 
-    if(newEncoderPos > TurretConstants.MAX_ANGLE * rotationsPerDegree){
+    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree) + (offset)){
       newEncoderPos -= 360 * rotationsPerDegree;
     }
-    else if(newEncoderPos < TurretConstants.MIN_ANGLE * rotationsPerDegree){
+    else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)  + (offset)){
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
-    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + TurretConstants.OFFSET));
+    offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
+
+    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + offset));
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);
