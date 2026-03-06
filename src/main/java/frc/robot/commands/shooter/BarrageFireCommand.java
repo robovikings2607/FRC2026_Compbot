@@ -63,10 +63,10 @@ public class BarrageFireCommand extends Command {
 
             case SHOOTING:
                 // Run the feeder fast to pull balls away
-                feeder.runForwardAtTunedSpeed(); //run at 100%
+                feeder.runForwardAtTunedSpeed(); 
                 
                 // Run the spindexer at a tuned, constant RPS to feed the balls
-                spindexer.runForwardAtTunedSpeed(); //run at 100%
+                spindexer.runForwardAtTunedSpeed(); 
                 
                 // Watch for a current spike indicating a pinch at the exit hole
                 if (spindexer.isJammed()) {
