@@ -14,6 +14,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -50,6 +51,7 @@ public class TurretSubsystem extends SubsystemBase {
   private MotionMagicVoltage magicMotionRequest;
   private double previousSetPoint, previousEncoderPos, offset;
   private boolean fixedShot = false;
+  private boolean isDeactivated = false;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -111,6 +113,8 @@ public class TurretSubsystem extends SubsystemBase {
 
     // This method will be called once per scheduler run
 
+
+
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
     double robotRotation = robotPose.getRotation().getDegrees();
@@ -122,6 +126,11 @@ public class TurretSubsystem extends SubsystemBase {
 
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
 
+    
+    if(isDeactivated){
+      turretMotor.setControl(new CoastOut());
+    }
+    else{
     if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
       newEncoderPos -= 360 * rotationsPerDegree;
     }
@@ -140,6 +149,7 @@ public class TurretSubsystem extends SubsystemBase {
     else{
       robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 0);
     }
+  }
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);
@@ -196,6 +206,10 @@ public class TurretSubsystem extends SubsystemBase {
   public boolean inTolerance(double pose){
     return turretMotor.getPosition().getValueAsDouble() > pose - 0.5 ||
            turretMotor.getPosition().getValueAsDouble() < pose + 0.5; 
+  }
+
+  public void deactivateTurret(boolean deactivate){
+    isDeactivated = deactivate;
   }
 
 }

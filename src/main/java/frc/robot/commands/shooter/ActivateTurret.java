@@ -5,33 +5,28 @@
 package frc.robot.commands.shooter;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.Robot;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.FlywheelSubsystem;
-import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class StopShooter extends InstantCommand {
+public class ActivateTurret extends InstantCommand {
 
   RobotContainer robot;
-  FlywheelSubsystem flywheel;
-  HoodSubsystem hood;
+  TurretSubsystem turret;
 
-  public StopShooter(RobotContainer robot) {
+  public ActivateTurret(RobotContainer robot) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.robot = robot;
-    flywheel = robot.flywheel;
-    hood = robot.hood;
+    turret = robot.turret;
 
-    addRequirements(flywheel, hood);
+    addRequirements(turret);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    hood.coastOut();
-    flywheel.coastOut();
+    turret.deactivateTurret(false);
   }
 }
