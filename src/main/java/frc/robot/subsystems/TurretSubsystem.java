@@ -26,6 +26,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -121,16 +122,24 @@ public class TurretSubsystem extends SubsystemBase {
 
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
 
-    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree) + (offset)){
+    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
       newEncoderPos -= 360 * rotationsPerDegree;
     }
-    else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)  + (offset)){
+    else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
     offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
 
-    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + offset));
+    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + TurretConstants.OFFSET));
+
+    if(turretMotor.getPosition().getValueAsDouble() > (TurretConstants.MAX_ANGLE - 3.0) * rotationsPerDegree ||
+       turretMotor.getPosition().getValueAsDouble() < (TurretConstants.MIN_ANGLE + 3.0) * rotationsPerDegree){
+        robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 1);
+       }
+    else{
+      robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 0);
+    }
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);

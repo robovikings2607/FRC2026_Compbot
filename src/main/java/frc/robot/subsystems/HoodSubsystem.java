@@ -124,8 +124,15 @@ public class HoodSubsystem extends SubsystemBase {
     hoodInterp.put(3.5, -1.0);
     hoodInterp.put(4.0, -1.0);
     hoodInterp.put(4.5, -2.0);
+    hoodInterp.put(4.75, -3.0);
     hoodInterp.put(5.0, -4.0);
+    hoodInterp.put(5.125, -4.25);
+    hoodInterp.put(5.25, -4.5);
+    hoodInterp.put(5.375, -4.75);
     hoodInterp.put(5.5, -5.0);
+    hoodInterp.put(5.625, -5.5);
+    hoodInterp.put(5.75, -6.0);
+    hoodInterp.put(5.875, -6.5);
     hoodInterp.put(6.0, -7.0);
   }
 

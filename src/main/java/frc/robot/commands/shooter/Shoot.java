@@ -65,7 +65,7 @@ public class Shoot extends Command {
       hood.positionControl(HoodConstants.MAX_HOOD_POSITION);
     }
     else{
-      flywheel.velocityControl(rps);
+      flywheel.velocityControl(rps);;
       hood.positionControl(angle);
     }
 
