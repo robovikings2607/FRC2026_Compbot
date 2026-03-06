@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.TurretConstants;
@@ -182,17 +183,27 @@ public class RobotContainer {
     private void configureSysIdBindings() {
         // VERY IMPORTANT: Put the robot up on blocks before running these!
         
-        // D-Pad Up: Quasistatic Forward (Slow ramp up)
-        operatorController.buttonA.whileTrue(flywheelExp.sysIdQuasistaticForward());
+        SysIdRoutine routineToTune = flywheelExp.getSysIdRoutine(); 
+
+        //Quasistatic Forward
+        operatorController.buttonA.whileTrue(
+            routineToTune.quasistatic(SysIdRoutine.Direction.kForward)
+        );
         
-        // D-Pad Down: Quasistatic Reverse (Slow ramp backward)
-        operatorController.buttonB.whileTrue(flywheelExp.sysIdQuasistaticReverse());
+        //Quasistatic Reverse
+        operatorController.buttonB.whileTrue(
+            routineToTune.quasistatic(SysIdRoutine.Direction.kReverse)
+        );
         
-        // D-Pad Right: Dynamic Forward (Instant jump to 7 volts)
-        operatorController.buttonX.whileTrue(flywheelExp.sysIdDynamicForward());
+        //Dynamic Forward
+        operatorController.buttonX.whileTrue(
+            routineToTune.dynamic(SysIdRoutine.Direction.kForward)
+        );
         
-        // D-Pad Left: Dynamic Reverse (Instant jump to -7 volts)
-        operatorController.buttonY.whileTrue(flywheelExp.sysIdDynamicReverse());
+        //Dynamic Reverse
+        operatorController.buttonY.whileTrue(
+            routineToTune.dynamic(SysIdRoutine.Direction.kReverse)
+        );
     }
 
     private void configureShotCategorizationButtons() {

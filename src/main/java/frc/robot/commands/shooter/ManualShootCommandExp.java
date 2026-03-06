@@ -34,7 +34,7 @@ public class ManualShootCommandExp extends Command {
 
         // Simple check: Are we there yet?
         if (hood.isReadyToShoot() && flywheel.isReadyToShoot()) {
-            feeder.run(1.0); // Pass 1.0 (Full Speed)
+            feeder.runForwardAtTunedSpeed(); 
         }
     }
 }

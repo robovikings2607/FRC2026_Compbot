@@ -63,7 +63,7 @@ public class BarrageFireCommand extends Command {
 
             case SHOOTING:
                 // Run the feeder fast to pull balls away
-                feeder.run(1.0); //run at 100%
+                feeder.runForwardAtTunedSpeed(); //run at 100%
                 
                 // Run the spindexer at a tuned, constant RPS to feed the balls
                 spindexer.runForwardAtTunedSpeed(); //run at 100%
@@ -78,7 +78,7 @@ public class BarrageFireCommand extends Command {
 
             case UNJAMMING:
                 // Keep running the feeder forward to clear the throat
-                feeder.run(1.0); //run at 100%
+                feeder.runForwardAtTunedSpeed(); //run at 100%
                 
                 // Briefly reverse the spindexer to break the pinch
                 spindexer.runGentleReverse();

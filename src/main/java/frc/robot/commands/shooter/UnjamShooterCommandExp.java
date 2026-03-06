@@ -33,9 +33,8 @@ public class UnjamShooterCommandExp extends Command {
 
   @Override
   public void execute() {
-      // Run both systems backward to back the game piece out of the choke point
-      spindexer.run(SpindexerConstants.REVERSE_SPEED);
-      feeder.run(FeederConstants.REVERSE_SPEED);
+      spindexer.runGentleReverse();
+      feeder.runGentleReverse();
   }
 
   @Override

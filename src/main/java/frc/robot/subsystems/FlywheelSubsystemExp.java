@@ -20,6 +20,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.utilities.ShooterUtils;
+import frc.robot.utilities.SysIdBuilder;
 
 
 public class FlywheelSubsystemExp extends SubsystemBase {
@@ -32,51 +33,9 @@ public class FlywheelSubsystemExp extends SubsystemBase {
 
     private double targetRPS = 0.0;    
 
-        // SysId requires applying raw voltage, bypassing any internal PID
-    private final VoltageOut sysIdControl = new VoltageOut(0);
-
-    // 1. Configure the SysIdRoutine
-    private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
-        // Use default ramp rate (1 V/s) and step voltage (7 V)
-        new SysIdRoutine.Config(), 
-        
-        new SysIdRoutine.Mechanism(
-            // 2. Tell SysId how to apply voltage to the TalonFX
-            (voltage) -> motor.setControl(sysIdControl.withOutput(voltage.in(Volts))),
-            
-            // 3. Tell SysId how to record the motor's state
-            (log) -> {
-                log.motor("flywheel")
-                   .voltage(Volts.of(motor.getMotorVoltage().getValueAsDouble()))
-                   .angularPosition(Rotations.of(motor.getPosition().getValueAsDouble()))
-                   .angularVelocity(RotationsPerSecond.of(motor.getVelocity().getValueAsDouble()));
-            },
-            
-            // Require this subsystem
-            this 
-        )
-    );
-
-    // -----------------------------------------------------------
-    // SysId Test Commands
-    // -----------------------------------------------------------
-
-    public Command sysIdQuasistaticForward() {
-        return sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward);
-    }
-
-    public Command sysIdQuasistaticReverse() {
-        return sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse);
-    }
-
-    public Command sysIdDynamicForward() {
-        return sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward);
-    }
-
-    public Command sysIdDynamicReverse() {
-        return sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse);
-    }
-
+    private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
+        motor, this, "flywheel", 7.0
+    );    
 
     public FlywheelSubsystemExp(RobotContainer robot) {
       this.robot = robot;
@@ -84,6 +43,10 @@ public class FlywheelSubsystemExp extends SubsystemBase {
       configureMotor();
     }
 
+    public SysIdRoutine getSysIdRoutine() {
+        return sysIdRoutine;
+    }    
+    
     public void setRPS(double targetRPS) {
         double adjustedTargetRPS = targetRPS / GEAR_RATIO;
 
@@ -144,9 +107,9 @@ public class FlywheelSubsystemExp extends SubsystemBase {
             slot0Configs.kS = 0.2; // Voltage output to overcome static friction
             slot0Configs.kV = 0.096; // A velocity target of 1 rps requires this voltage output.
             slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
-            slot0Configs.kP = 0.05; // A position error of 2.5 rotations requires this voltage output
-            slot0Configs.kI = 0; // no output for integrated error
-            slot0Configs.kD = 0.01; // A velocity error of 1 rps requires this voltage output
+            slot0Configs.kP = 0.6; // A position error of x rotations requires this voltage output
+            slot0Configs.kI = 0.0; // no output for integrated error
+            slot0Configs.kD = 0.0; // A velocity error of 1 rps requires this voltage output
 
       motor.getConfigurator().apply(configs);
       motor.setNeutralMode(NeutralModeValue.Coast);

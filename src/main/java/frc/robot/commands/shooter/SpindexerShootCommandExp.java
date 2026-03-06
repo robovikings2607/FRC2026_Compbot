@@ -43,10 +43,10 @@ public class SpindexerShootCommandExp extends InstantCommand {
   @Override
   public void execute() {
 
-      spindexer.run(SpindexerConstants.SHOOT_SPEED);
+      spindexer.runForwardAtTunedSpeed();
 
       if (isReadyToShoot.getAsBoolean()) {
-          feeder.run(FeederConstants.SHOOT_SPEED); 
+          feeder.runForwardAtTunedSpeed(); 
       } else {
           // A ball just went through and the RPM dropped, OR we are still spinning up.
           // STOP the feeder immediately so the next ball waits its turn.

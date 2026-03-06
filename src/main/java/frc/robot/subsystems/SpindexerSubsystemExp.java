@@ -4,60 +4,55 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
+import frc.robot.utilities.SysIdBuilder;
 import frc.robot.Constants.SpindexerConstants;
 
 public class SpindexerSubsystemExp extends SubsystemBase {
-  private TalonFX motor;
-  private final DutyCycleOut driveRequest = new DutyCycleOut(0);      
-  // We use a VelocityVoltage request to force a constant RPM
-  private final VelocityVoltage velocityReq = new VelocityVoltage(0).withSlot(0);
-  
-  // This is the "Goldilocks" speed you found during testing
-  // e.g., 1.5 Rotations Per Second (90 RPM)
-  private final double TUNED_DELIVERY_RPS = 1.5; 
+    private TalonFX motor = new TalonFX(SpindexerConstants.SPINDEXER_ID);
 
+    // We use a VelocityVoltage request to force a constant RPM
+    private final VelocityVoltage velocityReq = new VelocityVoltage(0).withSlot(0);
 
+    // This is the "Goldilocks" speed you found during testing
+    // e.g., 1.5 Rotations Per Second (90 RPM)
+    private final double TUNED_DELIVERY_RPS = 1.5; 
 
-  public SpindexerSubsystemExp(RobotContainer robot) {
-    motor = new TalonFX(SpindexerConstants.SPINDEXER_ID);
-  }
+    private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
+      motor, this, "spindexer", 4.5
+    );    
 
-  @Override
-  public void periodic() {
+    public SpindexerSubsystemExp(RobotContainer robot) {
+        configureMotor();        
+    }
 
-  }
+    public SysIdRoutine getSysIdRoutine() {
+        return sysIdRoutine;
+    }    
 
-  /**
-   * Runs the spindexer at a specific percent speed.
-   * @param percent -1.0 to 1.0
-   */
-  public void run(double percent) {
-      motor.setControl(driveRequest.withOutput(percent));
-  }
+    public void stop() {
+        motor.setControl(velocityReq.withVelocity(0));        
+    }
 
-  public void stop() {
-      motor.setControl(driveRequest.withOutput(0));
-  }
+    // Stator current measures the torque the motor is applying. 
+    // When it spikes, you are jammed.
+    public double getCurrent() {
+        return motor.getStatorCurrent().getValueAsDouble();
+    }
 
-  // Stator current measures the torque the motor is applying. 
-  // When it spikes, you are jammed.
-  public double getCurrent() {
-      return motor.getStatorCurrent().getValueAsDouble();
-  }
+    public boolean isJammed() {
+        // If the motor is pulling more than 40 Amps, it is physically stuck.
+        // (You will need to tune this 40 Amp threshold by looking at your logs!)
+        return getCurrent() > 40.0; 
+    }
 
-  public boolean isJammed() {
-      // If the motor is pulling more than 40 Amps, it is physically stuck.
-      // (You will need to tune this 40 Amp threshold by looking at your logs!)
-      return getCurrent() > 40.0; 
-  }
-
-      public void runForwardAtTunedSpeed() {
-        // Send the velocity request to the motor
+    public void runForwardAtTunedSpeed() {
         motor.setControl(velocityReq.withVelocity(TUNED_DELIVERY_RPS));
     }
 
@@ -70,4 +65,21 @@ public class SpindexerSubsystemExp extends SubsystemBase {
         motor.set(-0.30); 
     }
 
+    public void configureMotor(){
+
+        TalonFXConfiguration configs = new TalonFXConfiguration();
+
+        var slot0Configs = configs.Slot0;
+            slot0Configs.kS = 0.25; // Voltage output to overcome static friction
+            slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
+            slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
+            slot0Configs.kP = 4.8; // A position error of x rotations requires this voltage output
+            slot0Configs.kI = 0; // no output for integrated error
+            slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
+
+        motor.getConfigurator().apply(configs);
+        motor.setNeutralMode(NeutralModeValue.Brake);
+
+        motor.setPosition(0);
+  }
 }
