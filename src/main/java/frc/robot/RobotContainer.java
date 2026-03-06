@@ -122,7 +122,8 @@ public class RobotContainer {
 
     public RobotContainer() {
 
-        configureBindings();
+        //configureBindings();
+        configureSysIdBindings();
         configureNamedCommands();
         configureDefaultCommands();
 
@@ -176,6 +177,22 @@ public class RobotContainer {
         configureShotCategorizationButtons();        
 
         drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    private void configureSysIdBindings() {
+        // VERY IMPORTANT: Put the robot up on blocks before running these!
+        
+        // D-Pad Up: Quasistatic Forward (Slow ramp up)
+        operatorController.buttonA.whileTrue(flywheelExp.sysIdQuasistaticForward());
+        
+        // D-Pad Down: Quasistatic Reverse (Slow ramp backward)
+        operatorController.buttonB.whileTrue(flywheelExp.sysIdQuasistaticReverse());
+        
+        // D-Pad Right: Dynamic Forward (Instant jump to 7 volts)
+        operatorController.buttonX.whileTrue(flywheelExp.sysIdDynamicForward());
+        
+        // D-Pad Left: Dynamic Reverse (Instant jump to -7 volts)
+        operatorController.buttonY.whileTrue(flywheelExp.sysIdDynamicReverse());
     }
 
     private void configureShotCategorizationButtons() {

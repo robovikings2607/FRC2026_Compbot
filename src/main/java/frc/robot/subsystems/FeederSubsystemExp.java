@@ -1,25 +1,28 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+//import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
-import frc.robot.utilities.GeometryUtil;
+import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import frc.robot.Constants.FeederConstants;
-import frc.robot.Constants.FlywheelConstants;
-
 
 
 public class FeederSubsystemExp extends SubsystemBase {
-    private TalonFX motor;
+    private TalonFX motor = new TalonFX(FeederConstants.FEEDER_ID);
     private final DutyCycleOut driveRequest = new DutyCycleOut(0);    
-    
+
+
     public FeederSubsystemExp(RobotContainer robot) {
       configureMotor();
     }
@@ -37,7 +40,7 @@ public class FeederSubsystemExp extends SubsystemBase {
     }
 
   public void configureMotor(){
-    motor = new TalonFX(FeederConstants.FEEDER_ID);
+    
 
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
@@ -64,7 +67,7 @@ public class FeederSubsystemExp extends SubsystemBase {
     configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -rotationsPerDegree * 240; */
   
     motor.getConfigurator().apply(configs);
-    motor.setNeutralMode(NeutralModeValue.Brake);
+    motor.setNeutralMode(NeutralModeValue.Coast);
 
     motor.setPosition(0); //
   }

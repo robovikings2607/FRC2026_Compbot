@@ -1,14 +1,20 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -19,17 +25,61 @@ import frc.robot.utilities.ShooterUtils;
 public class FlywheelSubsystemExp extends SubsystemBase {
     private static final double GEAR_RATIO = 1.0;
     private final double TARGET_ERR_TOLERANCE_RPS = 2.0;  
-    protected final TalonFX motor;
+    protected final TalonFX motor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);      
     protected final RobotContainer robot;
     private VelocityDutyCycle velocityControl = new VelocityDutyCycle(0);   
     private final Debouncer readyDebouncer = new Debouncer(0.05, Debouncer.DebounceType.kRising);
 
     private double targetRPS = 0.0;    
 
+        // SysId requires applying raw voltage, bypassing any internal PID
+    private final VoltageOut sysIdControl = new VoltageOut(0);
+
+    // 1. Configure the SysIdRoutine
+    private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
+        // Use default ramp rate (1 V/s) and step voltage (7 V)
+        new SysIdRoutine.Config(), 
+        
+        new SysIdRoutine.Mechanism(
+            // 2. Tell SysId how to apply voltage to the TalonFX
+            (voltage) -> motor.setControl(sysIdControl.withOutput(voltage.in(Volts))),
+            
+            // 3. Tell SysId how to record the motor's state
+            (log) -> {
+                log.motor("flywheel")
+                   .voltage(Volts.of(motor.getMotorVoltage().getValueAsDouble()))
+                   .angularPosition(Rotations.of(motor.getPosition().getValueAsDouble()))
+                   .angularVelocity(RotationsPerSecond.of(motor.getVelocity().getValueAsDouble()));
+            },
+            
+            // Require this subsystem
+            this 
+        )
+    );
+
+    // -----------------------------------------------------------
+    // SysId Test Commands
+    // -----------------------------------------------------------
+
+    public Command sysIdQuasistaticForward() {
+        return sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward);
+    }
+
+    public Command sysIdQuasistaticReverse() {
+        return sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse);
+    }
+
+    public Command sysIdDynamicForward() {
+        return sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward);
+    }
+
+    public Command sysIdDynamicReverse() {
+        return sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse);
+    }
+
 
     public FlywheelSubsystemExp(RobotContainer robot) {
       this.robot = robot;
-      this.motor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);      
 
       configureMotor();
     }
