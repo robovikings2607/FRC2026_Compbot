@@ -8,6 +8,7 @@ import java.net.PortUnreachableException;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -63,7 +64,7 @@ public class FeederSubsystem extends SubsystemBase {
   }
 
   public void stopMotor() {
-    feederMotor.setVoltage(0);
+    feederMotor.setControl(new CoastOut());
   }
 
   public void reverseMotor() {

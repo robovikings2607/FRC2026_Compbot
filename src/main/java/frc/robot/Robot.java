@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -27,7 +28,13 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         m_timeAndJoystickReplay.update();
-        CommandScheduler.getInstance().run(); 
+        CommandScheduler.getInstance().run();
+        
+        if(RobotController.getUserButton()){
+            m_robotContainer.hood.getMotor().setPosition(0.0);
+            m_robotContainer.turret.getMotor().setPosition(0.0);
+            m_robotContainer.intake.getPivotMotor().setPosition(0.0);
+        } 
     }
 
     @Override

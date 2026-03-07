@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -64,6 +65,10 @@ public class IntakeSubsystem extends SubsystemBase {
     }
      */
 
+   /*  if(RobotController.getUserButton()){
+      pivotMotor.setPosition(0.0);
+    } */
+
     SmartDashboard.putBoolean("Intake/IsJammed", isJammed());
     SmartDashboard.putNumber("Intake/Position", intakePosition);
   }
@@ -82,7 +87,7 @@ public class IntakeSubsystem extends SubsystemBase {
     );
 
     pivotMotor.getConfigurator().apply(configs);
-    pivotMotor.setPosition(0.0);
+    //ppivotMotor.setPosition(0.0);
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
     pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_RETRACTED));
   }
@@ -137,4 +142,8 @@ public class IntakeSubsystem extends SubsystemBase {
       pivotMotor.setPosition(0.0);
     }
   } */
+
+  public TalonFX getPivotMotor(){
+    return pivotMotor;
+  }
 }

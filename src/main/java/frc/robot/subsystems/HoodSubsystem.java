@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -74,6 +75,10 @@ public class HoodSubsystem extends SubsystemBase {
 
     // setPoint = SmartDashboard.getNumber("Hood/SetPoint", 0) * rotationsPerDegree;
     // hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
+
+   /*  if(RobotController.getUserButton()){
+      hoodMotor.setPosition(0.0);
+    } */
   }
 
 
@@ -112,7 +117,7 @@ public class HoodSubsystem extends SubsystemBase {
     hoodMotor.getConfigurator().apply(configs);
     hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    hoodMotor.setPosition(0);
+    //hoodMotor.setPosition(0);
   }
 
   public void createInterpMap(){
@@ -172,5 +177,9 @@ public class HoodSubsystem extends SubsystemBase {
 
   public void fixedShot(boolean fixed){
     fixedShot = fixed;
+  }
+
+  public TalonFX getMotor(){
+    return hoodMotor;
   }
 }

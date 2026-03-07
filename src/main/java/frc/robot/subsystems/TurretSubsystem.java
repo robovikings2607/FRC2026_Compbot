@@ -212,4 +212,8 @@ public class TurretSubsystem extends SubsystemBase {
     isDeactivated = deactivate;
   }
 
+  public TalonFX getMotor(){
+    return turretMotor;
+  }
+
 }
