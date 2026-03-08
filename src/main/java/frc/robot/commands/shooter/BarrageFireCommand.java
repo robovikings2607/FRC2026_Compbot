@@ -7,7 +7,7 @@ import frc.robot.subsystems.FlywheelSubsystemExp;
 import frc.robot.subsystems.SpindexerSubsystemExp;
 
 public class BarrageFireCommand extends Command {
-    private final FlywheelSubsystemExp shooter;
+    private final FlywheelSubsystemExp flywheel;
     private final FeederSubsystemExp feeder;
     private final SpindexerSubsystemExp spindexer;
     
@@ -24,25 +24,25 @@ public class BarrageFireCommand extends Command {
     private FireState currentState;
 
     public BarrageFireCommand(
-        FlywheelSubsystemExp shooter, 
+        FlywheelSubsystemExp flywheel, 
         FeederSubsystemExp feeder, 
         SpindexerSubsystemExp spindexer, 
         double targetRPS) {
 
-        this.shooter = shooter;
+        this.flywheel = flywheel;
         this.feeder = feeder;
         this.spindexer = spindexer;
         this.targetRPS = targetRPS;
         
         // Require all three subsystems so nothing else can interfere
-        addRequirements(shooter, feeder, spindexer);
+        addRequirements(flywheel, feeder, spindexer);
     }
 
     @Override
     public void initialize() {
         // Start the sequence by spooling the flywheel
         currentState = FireState.SPOOLING;
-        shooter.setRPS(targetRPS);
+        flywheel.setRPS(targetRPS);
         
         // Ensure feeder and spindexer start stopped
         feeder.stop();
@@ -56,7 +56,7 @@ public class BarrageFireCommand extends Command {
             
             case SPOOLING:
                 // Wait for the flywheel to reach steady-state RPM
-                if (shooter.isReadyToShoot()) {
+                if (flywheel.isReadyToShoot()) {
                     currentState = FireState.SHOOTING;
                 }
                 break;
@@ -95,7 +95,7 @@ public class BarrageFireCommand extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        shooter.stop();
+        flywheel.stop();
         feeder.stop();
         spindexer.stop();
     }

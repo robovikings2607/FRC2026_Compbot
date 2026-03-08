@@ -25,7 +25,7 @@ import frc.robot.utilities.SysIdBuilder;
 
 public class FlywheelSubsystemExp extends SubsystemBase {
     private static final double GEAR_RATIO = 1.0;
-    private final double TARGET_ERR_TOLERANCE_RPS = 300.0;  
+    private final double TARGET_ERR_TOLERANCE_RPS = 0.83;  
     protected final TalonFX motor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);      
     protected final RobotContainer robot;
     private VelocityDutyCycle velocityControl = new VelocityDutyCycle(0);   
