@@ -79,6 +79,8 @@ public class HoodSubsystem extends SubsystemBase {
    /*  if(RobotController.getUserButton()){
       hoodMotor.setPosition(0.0);
     } */
+
+    SmartDashboard.putNumber("Hood/Positioj", hoodMotor.getPosition().getValueAsDouble());
   }
 
 

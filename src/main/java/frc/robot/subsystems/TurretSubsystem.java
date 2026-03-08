@@ -81,7 +81,7 @@ public class TurretSubsystem extends SubsystemBase {
         slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
         slot0Configs.kP = 4.8; // A position error of 2.5 rotations requires this voltage output
         slot0Configs.kI = 0; // no output for integrated error
-        slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
+        slot0Configs.kD = 0.15; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = 40; // Target cruise velocity of 80 rps
@@ -113,8 +113,6 @@ public class TurretSubsystem extends SubsystemBase {
 
     // This method will be called once per scheduler run
 
-
-
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
     double robotRotation = robotPose.getRotation().getDegrees();
@@ -127,10 +125,6 @@ public class TurretSubsystem extends SubsystemBase {
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
 
     
-    if(isDeactivated){
-      turretMotor.setControl(new CoastOut());
-    }
-    else{
     if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
       newEncoderPos -= 360 * rotationsPerDegree;
     }
@@ -140,7 +134,12 @@ public class TurretSubsystem extends SubsystemBase {
 
     offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
 
-    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + TurretConstants.OFFSET));
+    if(isDeactivated){
+      turretMotor.setControl(new CoastOut());
+    }
+    else{
+      turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + TurretConstants.OFFSET));
+    }
 
     if(turretMotor.getPosition().getValueAsDouble() > (TurretConstants.MAX_ANGLE - 3.0) * rotationsPerDegree ||
        turretMotor.getPosition().getValueAsDouble() < (TurretConstants.MIN_ANGLE + 3.0) * rotationsPerDegree){
@@ -149,7 +148,6 @@ public class TurretSubsystem extends SubsystemBase {
     else{
       robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 0);
     }
-  }
 
     SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
     SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);

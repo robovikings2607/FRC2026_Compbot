@@ -70,7 +70,7 @@ public class IntakeSubsystem extends SubsystemBase {
     } */
 
     SmartDashboard.putBoolean("Intake/IsJammed", isJammed());
-    SmartDashboard.putNumber("Intake/Position", intakePosition);
+    SmartDashboard.putNumber("Intake/Position", pivotMotor.getPosition().getValueAsDouble());
   }
 
   public void configurePivotMotor(){
