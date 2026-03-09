@@ -82,7 +82,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     configs.withCurrentLimits(
         new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(Amps.of(120))
+            .withStatorCurrentLimit(Amps.of(95))
             .withStatorCurrentLimitEnable(true)
     );
 
@@ -105,7 +105,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void runRollersUnjammed(){
-    rollerMotor.setVoltage(8.0);
+    rollerMotor.setVoltage(9.0);
   }
 
   public void runRollersJammed(){
@@ -145,5 +145,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public TalonFX getPivotMotor(){
     return pivotMotor;
+  }
+
+  public void forcePivotDown(){
+    pivotMotor.setVoltage(-2.0);
+    runRollersUnjammed();
   }
 }

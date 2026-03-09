@@ -79,14 +79,14 @@ public class TurretSubsystem extends SubsystemBase {
         slot0Configs.kS = 0.25; // Voltage output to overcome static friction
         slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
         slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
-        slot0Configs.kP = 4.8; // A position error of 2.5 rotations requires this voltage output
+        slot0Configs.kP = 5.0; // A position error of 2.5 rotations requires this voltage output
         slot0Configs.kI = 0; // no output for integrated error
         slot0Configs.kD = 0.15; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 40; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 80; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 400; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 50; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 2000; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 80000; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
     //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;

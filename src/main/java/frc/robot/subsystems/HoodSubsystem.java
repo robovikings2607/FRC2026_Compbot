@@ -93,7 +93,7 @@ public class HoodSubsystem extends SubsystemBase {
         slot0Configs.kS = 1.0; // Voltage output to overcome static friction
         slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
         slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
-        slot0Configs.kP = 3.8; // A position error of 2.5 rotations requires this voltage output
+        slot0Configs.kP = 3.8; // A position error of 2.5 rotations requires this voltage outputp
         slot0Configs.kI = 0; // no output for integrated error
         slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
 
@@ -112,7 +112,7 @@ public class HoodSubsystem extends SubsystemBase {
   
     configs.withCurrentLimits(
             new CurrentLimitsConfigs()
-                .withStatorCurrentLimit(Amps.of(30))
+                .withStatorCurrentLimit(Amps.of(60))
                 .withStatorCurrentLimitEnable(true)
         );
 
@@ -126,7 +126,10 @@ public class HoodSubsystem extends SubsystemBase {
     //key = distance from goal
     //value = position of hood in desired shot angle
     hoodInterp.put(0.0, 0.0);
-    hoodInterp.put(6.0, 0.0);
+    hoodInterp.put(3.9, 0.0);
+    hoodInterp.put(4.0, -3.0);
+
+    hoodInterp.put(6.0, -3.0);
 /*     hoodInterp.put(2.53, 0.0);
     hoodInterp.put(3.1, 0.0);
     hoodInterp.put(3.5, -1.0);

@@ -64,7 +64,7 @@ public class FeederSubsystem extends SubsystemBase {
 
   public void runMotor() {
     //feederMotor.setVoltage(FeederConstants.FEEDER_SPEED);
-    feederMotor.setControl(control.withVelocity(83.33));
+    feederMotor.setControl(control.withVelocity(75));
   }
 
   public void stopMotor() {

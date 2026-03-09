@@ -32,6 +32,7 @@ import frc.robot.commands.DoNothing;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseRollers;
 import frc.robot.commands.intake.DeployIntake;
+import frc.robot.commands.intake.ForceIntakeDown;
 import frc.robot.commands.intake.JostlePieces;
 import frc.robot.commands.intake.RetractIntake;
 import frc.robot.commands.shooter.StopShooter;
@@ -143,6 +144,7 @@ public class RobotContainer {
         operatorController.buttonX.onTrue(new ActivateTurret(this));
         operatorController.leftBumper.onTrue(new JostlePieces(this));
         operatorController.rightBumper.whileTrue(new ReverseSpindexer(this));
+        operatorController.rightTriggerButton.onTrue(new ForceIntakeDown(this));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
