@@ -159,6 +159,17 @@ public class RobotContainer {
 
         //Shooter
         driverController.rightTriggerButton.whileTrue(new Shoot(this));
+        operatorController.rightTriggerButton.whileTrue(new AutoAimAndShootCommandExp(
+            this.turretExp, 
+            this.hoodExp, 
+            this.flywheelExp, 
+            this.feederExp,
+            this.spindexerExp,
+            () -> drivetrain.getState().Pose,
+            this::getFieldRelativeVelocity
+        ));        
+
+
         driverController.buttonB.onTrue(new StopShooter(this));
         driverController.buttonY.onTrue(new ZeroHoodCommandExp(this).withTimeout(2.0));    
         driverController.buttonX.whileTrue(new UnjamShooterCommandExp(spindexerExp, feederExp)
@@ -168,15 +179,6 @@ public class RobotContainer {
         operatorController.buttonY.onTrue(new RetractIntake(this));
         operatorController.buttonA.onTrue(new DeployIntake(this));
 
-        operatorController.rightBumper.onTrue(new AutoAimAndShootCommandExp(
-            this.turretExp, 
-            this.hoodExp, 
-            this.flywheelExp, 
-            this.feederExp,
-            this.spindexerExp,
-            () -> drivetrain.getState().Pose,
-            this::getFieldRelativeVelocity
-        ));        
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
