@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -167,6 +168,15 @@ public class RobotContainer {
         operatorController.buttonY.onTrue(new RetractIntake(this));
         operatorController.buttonA.onTrue(new DeployIntake(this));
 
+        operatorController.rightBumper.onTrue(new AutoAimAndShootCommandExp(
+            this.turretExp, 
+            this.hoodExp, 
+            this.flywheelExp, 
+            this.feederExp,
+            this.spindexerExp,
+            () -> drivetrain.getState().Pose,
+            this::getFieldRelativeVelocity
+        ));        
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
