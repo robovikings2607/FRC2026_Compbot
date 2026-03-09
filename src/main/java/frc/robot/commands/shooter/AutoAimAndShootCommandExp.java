@@ -138,7 +138,6 @@ public class AutoAimAndShootCommandExp extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        flywheel.stop();
         feeder.stop();
         spindexer.stop();
     }

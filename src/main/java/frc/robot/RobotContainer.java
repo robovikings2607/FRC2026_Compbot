@@ -273,10 +273,12 @@ public class RobotContainer {
             flywheelExp
         ));
 
-        hoodExp.setDefaultCommand(new RunCommand(
-            () -> hoodExp.setAngle(HoodConstants.ZERO_POSITION_ANGLE), 
-            hoodExp
-        ));
+        //if hood doesn't get forced down by gravity then it will just stay where it is which
+        //is probably OK.
+        // hoodExp.setDefaultCommand(new RunCommand(
+        //     () -> hoodExp.setAngle(HoodConstants.ZERO_POSITION_ANGLE), 
+        //     hoodExp
+        // ));
     }
 
 
