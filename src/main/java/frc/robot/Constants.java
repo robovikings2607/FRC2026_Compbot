@@ -49,7 +49,7 @@ public final class Constants {
 
   public static final class FlywheelConstants {
     public static final int FLYWHEEL_ID = 17;
-    public static final double IDLE_RPM = 1500.0;    
+    public static final double IDLE_RPS = 1500.0 / 60;    
   }
 
   public static final class HoodConstants {

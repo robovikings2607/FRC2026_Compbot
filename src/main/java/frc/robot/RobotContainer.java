@@ -269,7 +269,7 @@ public class RobotContainer {
         ));
 
         flywheelExp.setDefaultCommand(new RunCommand(
-            () -> flywheelExp.setRPS(FlywheelConstants.IDLE_RPM), 
+            () -> flywheelExp.setRPS(FlywheelConstants.IDLE_RPS), 
             flywheelExp
         ));
 
