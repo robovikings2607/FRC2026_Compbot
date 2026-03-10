@@ -38,7 +38,7 @@ public class AimingCalculator {
      * @param fieldRelVelocity  The robot's field-relative velocity vector (Vx, Vy in m/s)
      * @return An AimingSolution containing the Virtual Target and the final Shooter State.
      */
-    public AimingSolution calculateMovingAimingSolution(
+public AimingSolution calculateMovingAimingSolution(
             Translation2d robotPosition, 
             Translation2d realTargetPosition, 
             ChassisSpeeds fieldRelVelocity) {
@@ -46,26 +46,49 @@ public class AimingCalculator {
         // STEP 1: Calculate the Real Distance
         double realDistance = robotPosition.getDistance(realTargetPosition);
 
-        // STEP 2: Get the Initial Guess for Time of Flight
-        double estimatedToF = getTargetState(realDistance).timeOfFlightSeconds;
+        // STEP 2: Get the BASE State using REAL Distance
+        // This guarantees your Hood Angle is perfectly matched to your physical location
+        ShooterState baseState = getTargetState(realDistance);
+        double estimatedToF = baseState.timeOfFlightSeconds;
 
-        // STEP 3: Calculate the Virtual Target
-        // We shift the target in the OPPOSITE direction of our travel.
-        // If we drive +X, the ball carries that +X momentum, so we must aim -X to compensate.
+        // STEP 3: Calculate the Virtual Target (For Turret/Heading)
+        // This shifts the target to compensate for lateral (sideways) drift
         double virtualTargetX = realTargetPosition.getX() - (fieldRelVelocity.vxMetersPerSecond * estimatedToF);
         double virtualTargetY = realTargetPosition.getY() - (fieldRelVelocity.vyMetersPerSecond * estimatedToF);
         Translation2d virtualTarget = new Translation2d(virtualTargetX, virtualTargetY);
 
-        // STEP 4: Calculate the Virtual Distance
-        // How far away is this new, shifted target from our robot?
-        double virtualDistance = robotPosition.getDistance(virtualTarget);
+        // STEP 4: Calculate Radial Velocity using a Dot Product
+        // We need to find out how much of our chassis speed is pointed directly at the target.
+        double dx = realTargetPosition.getX() - robotPosition.getX();
+        double dy = realTargetPosition.getY() - robotPosition.getY();
+        
+        // Normalize the vector (create a unit vector pointing at the target)
+        double unitX = dx / realDistance;
+        double unitY = dy / realDistance;
 
-        // STEP 5: Get the Final Shooter State using the Virtual Distance
-        // This gives us the perfectly corrected Hood Angle and Flywheel RPM!
-        ShooterState finalState = getTargetState(virtualDistance);
+        // Dot product: (Velocity X * Unit X) + (Velocity Y * Unit Y)
+        // If positive: Robot is moving TOWARD the goal.
+        // If negative: Robot is moving AWAY from the goal (fadeaway).
+        double radialVelocityMPS = (fieldRelVelocity.vxMetersPerSecond * unitX) + 
+                                   (fieldRelVelocity.vyMetersPerSecond * unitY);
 
-        // STEP 6: Package it up and return it
-        return new AimingSolution(virtualTarget, finalState);
-    }
-    
+        // STEP 5: Calculate the RPS Compensation
+        // You will need to experimentally tune this constant on the practice field.
+        // "For every 1 meter per second of robot speed, alter the wheel by X RPM"
+        double RPS_PER_MPS_FACTOR = 50.0 / 60; 
+        
+        // If moving toward (+), subtract RPM to avoid overshooting.
+        // If moving away (-), subtracting a negative adds RPM to give the ball more energy.
+        double compensatedRPS = baseState.rps - (radialVelocityMPS * RPS_PER_MPS_FACTOR);
+
+        // STEP 6: Package the Hybrid State
+        // We build a new state combining the perfect arc (Hood) with the compensated energy (RPM)
+        ShooterState finalCompensatedState = new ShooterState(
+            compensatedRPS, 
+            baseState.hoodAngle, // Strictly uses the real distance arc!
+            baseState.timeOfFlightSeconds
+        );
+
+        return new AimingSolution(virtualTarget, finalCompensatedState);
+    }    
 }
