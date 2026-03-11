@@ -1,5 +1,8 @@
 package frc.robot;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
@@ -14,6 +17,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -29,6 +36,13 @@ public class Telemetry {
 
     // 1. Your manual toggle. Set to false before a match, true in the pits.
     public static boolean DEBUG_MODE = true;    
+    
+    // Grab the direct disk logger
+    private static final DataLog log = DataLogManager.getLog();
+    
+    // Caches to hold our log entries so we don't recreate them every 20ms
+    private static final Map<String, DoubleLogEntry> doubleLogs = new HashMap<>();
+    private static final Map<String, BooleanLogEntry> booleanLogs = new HashMap<>();    
 
     /**
      * Construct a telemetry object, with the specified max speed of the robot
@@ -42,6 +56,32 @@ public class Telemetry {
         /* Set up the module state Mechanism2d telemetry */
         for (int i = 0; i < 4; ++i) {
             SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
+        }
+    }
+
+        /**
+     * Logs data directly to the .wpilog file, and optionally to SmartDashboard.
+     */
+    public static void logDouble(String key, double value) {
+        // 1. ALWAYS write directly to the disk (.wpilog)
+        // We put it in a clean "/RobotData/" folder in AdvantageScope
+        DoubleLogEntry entry = doubleLogs.computeIfAbsent(key, 
+            k -> new DoubleLogEntry(log, "/RobotData/" + k));
+        entry.append(value);
+
+        // 2. ONLY push over Wi-Fi if it's safe and requested
+        if (DEBUG_MODE && !DriverStation.isFMSAttached()) {
+            SmartDashboard.putNumber(key, value);
+        }
+    }
+
+    public static void logBoolean(String key, boolean value) {
+        BooleanLogEntry entry = booleanLogs.computeIfAbsent(key, 
+            k -> new BooleanLogEntry(log, "/RobotData/" + k));
+        entry.append(value);
+
+        if (DEBUG_MODE && !DriverStation.isFMSAttached()) {
+            SmartDashboard.putBoolean(key, value);
         }
     }
 
