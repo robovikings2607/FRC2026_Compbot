@@ -124,13 +124,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
 
-    
-    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
-      newEncoderPos -= 360 * rotationsPerDegree;
-    }
-    else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
-      newEncoderPos += 360 * rotationsPerDegree;
-    }
+    newEncoderPos = clampEncoderPos(newEncoderPos);
 
     offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
 
@@ -168,7 +162,17 @@ public class TurretSubsystem extends SubsystemBase {
     return -robotRotationAdjustedAngle * rotationsPerDegree;
   }
 
-  private static double getDelta(double previousSetPoint, double newSetPoint){
+  public static double clampEncoderPos(double newEncoderPos){
+    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
+      newEncoderPos -= 360 * rotationsPerDegree;
+    }
+    else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
+      newEncoderPos += 360 * rotationsPerDegree;
+    }
+    return newEncoderPos;
+  }
+
+  public static double getDelta(double previousSetPoint, double newSetPoint){
     double delta = 0;
 
     if(Math.abs(previousSetPoint - newSetPoint) > 9.5){ //if turret wraps
