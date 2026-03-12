@@ -40,6 +40,7 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.LimelightHelpers;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.ShooterUtils;
 
 import static edu.wpi.first.units.Units.*;
@@ -67,9 +68,9 @@ public class TurretSubsystem extends SubsystemBase {
     configureMotor();
     magicMotionRequest = new MotionMagicVoltage(0.0);
 
-    SmartDashboard.putNumber("Turret/BootUpPose", turretMotor.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("SetOffset", 0.0);
-    //SmartDashboard.putNumber("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());
+    logNumber2("Turret/BootUpPose", turretMotor.getPosition().getValueAsDouble());
+    logNumber2("SetOffset", 0.0);    
+    //logNumber2("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());        
   }
 
   private void configureMotor() {
@@ -149,16 +150,16 @@ public class TurretSubsystem extends SubsystemBase {
       robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 0);
     }
 
-    SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
-    SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);
-    SmartDashboard.putNumber("Turret/PreviousPosition", previousEncoderPos);
+    logNumber2("Turret/Delta", getDelta(previousSetPoint, newSetPoint));        
+    logNumber2("Turret/PreviousSetPoint", previousSetPoint);        
+    logNumber2("Turret/PreviousPosition", previousEncoderPos);        
 
     previousSetPoint = newSetPoint;
     previousEncoderPos = newEncoderPos;
 
-    SmartDashboard.putNumber("Turret/NewSetPoint", newSetPoint);
-    SmartDashboard.putNumber("Turret/NewPosition", newEncoderPos);
-    SmartDashboard.putNumber("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());
+    logNumber2("Turret/NewSetPoint", newSetPoint);        
+    logNumber2("Turret/NewPosition", newEncoderPos);        
+    logNumber2("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());        
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
@@ -212,6 +213,14 @@ public class TurretSubsystem extends SubsystemBase {
 
   public TalonFX getMotor(){
     return turretMotor;
+  }
+
+  public void logNumber(String key, double value){
+    SmartDashboard.putNumber(key, value);
+  }
+
+  public void logNumber2(String key, double value){
+    RobotLogger.logDouble(key, value);
   }
 
 }

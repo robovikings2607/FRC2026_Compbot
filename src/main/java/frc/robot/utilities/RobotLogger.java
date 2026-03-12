@@ -2,8 +2,6 @@ package frc.robot.utilities;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
