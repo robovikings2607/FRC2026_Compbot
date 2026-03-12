@@ -120,7 +120,13 @@ public class TurretSubsystem extends SubsystemBase {
     Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
     //checks alliance and aims at corresponding hub
-    double setpoint = getTurretSetPoint(shooterPose, goalPose, robotRotation);
+    double newSetPoint = getTurretSetPoint(shooterPose, goalPose, robotRotation);
+
+    double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
+
+    newEncoderPos = clampEncoderPos(newEncoderPos);
+
+    offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
 
     if(isDeactivated){
       turretMotor.setControl(new CoastOut());
@@ -139,7 +145,17 @@ public class TurretSubsystem extends SubsystemBase {
     return -robotRotationAdjustedAngle * rotationsPerDegree;
   }
 
-  private static double getDelta(double previousSetPoint, double newSetPoint){
+  public static double clampEncoderPos(double newEncoderPos){
+    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
+      newEncoderPos -= 360 * rotationsPerDegree;
+    }
+    else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
+      newEncoderPos += 360 * rotationsPerDegree;
+    }
+    return newEncoderPos;
+  }
+
+  public static double getDelta(double previousSetPoint, double newSetPoint){
     double delta = 0;
 
     if(Math.abs(previousSetPoint - newSetPoint) > 9.5){ //if turret wraps

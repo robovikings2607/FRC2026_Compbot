@@ -2,43 +2,13 @@ package frc.robot.subsystems;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
+import frc.robot.Constants.TurretConstants;
 
 public class TurretAccumulationTest {
 
-    // Copied from TurretSubsystem / Constants
     private static final double rotationsPerDegree = 10.0 / 360.0;
-    private static final double WRAP_THRESHOLD     = 9.5;
-    private static final double WRAP_PERIOD        = 10.0;
-
-    // From Constants.java (OFFSET = 0)
-    private static final double MAX_ANGLE_DEG = 241.2 - 10.0;            // 231.2 degrees
-    private static final double MIN_ANGLE_DEG = -137.988 + 10.0;         // -127.988 degrees
-    private static final double MAX_ROTATIONS  = MAX_ANGLE_DEG * rotationsPerDegree; // ~6.42
-    private static final double MIN_ROTATIONS  = MIN_ANGLE_DEG * rotationsPerDegree; // ~-3.55
-
-    /** Exact copy of TurretSubsystem.getDelta */
-    private static double getDelta(double previousSetPoint, double newSetPoint) {
-        double delta = 0;
-        if (Math.abs(previousSetPoint - newSetPoint) > WRAP_THRESHOLD) {
-            delta = WRAP_PERIOD - Math.abs(previousSetPoint - newSetPoint);
-            if (previousSetPoint < newSetPoint) {
-                delta = -delta;
-            }
-        } else {
-            delta = newSetPoint - previousSetPoint;
-        }
-        return delta;
-    }
-
-    /** Exact copy of the clamp block in TurretSubsystem.periodic */
-    private static double clamp(double newEncoderPos) {
-        if (newEncoderPos > MAX_ROTATIONS) {
-            newEncoderPos -= 360 * rotationsPerDegree;
-        } else if (newEncoderPos < MIN_ROTATIONS) {
-            newEncoderPos += 360 * rotationsPerDegree;
-        }
-        return newEncoderPos;
-    }
+    private static final double MAX_ROTATIONS = TurretConstants.MAX_ANGLE * rotationsPerDegree;
+    private static final double MIN_ROTATIONS = TurretConstants.MIN_ANGLE * rotationsPerDegree;
 
     @Test
     public void testNormalTrackingNearMinAngle() {
@@ -47,8 +17,8 @@ public class TurretAccumulationTest {
         double previousEncoderPos = -3.4;
 
         double newSetPoint    = -3.5;
-        double delta          = getDelta(previousSetPoint, newSetPoint);
-        double newEncoderPos  = clamp(previousEncoderPos + delta);
+        double delta          = TurretSubsystem.getDelta(previousSetPoint, newSetPoint);
+        double newEncoderPos  = TurretSubsystem.clampEncoderPos(previousEncoderPos + delta);
 
         // -3.5 is still above MIN_ROTATIONS (-3.555), so no clamp fires
         assertTrue(newEncoderPos > MIN_ROTATIONS,
@@ -66,14 +36,14 @@ public class TurretAccumulationTest {
         // Robot turns slightly so the field-geometry setpoint drops below MIN_ROTATIONS
         double newSetPoint = -3.7;  // below MIN_ROTATIONS (-3.555)
 
-        double delta         = getDelta(previousSetPoint, newSetPoint);
-        double newEncoderPos = clamp(previousEncoderPos + delta);
+        double delta         = TurretSubsystem.getDelta(previousSetPoint, newSetPoint);
+        double newEncoderPos = TurretSubsystem.clampEncoderPos(previousEncoderPos + delta);
 
         // getDelta sees a small (-0.3) move, no wrap detection
         assertEquals(-0.3, delta, 0.001, "Delta should be a small, normal move");
 
         // But the clamp code fires and adds 10 rotations — turret jumps to opposite extreme
-        double expected = -3.7 + (WRAP_PERIOD); // ~6.3
+        double expected = -3.7 + (10.0); // ~6.3
         assertEquals(expected, newEncoderPos, 0.001,
             "Clamp wraps newEncoderPos to the opposite extreme (~6.3 rotations)");
 
@@ -89,8 +59,8 @@ public class TurretAccumulationTest {
         double[] subsequentSetPoints = { -3.75, -3.80, -3.85, -3.72 };
 
         for (double sp : subsequentSetPoints) {
-            delta         = getDelta(previousSetPoint, sp);
-            newEncoderPos = clamp(previousEncoderPos + delta);
+            delta         = TurretSubsystem.getDelta(previousSetPoint, sp);
+            newEncoderPos = TurretSubsystem.clampEncoderPos(previousEncoderPos + delta);
 
             // delta is always tiny (< 0.2), no wrap triggered
             assertTrue(Math.abs(delta) < 0.2, "Delta should remain small");
