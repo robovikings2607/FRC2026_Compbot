@@ -120,50 +120,21 @@ public class TurretSubsystem extends SubsystemBase {
     Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
     //checks alliance and aims at corresponding hub
-    double newSetPoint = getTurretSetPoint(shooterPose, goalPose, robotRotation);
-
-    double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
-
-    
-    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
-      newEncoderPos -= 360 * rotationsPerDegree;
-    }
-    else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
-      newEncoderPos += 360 * rotationsPerDegree;
-    }
-
-    offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
+    double setpoint = getTurretSetPoint(shooterPose, goalPose, robotRotation);
 
     if(isDeactivated){
       turretMotor.setControl(new CoastOut());
     }
     else{
-      turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + TurretConstants.OFFSET));
+      turretMotor.setControl(magicMotionRequest.withPosition(setpoint));
     }
 
-    if(turretMotor.getPosition().getValueAsDouble() > (TurretConstants.MAX_ANGLE - 3.0) * rotationsPerDegree ||
-       turretMotor.getPosition().getValueAsDouble() < (TurretConstants.MIN_ANGLE + 3.0) * rotationsPerDegree){
-        robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 1);
-       }
-    else{
-      robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 0);
-    }
-
-    SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
-    SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);
-    SmartDashboard.putNumber("Turret/PreviousPosition", previousEncoderPos);
-
-    previousSetPoint = newSetPoint;
-    previousEncoderPos = newEncoderPos;
-
-    SmartDashboard.putNumber("Turret/NewSetPoint", newSetPoint);
-    SmartDashboard.putNumber("Turret/NewPosition", newEncoderPos);
-    SmartDashboard.putNumber("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Turret/setpoint", setpoint);
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
     double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
-    double robotRotationAdjustedAngle = angle - robotRotation;   
+    double robotRotationAdjustedAngle = MathUtil.clamp(angle - robotRotation, -180.0, 180.0);   
 
     return -robotRotationAdjustedAngle * rotationsPerDegree;
   }
