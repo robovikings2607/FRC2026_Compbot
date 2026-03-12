@@ -45,7 +45,6 @@ public class FlywheelSubsystem extends SubsystemBase {
     configureMotor();
     createInterpMap();
 
-    SmartDashboard.putNumber("Flywheel/Speed", 0);
   }
 
   @Override
@@ -58,6 +57,10 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     double distance = shooterPose.getDistance(goalPose);
     SmartDashboard.putNumber("Distance", distance);
+
+    SmartDashboard.putNumber("Flywheel/Speed", flywheelMotor.getRotorVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Flywheel/WantedSpeed", getGoal(distance));
+
     
 /*     // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
     if(!readyToShoot){
@@ -101,15 +104,15 @@ public class FlywheelSubsystem extends SubsystemBase {
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, -47.5);
-    flywheelInterp.put(2.53, -47.5);
-    flywheelInterp.put(3.1, -50.0);
-    flywheelInterp.put(3.5, -52.5);
-    flywheelInterp.put(4.0, -55.0);
-    flywheelInterp.put(4.5, -59.0);
-    flywheelInterp.put(5.0, -62.0);
-    flywheelInterp.put(5.5, -65.0);
-    flywheelInterp.put(6.0, -66.0);
+    flywheelInterp.put(0.0, -49.5);
+    flywheelInterp.put(2.53, -49.5);
+    flywheelInterp.put(3.1, -52.0);
+    flywheelInterp.put(3.5, -56.5);
+    flywheelInterp.put(4.0, -59.0);
+    flywheelInterp.put(4.5, -62.0);
+    flywheelInterp.put(5.0, -65.0);
+    flywheelInterp.put(5.5, -68.0);
+    flywheelInterp.put(6.0, -69.0);
   }
 
   public void setGoal(double distance){

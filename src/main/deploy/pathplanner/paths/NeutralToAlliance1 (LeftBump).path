@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.822551020408163,
-        "y": 4.698715986394557
+        "x": 7.797738944365191,
+        "y": 3.5498002853067057
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.830085592011411,
-        "y": 6.538630527817404
+        "x": 7.90124821683251,
+        "y": 5.503537803135099
       },
       "isLocked": false,
-      "linkedName": "LeftPostCollect"
+      "linkedName": "CopyLeftPostCollect"
     },
     {
       "anchor": {
@@ -20,8 +20,8 @@
         "y": 5.6070470756062765
       },
       "prevControl": {
-        "x": 2.7969472182596284,
-        "y": 5.270641940085591
+        "x": 2.8163552068467754,
+        "y": 5.995206847357638
       },
       "nextControl": null,
       "isLocked": false,

@@ -39,7 +39,12 @@ public final class ShooterUtils {
   }
 
   public static boolean inNeutralZone(Pose2d robotPose){
-    return robotPose.getX() > Units.inchesToMeters(182.11) && robotPose.getX() < Units.inchesToMeters(469.11);
+    if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){
+      return robotPose.getX() > Units.inchesToMeters(182.11);
+    }
+    else{
+      return robotPose.getX() < Units.inchesToMeters(469.11);
+    }
   }
 
   public static Translation2d determineShootingGoal(Pose2d robotPose){

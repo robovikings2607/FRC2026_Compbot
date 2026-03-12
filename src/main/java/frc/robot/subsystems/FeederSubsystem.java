@@ -8,6 +8,7 @@ import java.net.PortUnreachableException;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -24,15 +25,19 @@ public class FeederSubsystem extends SubsystemBase {
   //private int reverse;
   private TalonFX feederMotor;
   private VelocityVoltage control = new VelocityVoltage(0.0);
+  private double speed;
 
   public FeederSubsystem(RobotContainer robot) {
     feederMotor = new TalonFX(FeederConstants.FEEDER_ID);
     configureMotor();
+    SmartDashboard.putNumber("Feeder/Speed", 0.0);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    speed = SmartDashboard.getNumber("Feeder/Speed", 0.0);
+
   }
 
   public void configureMotor(){
@@ -59,11 +64,11 @@ public class FeederSubsystem extends SubsystemBase {
 
   public void runMotor() {
     //feederMotor.setVoltage(FeederConstants.FEEDER_SPEED);
-    feederMotor.setControl(control.withVelocity(83.33));
+    feederMotor.setControl(control.withVelocity(75));
   }
 
   public void stopMotor() {
-    feederMotor.setVoltage(0);
+    feederMotor.setControl(new CoastOut());
   }
 
   public void reverseMotor() {

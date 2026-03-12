@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -31,11 +32,13 @@ import frc.robot.commands.DoNothing;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseRollers;
 import frc.robot.commands.intake.DeployIntake;
+import frc.robot.commands.intake.ForceIntakeDown;
 import frc.robot.commands.intake.JostlePieces;
 import frc.robot.commands.intake.RetractIntake;
 import frc.robot.commands.shooter.StopShooter;
 import frc.robot.commands.shooter.ActivateTurret;
 import frc.robot.commands.shooter.DeactivateTurret;
+import frc.robot.commands.shooter.ReverseSpindexer;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -131,8 +134,8 @@ public class RobotContainer {
         //Shooter
         driverController.rightTriggerButton.whileTrue(new Shoot(this));
         driverController.buttonA.onTrue(new StopShooter(this));
-        operatorController.buttonB.onTrue(new DeactivateTurret(this));
-        operatorController.buttonX.onTrue(new ActivateTurret(this));
+        driverController.buttonB.onTrue(new DeactivateTurret(this));
+        driverController.buttonX.onTrue(new ActivateTurret(this));
 
         //Operator/Emergency
         operatorController.buttonY.onTrue(new RetractIntake(this));
@@ -140,6 +143,8 @@ public class RobotContainer {
         operatorController.buttonB.onTrue(new DeactivateTurret(this));
         operatorController.buttonX.onTrue(new ActivateTurret(this));
         operatorController.leftBumper.onTrue(new JostlePieces(this));
+        operatorController.rightBumper.whileTrue(new ReverseSpindexer(this));
+        operatorController.rightTriggerButton.onTrue(new ForceIntakeDown(this));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
@@ -156,7 +161,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("DoNothing", new DoNothing());
         NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
         NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
-        NamedCommands.registerCommand("Shoot", new Shoot(this).raceWith(new WaitCommand(5.0)));
+        NamedCommands.registerCommand("Shoot", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(5.0)));
     }
 
     // Toggle low gear and high gear speeds

@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.721084165477888,
-        "y": 2.5147075606276754
+        "x": 5.850470756062768,
+        "y": 2.1265477888730393
       },
       "isLocked": false,
       "linkedName": "RightPostCollect"
@@ -20,8 +20,8 @@
         "y": 2.2041797432239663
       },
       "prevControl": {
-        "x": 2.894496419109726,
-        "y": 2.122147430298796
+        "x": 2.9522111269614832,
+        "y": 2.3335663338088444
       },
       "nextControl": null,
       "isLocked": false,
