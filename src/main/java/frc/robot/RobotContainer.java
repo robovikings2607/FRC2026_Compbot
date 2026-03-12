@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DoNothing;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
@@ -57,6 +58,7 @@ import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.utilities.AxisButton;
+import frc.robot.utilities.ISysIdTunable;
 
 public class RobotContainer {
     public Field2d field = new Field2d();
@@ -162,6 +164,45 @@ public class RobotContainer {
         NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
         NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
         NamedCommands.registerCommand("Shoot", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(5.0)));
+    }
+
+     /**
+     * VERY IMPORTANT: Put the robot up on blocks before running these!
+     * VERY IMPORTANT: Change the button bindings to those you want to trigger the 4 tests
+     * 
+     * Configure buttons to run a SysId test against a particular subsystem's motor to get
+     * the best values for that motor's PID configuration.
+     * 
+     * You always want to do this outside of the normal context of running the robot
+     * only call this method from the constructor of RobotContainer and comment out the rest
+     * of the code in that constructor
+     * 
+     * @param tuningTarget  The subsystem implementing the ISysIdTunable interface
+     *                      whose motor you want to run the Sysid tool against
+     */
+    private void configureSysIdBindings(ISysIdTunable tuningTarget) {
+        
+        SysIdRoutine routineToTune = tuningTarget.getSysIdRoutine(); 
+
+        //Quasistatic Forward
+        operatorController.buttonA.whileTrue(
+            routineToTune.quasistatic(SysIdRoutine.Direction.kForward)
+        );
+        
+        //Quasistatic Reverse
+        operatorController.buttonB.whileTrue(
+            routineToTune.quasistatic(SysIdRoutine.Direction.kReverse)
+        );
+        
+        //Dynamic Forward
+        operatorController.buttonX.whileTrue(
+            routineToTune.dynamic(SysIdRoutine.Direction.kForward)
+        );
+        
+        //Dynamic Reverse
+        operatorController.buttonY.whileTrue(
+            routineToTune.dynamic(SysIdRoutine.Direction.kReverse)
+        );
     }
 
     // Toggle low gear and high gear speeds

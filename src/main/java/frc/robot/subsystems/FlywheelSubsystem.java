@@ -20,17 +20,20 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.utilities.GeometryUtil;
+import frc.robot.utilities.ISysIdTunable;
 import frc.robot.utilities.ShooterUtils;
+import frc.robot.utilities.SysIdBuilder;
 
 import static edu.wpi.first.units.Units.*;
 
-public class FlywheelSubsystem extends SubsystemBase {
+public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   /** Creates a new ShooterHoodSubsystem. */
-  public final TalonFX flywheelMotor;
+  public final TalonFX flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
   private final RobotContainer robot;
   private VelocityVoltage velocityControl = new VelocityVoltage(0);
   private CoastOut coastOut = new CoastOut();
@@ -41,11 +44,18 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
-    flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
     configureMotor();
     createInterpMap();
 
   }
+
+  private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
+    flywheelMotor, this, "flywheel", 7.0
+  );    
+ 
+  public SysIdRoutine getSysIdRoutine() {
+    return sysIdRoutine;
+  }    
 
   @Override
   public void periodic() {
