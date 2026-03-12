@@ -72,7 +72,7 @@ public class TurretAccumulationTest {
 
             // The correct position and commanded position are ~10 rotations apart — no recovery
             double error = Math.abs(newEncoderPos - sp);
-            assertTrue(error > 9.0,
+            assertTrue(error < 0.5,
                 "Error of " + error + " rotations persists with no recovery mechanism");
 
             previousSetPoint   = sp;
