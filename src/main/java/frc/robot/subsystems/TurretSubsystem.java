@@ -134,7 +134,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
     double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
-    double robotRotationAdjustedAngle = MathUtil.clamp(angle - robotRotation, -180.0, 180.0);   
+    double robotRotationAdjustedAngle = MathUtil.inputModulus(angle - robotRotation, -180.0, 180.0);   
 
     return -robotRotationAdjustedAngle * rotationsPerDegree;
   }
