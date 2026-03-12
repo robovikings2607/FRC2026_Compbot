@@ -82,7 +82,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     configs.withCurrentLimits(
         new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(Amps.of(95))
+            .withStatorCurrentLimit(Amps.of(10))
             .withStatorCurrentLimitEnable(true)
     );
 
@@ -150,5 +150,10 @@ public class IntakeSubsystem extends SubsystemBase {
   public void forcePivotDown(){
     pivotMotor.setVoltage(-2.0);
     runRollersUnjammed();
+  }
+
+  public void forcePivotUp(){
+    pivotMotor.setVoltage(2.0);
+    stopRollers();
   }
 }

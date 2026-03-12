@@ -19,6 +19,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -52,11 +53,15 @@ public class TurretSubsystem extends SubsystemBase {
   private double previousSetPoint, previousEncoderPos, offset;
   private boolean fixedShot = false;
   private boolean isDeactivated = false;
+  private PhoenixPIDController pidController;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
 
     turretMotor = new TalonFX(TurretConstants.TURRET_ID);
+
+    pidController = new PhoenixPIDController(0, 0, 0);
+    pidController.enableContinuousInput(TurretConstants.MIN_ANGLE, TurretConstants.MAX_ANGLE);
 
     //turretMotor.setPosition(0);
     previousSetPoint = 0;

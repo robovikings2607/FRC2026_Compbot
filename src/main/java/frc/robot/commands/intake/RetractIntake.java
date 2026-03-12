@@ -27,7 +27,7 @@ public class RetractIntake extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.retractIntake();
+    intake.forcePivotUp();
     intake.stopRollers();
   }
 }
