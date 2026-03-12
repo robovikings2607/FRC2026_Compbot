@@ -31,7 +31,7 @@ public class DeployIntake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.deployIntake();
+    intake.forcePivotDown();
     intake.runRollersUnjammed();
   }
 
