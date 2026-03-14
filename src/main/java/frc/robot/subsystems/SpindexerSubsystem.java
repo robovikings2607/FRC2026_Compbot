@@ -11,19 +11,30 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.SysIdBuilder;
 import frc.robot.Constants.SpindexerConstants;
 
 import static edu.wpi.first.units.Units.*;
 
-public class SpindexerSubsystem extends SubsystemBase {
+public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   private int reverse;
   /** Creates a new SpinDexerSubSystem. */
  private TalonFX spindexerMotor;
   public SpindexerSubsystem(RobotContainer robot) {
     spindexerMotor = new TalonFX(SpindexerConstants.SPINDEXER_ID);
   }
+
+  private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
+      spindexerMotor, this, "spindexer", 4.5
+  );    
+
+   public SysIdRoutine getSysIdRoutine() {
+    return sysIdRoutine;
+  }    
 
   @Override
   public void periodic() {

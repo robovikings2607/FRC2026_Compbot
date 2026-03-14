@@ -14,13 +14,16 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.SysIdBuilder;
 import frc.robot.Constants.FeederConstants;
 
 import static edu.wpi.first.units.Units.*;
 
-public class FeederSubsystem extends SubsystemBase {
+public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
   /** Creates a new FeederSubsystem. */
   //private int reverse;
   private TalonFX feederMotor;
@@ -32,6 +35,14 @@ public class FeederSubsystem extends SubsystemBase {
     configureMotor();
     SmartDashboard.putNumber("Feeder/Speed", 0.0);
   }
+
+  private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
+        feederMotor, this, "feeder", 4.0
+  );    
+
+  public SysIdRoutine getSysIdRoutine() {
+    return sysIdRoutine;
+  }    
 
   @Override
   public void periodic() {
