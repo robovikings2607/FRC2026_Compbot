@@ -41,6 +41,15 @@ public class SpindexerSubsystem extends SubsystemBase {
             .withStatorCurrentLimitEnable(true)
     );
 
+    //TODO JJF: Get the real numbers for these values through tuning
+    var slot0Configs = configs.Slot0;
+        slot0Configs.kS = 0.0; // Voltage output to overcome static friction
+        slot0Configs.kV = 0.0; // A velocity target of 1 rps requires this voltage output.
+        slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
+        slot0Configs.kP = 0; // A position error of x rotations requires this voltage output
+        slot0Configs.kI = 0; // no output for integrated error
+        slot0Configs.kD = 0.0; // A velocity error of 1 rps requires this voltage output
+
     spindexerMotor.getConfigurator().apply(configs);
   }
 
