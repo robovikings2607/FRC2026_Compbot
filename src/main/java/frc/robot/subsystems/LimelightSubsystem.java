@@ -32,6 +32,9 @@ public class LimelightSubsystem extends SubsystemBase {
   /** Creates a new LimelightSubsystem. */
   RobotContainer robot;
   FieldObject2d fieldVisionDetections, fieldVisionPose;
+  FieldObject2d leftFieldVisionDetections, leftFieldVisionPose;
+  FieldObject2d rightFieldVisionDetections, rightFieldVisionPose;  
+  
   double yaw;
   String LEFT_LIMELIGHT_NAME = "limelight-left";
   String RIGHT_LIMELIGHT_NAME = "limelight-right";
@@ -74,8 +77,14 @@ public class LimelightSubsystem extends SubsystemBase {
   LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
   LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
   
-  fieldVisionDetections = robot.field.getObject("Limelight"+"/visionDetections");
-  fieldVisionPose = robot.field.getObject("Limelight"+"/fieldVisionPose");
+  leftFieldVisionDetections = robot.field.getObject("Limelight/" + LEFT_LIMELIGHT_NAME +"/visionDetections");
+  leftFieldVisionPose = robot.field.getObject("Limelight/" + LEFT_LIMELIGHT_NAME + "/fieldVisionPose");
+
+  rightFieldVisionDetections = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/visionDetections");
+  rightFieldVisionPose = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/fieldVisionPose");
+
+
+   SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets", leftLL != null ? leftLL.tagCount > 0 : false);
 
    if(isValidUpdate(leftLL)){
       LimelightHelpers.PoseEstimate mt2 = leftLL;
@@ -92,8 +101,12 @@ public class LimelightSubsystem extends SubsystemBase {
 
       // System.out.println("has pose");
       List<Pose2d> tagPoses = getTagPoses(mt2);     
-      drawTargetsOnField(mt2, tagPoses);
+
+      leftFieldVisionDetections.setPoses(tagPoses);
+      leftFieldVisionPose.setPose(mt2.pose); 
     }
+
+       SmartDashboard.putBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightLL != null ? rightLL.tagCount > 0 : false);
 
     if(isValidUpdate(rightLL)){
       LimelightHelpers.PoseEstimate mt2 = rightLL;
@@ -110,28 +123,10 @@ public class LimelightSubsystem extends SubsystemBase {
 
       // System.out.println("has pose");
       List<Pose2d> tagPoses = getTagPoses(mt2);     
-      drawTargetsOnField(mt2, tagPoses);
+
+      rightFieldVisionDetections.setPoses(tagPoses);
+      rightFieldVisionPose.setPose(mt2.pose); 
     }
-
-
-   //  SmartDashboard.putNumber("Limelight/hasTarget", hasTargets);
-  }
-
-  public void drawTargetsOnField(LimelightHelpers.PoseEstimate mt2, List<Pose2d> tagPoses)
-  {
-      if(mt2 == null){
-          return;
-      }
-
-      if (mt2.pose.equals(new Pose2d()))
-      {
-          fieldVisionDetections.setPoses(Collections.emptyList());
-          fieldVisionPose.setPoses(Collections.emptyList());
-          return;
-      }
-
-      fieldVisionDetections.setPoses(tagPoses);
-      fieldVisionPose.setPose(mt2.pose); 
   }
 
   public boolean isValidUpdate(LimelightHelpers.PoseEstimate mt2){
