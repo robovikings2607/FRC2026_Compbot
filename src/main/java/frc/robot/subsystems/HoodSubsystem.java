@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.ShooterUtils;
 import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.HoodConstants;
@@ -152,6 +153,7 @@ public class HoodSubsystem extends SubsystemBase {
   }
 
   public void positionControl(double angle){
+    RobotLogger.logDouble("hood", angle);
     hoodMotor.setControl(magicMotionRequest.withPosition(angle));
   }
 
