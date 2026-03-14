@@ -49,7 +49,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final TalonFX turretMotor;
   private final RobotContainer robot;
   private MotionMagicVoltage magicMotionRequest;
-  private double previousSetPoint, previousEncoderPos, offset;
+  private double previousSetPoint, currentEncoderPos, offset;
   private boolean fixedShot = false;
   private boolean isDeactivated = false;
 
@@ -59,8 +59,7 @@ public class TurretSubsystem extends SubsystemBase {
     turretMotor = new TalonFX(TurretConstants.TURRET_ID);
 
     //turretMotor.setPosition(0);
-    previousSetPoint = 0;
-    previousEncoderPos = 0;
+    //previousSetPoint = turretMotor.getPosition().getValueAsDouble();
         
     // turretMotor.setPosition(0.0);
 
@@ -120,11 +119,12 @@ public class TurretSubsystem extends SubsystemBase {
     Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
     //checks alliance and aims at corresponding hub
-    double newSetPoint = getTurretSetPoint(shooterPose, goalPose, robotRotation);
+    double currentEncoderPos = turretMotor.getPosition().getValueAsDouble();
+    double targetEncoderPos = getTurretSetPoint(shooterPose, goalPose, robotRotation);
 
-    double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
+    double wantedEncoderPos = currentEncoderPos + (currentEncoderPos + getDelta(currentEncoderPos, targetEncoderPos));
 
-    newEncoderPos = clampEncoderPos(newEncoderPos);
+    wantedEncoderPos = clampEncoderPos(wantedEncoderPos);
 
     offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
 
@@ -132,10 +132,10 @@ public class TurretSubsystem extends SubsystemBase {
       turretMotor.setControl(new CoastOut());
     }
     else{
-      turretMotor.setControl(magicMotionRequest.withPosition(setpoint));
+      turretMotor.setControl(magicMotionRequest.withPosition(wantedEncoderPos));
     }
 
-    SmartDashboard.putNumber("Turret/setpoint", setpoint);
+    SmartDashboard.putNumber("Turret/setpoint", wantedEncoderPos);
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
@@ -158,7 +158,7 @@ public class TurretSubsystem extends SubsystemBase {
   public static double getDelta(double previousSetPoint, double newSetPoint){
     double delta = 0;
 
-    if(Math.abs(previousSetPoint - newSetPoint) > 9.5){ //if turret wraps
+    if(Math.abs(previousSetPoint - newSetPoint) >= 10.0){ //if turret wraps
       delta = 10 - Math.abs(previousSetPoint - newSetPoint);
      
       if(previousSetPoint < newSetPoint){
