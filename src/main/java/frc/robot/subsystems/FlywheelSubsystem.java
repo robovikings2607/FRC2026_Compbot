@@ -44,7 +44,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
-    configureMotor();
+    //configureMotor();
     configureMotorForSysId();
     createInterpMap();
 
