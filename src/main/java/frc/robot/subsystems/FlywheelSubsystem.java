@@ -45,6 +45,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
     configureMotor();
+    configureMotorForSysId();
     createInterpMap();
 
   }
@@ -109,6 +110,18 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
 
     flywheelMotor.setNeutralMode(NeutralModeValue.Coast);
     flywheelMotor.getConfigurator().apply(configs);
+  }
+
+    private void configureMotorForSysId() {
+    // --- THE SYSID FIX: FORCE HIGH-SPEED DATA LOGGING ---
+    // We tell the motor to send Voltage, Position, and Velocity at 250 Hz (every 4 milliseconds)
+    flywheelMotor.getMotorVoltage().setUpdateFrequency(250.0);
+    flywheelMotor.getPosition().setUpdateFrequency(250.0);
+    flywheelMotor.getVelocity().setUpdateFrequency(250.0);
+        
+    // (Optional but recommended) Wait for the CAN bus to apply the changes
+    try { Thread.sleep(250); } catch (InterruptedException e) {}
+
   }
 
   public void createInterpMap(){
