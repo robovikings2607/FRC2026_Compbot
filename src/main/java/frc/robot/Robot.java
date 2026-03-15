@@ -5,10 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
-
-import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,12 +23,12 @@ public class Robot extends TimedRobot {
 
     public Robot() {
         m_robotContainer = new RobotContainer();
-        //DataLogManager.start();
     }
 
     @Override
     public void robotInit() {
         // Wakes up the Logger class and triggers its static setup block
+        // this will also call DataLogManager.start to initiate .wpilog logging 
         RobotLogger.init(); 
     }
 
