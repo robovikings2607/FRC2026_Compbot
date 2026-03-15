@@ -20,17 +20,20 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.utilities.GeometryUtil;
+import frc.robot.utilities.ISysIdTunable;
 import frc.robot.utilities.ShooterUtils;
+import frc.robot.utilities.SysIdBuilder;
 
 import static edu.wpi.first.units.Units.*;
 
-public class FlywheelSubsystem extends SubsystemBase {
+public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   /** Creates a new ShooterHoodSubsystem. */
-  public final TalonFX flywheelMotor;
+  public final TalonFX flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
   private final RobotContainer robot;
   private VelocityVoltage velocityControl = new VelocityVoltage(0);
   private CoastOut coastOut = new CoastOut();
@@ -41,12 +44,18 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
-    flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
     configureMotor();
     createInterpMap();
 
-    SmartDashboard.putNumber("Flywheel/Speed", 0);
   }
+
+  private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
+    flywheelMotor, this, "flywheel", 7.0
+  );    
+ 
+  public SysIdRoutine getSysIdRoutine() {
+    return sysIdRoutine;
+  }    
 
   @Override
   public void periodic() {
@@ -57,6 +66,11 @@ public class FlywheelSubsystem extends SubsystemBase {
     Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
     double distance = shooterPose.getDistance(goalPose);
+    SmartDashboard.putNumber("Distance", distance);
+
+    SmartDashboard.putNumber("Flywheel/Speed", flywheelMotor.getRotorVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Flywheel/WantedSpeed", getGoal(distance));
+
     
 /*     // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
     if(!readyToShoot){
@@ -100,15 +114,15 @@ public class FlywheelSubsystem extends SubsystemBase {
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, -45.5);
-    flywheelInterp.put(2.53, -45.5);
-    flywheelInterp.put(3.1, -48.0);
-    flywheelInterp.put(3.5, -50.5);
-    flywheelInterp.put(4.0, -53.0);
-    flywheelInterp.put(4.5, -57.0);
-    flywheelInterp.put(5.0, -60.0);
-    flywheelInterp.put(5.5, -63.0);
-    flywheelInterp.put(6.0, -64.0);
+    flywheelInterp.put(0.0, -49.5);
+    flywheelInterp.put(2.53, -49.5);
+    flywheelInterp.put(3.1, -52.0);
+    flywheelInterp.put(3.5, -56.5);
+    flywheelInterp.put(4.0, -59.0);
+    flywheelInterp.put(4.5, -62.0);
+    flywheelInterp.put(5.0, -65.0);
+    flywheelInterp.put(5.5, -68.0);
+    flywheelInterp.put(6.0, -69.0);
   }
 
   public void setGoal(double distance){
@@ -146,5 +160,9 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   public void fixedShot(boolean fixed){
     fixedShot = fixed;
+  }
+
+  public void tune(){
+    flywheelMotor.setControl(velocityControl.withVelocity(-70));
   }
 }

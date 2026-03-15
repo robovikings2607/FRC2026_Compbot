@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import frc.robot.utilities.RobotLogger;
 
 public class Telemetry {
     private final double MaxSpeed;
@@ -224,6 +225,48 @@ public class Telemetry {
         /* Telemeterize the pose to a Field2d */
         fieldTypePub.set("Field2d");
 
+        m_poseArray[0] = state.Pose.getX();
+        m_poseArray[1] = state.Pose.getY();
+        m_poseArray[2] = state.Pose.getRotation().getDegrees();
+        fieldPub.set(m_poseArray);
+
+
+        // ==========================================
+        // 2. LOW FREQUENCY (50Hz)
+        // ==========================================
+        telemetryLoopCounter++;
+        
+        // Run this block every 5th tick (250Hz / 5 = 50Hz)
+        if (telemetryLoopCounter >= 5) {
+            
+            // These are heavy structs and arrays. 50Hz is plenty fast enough 
+            // for debugging wheel slip or PID tuning without bloating your log files.
+            driveSpeeds.set(state.Speeds);
+            driveModuleStates.set(state.ModuleStates);
+            driveModuleTargets.set(state.ModuleTargets);
+            driveModulePositions.set(state.ModulePositions);
+
+            /* Telemeterize each module state to a Mechanism2d */
+            for (int i = 0; i < 4; ++i) {
+                m_moduleSpeeds[i].setAngle(state.ModuleStates[i].angle);
+                m_moduleDirections[i].setAngle(state.ModuleStates[i].angle);
+                m_moduleSpeeds[i].setLength(state.ModuleStates[i].speedMetersPerSecond / (2 * MaxSpeed));
+            }
+
+            telemetryLoopCounter = 0;
+        }
+
+
+        // ==========================================
+        // 1. HIGH FREQUENCY (250Hz)
+        // ==========================================
+        // Keep these running at full speed. Pose is critical for accurate 
+        // path replay, and the others are lightweight thread diagnostics.
+        drivePose.set(state.Pose);
+        driveTimestamp.set(state.Timestamp);
+        driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
+        /* Telemeterize the pose to a Field2d */
+        fieldTypePub.set("Field2d");
         m_poseArray[0] = state.Pose.getX();
         m_poseArray[1] = state.Pose.getY();
         m_poseArray[2] = state.Pose.getRotation().getDegrees();

@@ -8,9 +8,12 @@ import com.ctre.phoenix6.HootAutoReplay;
 
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.utilities.RobotLogger;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -24,32 +27,26 @@ public class Robot extends TimedRobot {
 
     public Robot() {
         m_robotContainer = new RobotContainer();
+        //DataLogManager.start();
     }
 
     @Override
     public void robotInit() {
-        // 1. Start the WPILib data logger
-        // This automatically captures all SmartDashboard/NetworkTables data
-        // and redirects standard console output (System.out.println) to the log file.
-        DataLogManager.start();
-
-        // 2. Log Driver Station inputs
-        // This is critical. It records exactly what the drivers were doing 
-        // with the joysticks and buttons, plus match data (auto/teleop state).
-        DriverStation.startDataLog(DataLogManager.getLog());
-
-        // 3. Optional custom text log
-        DataLogManager.log("Robot initialized and logging started.");
-        
-        // Note: CTRE's SignalLogger starts automatically as soon as 
-        // you instantiate a Phoenix 6 device (like a TalonFX), 
-        // so you don't need to explicitly start it here.
+        // Wakes up the Logger class and triggers its static setup block
+        RobotLogger.init(); 
     }
+
 
     @Override
     public void robotPeriodic() {
         m_timeAndJoystickReplay.update();
-        CommandScheduler.getInstance().run(); 
+        CommandScheduler.getInstance().run();
+        
+        if(RobotController.getUserButton()){
+            m_robotContainer.hood.getMotor().setPosition(0.0);
+            m_robotContainer.turret.getMotor().setPosition(0.0);
+            m_robotContainer.intake.getPivotMotor().setPosition(0.0);
+        } 
     }
 
     @Override

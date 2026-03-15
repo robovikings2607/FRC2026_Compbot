@@ -14,6 +14,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -26,6 +27,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -38,6 +40,7 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.LimelightHelpers;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.ShooterUtils;
 
 import static edu.wpi.first.units.Units.*;
@@ -47,8 +50,9 @@ public class TurretSubsystem extends SubsystemBase {
   private final TalonFX turretMotor;
   private final RobotContainer robot;
   private MotionMagicVoltage magicMotionRequest;
-  private double previousSetPoint, previousEncoderPos;
+  private double previousSetPoint, previousEncoderPos, offset;
   private boolean fixedShot = false;
+  private boolean isDeactivated = false;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -64,7 +68,9 @@ public class TurretSubsystem extends SubsystemBase {
     configureMotor();
     magicMotionRequest = new MotionMagicVoltage(0.0);
 
-    SmartDashboard.putNumber("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());
+    logNumber2("Turret/BootUpPose", turretMotor.getPosition().getValueAsDouble());
+    logNumber2("SetOffset", 0.0);    
+    //logNumber2("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());        
   }
 
   private void configureMotor() {
@@ -74,14 +80,14 @@ public class TurretSubsystem extends SubsystemBase {
         slot0Configs.kS = 0.25; // Voltage output to overcome static friction
         slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
         slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
-        slot0Configs.kP = 4.8; // A position error of 2.5 rotations requires this voltage output
+        slot0Configs.kP = 5.0; // A position error of 2.5 rotations requires this voltage output
         slot0Configs.kI = 0; // no output for integrated error
-        slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
+        slot0Configs.kD = 0.15; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 40; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 80; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 400; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 50; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 2000; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicJerk = 80000; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
     //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
@@ -119,25 +125,41 @@ public class TurretSubsystem extends SubsystemBase {
 
     double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
 
-    if(newEncoderPos > TurretConstants.MAX_ANGLE * rotationsPerDegree){
+    
+    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
       newEncoderPos -= 360 * rotationsPerDegree;
     }
-    else if(newEncoderPos < TurretConstants.MIN_ANGLE * rotationsPerDegree){
+    else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
-    turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + TurretConstants.OFFSET));
+    offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
 
-    SmartDashboard.putNumber("Turret/Delta", getDelta(previousSetPoint, newSetPoint));
-    SmartDashboard.putNumber("Turret/PreviousSetPoint", previousSetPoint);
-    SmartDashboard.putNumber("Turret/PreviousPosition", previousEncoderPos);
+    if(isDeactivated){
+      turretMotor.setControl(new CoastOut());
+    }
+    else{
+      turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + TurretConstants.OFFSET));
+    }
+
+    if(turretMotor.getPosition().getValueAsDouble() > (TurretConstants.MAX_ANGLE - 3.0) * rotationsPerDegree ||
+       turretMotor.getPosition().getValueAsDouble() < (TurretConstants.MIN_ANGLE + 3.0) * rotationsPerDegree){
+        robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 1);
+       }
+    else{
+      robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 0);
+    }
+
+    logNumber2("Turret/Delta", getDelta(previousSetPoint, newSetPoint));        
+    logNumber2("Turret/PreviousSetPoint", previousSetPoint);        
+    logNumber2("Turret/PreviousPosition", previousEncoderPos);        
 
     previousSetPoint = newSetPoint;
     previousEncoderPos = newEncoderPos;
 
-    SmartDashboard.putNumber("Turret/NewSetPoint", newSetPoint);
-    SmartDashboard.putNumber("Turret/NewPosition", newEncoderPos);
-    SmartDashboard.putNumber("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());
+    logNumber2("Turret/NewSetPoint", newSetPoint);        
+    logNumber2("Turret/NewPosition", newEncoderPos);        
+    logNumber2("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());        
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
@@ -183,6 +205,22 @@ public class TurretSubsystem extends SubsystemBase {
   public boolean inTolerance(double pose){
     return turretMotor.getPosition().getValueAsDouble() > pose - 0.5 ||
            turretMotor.getPosition().getValueAsDouble() < pose + 0.5; 
+  }
+
+  public void deactivateTurret(boolean deactivate){
+    isDeactivated = deactivate;
+  }
+
+  public TalonFX getMotor(){
+    return turretMotor;
+  }
+
+  public void logNumber(String key, double value){
+    SmartDashboard.putNumber(key, value);
+  }
+
+  public void logNumber2(String key, double value){
+    RobotLogger.logDouble(key, value);
   }
 
 }

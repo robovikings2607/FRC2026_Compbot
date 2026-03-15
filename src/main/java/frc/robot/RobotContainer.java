@@ -24,12 +24,14 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.Constants.HoodConstants;
@@ -40,9 +42,14 @@ import frc.robot.commands.DoNothing;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseRollers;
 import frc.robot.commands.intake.DeployIntake;
+import frc.robot.commands.intake.ForceIntakeDown;
+import frc.robot.commands.intake.JostlePieces;
 import frc.robot.commands.intake.RetractIntake;
 import frc.robot.commands.shooter.SpindexerShootCommandExp;
 import frc.robot.commands.shooter.StopShooter;
+import frc.robot.commands.shooter.ActivateTurret;
+import frc.robot.commands.shooter.DeactivateTurret;
+import frc.robot.commands.shooter.ReverseSpindexer;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
 import frc.robot.commands.shooter.TrackHubTargetExp;
@@ -70,6 +77,7 @@ import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.utilities.AxisButton;
+import frc.robot.utilities.ISysIdTunable;
 
 public class RobotContainer {
     public Field2d field = new Field2d();
@@ -159,6 +167,7 @@ public class RobotContainer {
 
         //Shooter
         driverController.rightTriggerButton.whileTrue(new Shoot(this));
+        driverController.buttonA.onTrue(new StopShooter(this));
         operatorController.rightTriggerButton.whileTrue(new AutoAimAndShootCommandExp(
             this.turretExp, 
             this.hoodExp, 
@@ -170,7 +179,8 @@ public class RobotContainer {
         ));        
 
 
-        driverController.buttonB.onTrue(new StopShooter(this));
+        driverController.buttonB.onTrue(new DeactivateTurret(this));
+        driverController.buttonX.onTrue(new ActivateTurret(this));
         driverController.buttonY.onTrue(new ZeroHoodCommandExp(this).withTimeout(2.0));    
         driverController.buttonX.whileTrue(new UnjamShooterCommandExp(spindexerExp, feederExp)
 );            
@@ -178,7 +188,11 @@ public class RobotContainer {
         //Operator/Emergency
         operatorController.buttonY.onTrue(new RetractIntake(this));
         operatorController.buttonA.onTrue(new DeployIntake(this));
-
+        operatorController.buttonB.onTrue(new DeactivateTurret(this));
+        operatorController.buttonX.onTrue(new ActivateTurret(this));
+        operatorController.leftBumper.onTrue(new JostlePieces(this));
+        operatorController.rightBumper.whileTrue(new ReverseSpindexer(this));
+        operatorController.rightTriggerButton.onTrue(new ForceIntakeDown(this));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
@@ -189,7 +203,70 @@ public class RobotContainer {
 
         configureShotCategorizationButtons();        
 
-        drivetrain.registerTelemetry(logger::telemeterize);
+        configureShotCategorizationButtons();        
+
+        drivetrain.registerTelemetry(logger::telemeterize2);
+    }
+
+    private void configureSysIdBindings() {
+        // VERY IMPORTANT: Put the robot up on blocks before running these!
+        
+        SysIdRoutine routineToTune = flywheelExp.getSysIdRoutine(); 
+
+        //Quasistatic Forward
+        operatorController.buttonA.whileTrue(
+            routineToTune.quasistatic(SysIdRoutine.Direction.kForward)
+        );
+        
+        //Quasistatic Reverse
+        operatorController.buttonB.whileTrue(
+            routineToTune.quasistatic(SysIdRoutine.Direction.kReverse)
+        );
+        
+        //Dynamic Forward
+        operatorController.buttonX.whileTrue(
+            routineToTune.dynamic(SysIdRoutine.Direction.kForward)
+        );
+        
+        //Dynamic Reverse
+        operatorController.buttonY.whileTrue(
+            routineToTune.dynamic(SysIdRoutine.Direction.kReverse)
+        );
+    }
+
+    private void configureShotCategorizationButtons() {
+        // Y Button: Perfect Make
+        driverController.buttonY.onTrue(
+            new InstantCommand(() -> {
+                SignalLogger.writeString("Scouting/ShotResult", "MAKE");
+                System.out.println("Logged to Hoot: MAKE"); 
+            })
+        );
+
+        // A Button: Missed Short
+        driverController.buttonA.onTrue(
+            new InstantCommand(() -> {
+                SignalLogger.writeString("Scouting/ShotResult", "MISS_SHORT");
+                System.out.println("Logged to Hoot: MISS_SHORT");
+            })
+        );
+
+        // B Button: Missed Long
+        driverController.buttonB.onTrue(
+            new InstantCommand(() -> {
+                SignalLogger.writeString("Scouting/ShotResult", "MISS_LONG");
+                System.out.println("Logged to Hoot: MISS_LONG");
+            })
+        );
+        
+        // X Button: Missed Left/Right
+        driverController.buttonX.onTrue(
+            new InstantCommand(() -> {
+                SignalLogger.writeString("Scouting/ShotResult", "MISS_WIDE");
+                System.out.println("Logged to Hoot: MISS_WIDE");
+            })
+        );
+
     }
 
     private void configureSysIdBindings() {
@@ -258,7 +335,47 @@ public class RobotContainer {
         NamedCommands.registerCommand("DoNothing", new DoNothing());
         NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
         NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
-        NamedCommands.registerCommand("Shoot", new Shoot(this).raceWith(new WaitCommand(5.0)));
+        NamedCommands.registerCommand("Shoot", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(5.0)));
+
+    }
+
+     /**
+     * VERY IMPORTANT: Put the robot up on blocks before running these!
+     * VERY IMPORTANT: Change the button bindings to those you want to trigger the 4 tests
+     * 
+     * Configure buttons to run a SysId test against a particular subsystem's motor to get
+     * the best values for that motor's PID configuration.
+     * 
+     * You always want to do this outside of the normal context of running the robot
+     * only call this method from the constructor of RobotContainer and comment out the rest
+     * of the code in that constructor
+     * 
+     * @param tuningTarget  The subsystem implementing the ISysIdTunable interface
+     *                      whose motor you want to run the Sysid tool against
+     */
+    private void configureSysIdBindings(ISysIdTunable tuningTarget) {
+        
+        SysIdRoutine routineToTune = tuningTarget.getSysIdRoutine(); 
+
+        //Quasistatic Forward
+        operatorController.buttonA.whileTrue(
+            routineToTune.quasistatic(SysIdRoutine.Direction.kForward)
+        );
+        
+        //Quasistatic Reverse
+        operatorController.buttonB.whileTrue(
+            routineToTune.quasistatic(SysIdRoutine.Direction.kReverse)
+        );
+        
+        //Dynamic Forward
+        operatorController.buttonX.whileTrue(
+            routineToTune.dynamic(SysIdRoutine.Direction.kForward)
+        );
+        
+        //Dynamic Reverse
+        operatorController.buttonY.whileTrue(
+            routineToTune.dynamic(SysIdRoutine.Direction.kReverse)
+        );
     }
 
     private void configureDefaultCommands() {
