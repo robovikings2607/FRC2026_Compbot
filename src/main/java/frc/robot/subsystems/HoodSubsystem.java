@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -34,7 +35,7 @@ public class HoodSubsystem extends SubsystemBase {
   private TalonFX hoodMotor;
   private RobotContainer robot;
 
-  private final MotionMagicVoltage magicMotionRequest = new MotionMagicVoltage(0);
+  private final PositionVoltage control = new PositionVoltage(0);
   private final CoastOut coastOut = new CoastOut();
   private static final double gearRatio = ((350.0/50.0)*(26.0/12.0));
   private static final double rotationsPerDegree = gearRatio/360.0;
@@ -73,7 +74,7 @@ public class HoodSubsystem extends SubsystemBase {
       }
     } */
 
-    // setPoint = SmartDashboard.getNumber("Hood/SetPoint", 0) * rotationsPerDegree;
+    //setPoint = SmartDashboard.getNumber("Hood/SetPoint", 0) * rotationsPerDegree;
     // hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
 
    /*  if(RobotController.getUserButton()){
@@ -90,17 +91,17 @@ public class HoodSubsystem extends SubsystemBase {
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
     var slot0Configs = configs.Slot0;
-        slot0Configs.kS = 1.0; // Voltage output to overcome static friction
+  /*       slot0Configs.kS = 1.0; // Voltage output to overcome static friction
         slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
-        slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
-        slot0Configs.kP = 3.8; // A position error of 2.5 rotations requires this voltage outputp
-        slot0Configs.kI = 0; // no output for integrated error
-        slot0Configs.kD = 0.11; // A velocity error of 1 rps requires this voltage output
+        slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output */
+        slot0Configs.kP = 7.2; // A position error of 2.5 rotations requires this voltage outputp
+        slot0Configs.kI = 0.0; // no output for integrated error
+        slot0Configs.kD = 0.0; // A velocity error of 1 rps requires this voltage output
 
-    var motionMagicConfigs = configs.MotionMagic;
+  /*   var motionMagicConfigs = configs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = 80; // Target cruise velocity of 80 rps
         motionMagicConfigs.MotionMagicAcceleration = 160; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds) */
 
      //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
@@ -126,10 +127,8 @@ public class HoodSubsystem extends SubsystemBase {
     //key = distance from goal
     //value = position of hood in desired shot angle
     hoodInterp.put(0.0, 0.0);
-    hoodInterp.put(3.9, 0.0);
-    hoodInterp.put(4.0, -3.0);
+    hoodInterp.put(4.5, 0.0);
 
-    hoodInterp.put(6.0, -3.0);
 /*     hoodInterp.put(2.53, 0.0);
     hoodInterp.put(3.1, 0.0);
     hoodInterp.put(3.5, -1.0);
@@ -152,7 +151,7 @@ public class HoodSubsystem extends SubsystemBase {
   }
 
   public void positionControl(double angle){
-    hoodMotor.setControl(magicMotionRequest.withPosition(angle));
+    hoodMotor.setControl(control.withPosition(angle));
   }
 
   public void coastOut(){
@@ -170,6 +169,7 @@ public class HoodSubsystem extends SubsystemBase {
 
   public double getGoal(double distance){
     return hoodInterp.get(distance) * rotationsPerDegree;
+    //return setPoint;
   }
 
   public double getSetPoint(){

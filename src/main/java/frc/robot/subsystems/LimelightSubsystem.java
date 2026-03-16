@@ -77,9 +77,9 @@ public class LimelightSubsystem extends SubsystemBase {
     }
 
 
-    List<Pose2d> tagPoses = getTagPoses(estimate.get());     
+/*     List<Pose2d> tagPoses = getTagPoses(estimate.get());     
     fieldVisionDetections.setPoses(tagPoses);
-    fieldVisionPose.setPose(estimate.get().pose); 
+    fieldVisionPose.setPose(estimate.get().pose);  */
   }
 
   @Override

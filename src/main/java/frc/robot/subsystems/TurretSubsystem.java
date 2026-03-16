@@ -75,16 +75,16 @@ public class TurretSubsystem extends SubsystemBase {
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
     var slot0Configs = configs.Slot0;
-        slot0Configs.kS = 0.25; // Voltage output to overcome static friction
+        slot0Configs.kS = 1.0; // Voltage output to overcome static friction
         slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
         slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
-        slot0Configs.kP = 5.0; // A position error of 2.5 rotations requires this voltage output
+        slot0Configs.kP = 6.0; // A position error of 2.5 rotations requires this voltage output
         slot0Configs.kI = 0; // no output for integrated error
         slot0Configs.kD = 0.15; // A velocity error of 1 rps requires this voltage output
 
     var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 50; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 2000; // Target acceleration of 160 rps/s (0.5 seconds)
+        motionMagicConfigs.MotionMagicCruiseVelocity = 70; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration = 2800; // Target acceleration of 160 rps/s (0.5 seconds)
         motionMagicConfigs.MotionMagicJerk = 80000; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
     //enable software limits
@@ -122,7 +122,7 @@ public class TurretSubsystem extends SubsystemBase {
     double currentEncoderPos = turretMotor.getPosition().getValueAsDouble();
     double targetEncoderPos = getTurretSetPoint(shooterPose, goalPose, robotRotation);
 
-    double wantedEncoderPos = currentEncoderPos + (currentEncoderPos + getDelta(currentEncoderPos, targetEncoderPos));
+    double wantedEncoderPos = currentEncoderPos + getDelta(currentEncoderPos, targetEncoderPos);
 
     wantedEncoderPos = clampEncoderPos(wantedEncoderPos);
 
@@ -146,13 +146,13 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public static double clampEncoderPos(double newEncoderPos){
-    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
+/*     if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
       newEncoderPos -= 360 * rotationsPerDegree;
     }
     else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
       newEncoderPos += 360 * rotationsPerDegree;
-    }
-    return newEncoderPos;
+    } */
+    return MathUtil.inputModulus(newEncoderPos, rotationsPerDegree * TurretConstants.MIN_ANGLE, rotationsPerDegree * TurretConstants.MAX_ANGLE);
   }
 
   public static double getDelta(double previousSetPoint, double newSetPoint){
