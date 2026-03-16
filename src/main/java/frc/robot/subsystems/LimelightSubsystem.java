@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -65,6 +66,23 @@ public class LimelightSubsystem extends SubsystemBase {
         e.printStackTrace();
     }
 
+  }
+
+  void log_limelight(String name, Optional<LimelightHelpers.PoseEstimate> estimate) {
+    var fieldVisionDetections = robot.field.getObject("Limelight/"+name+"/visionDetections");
+    var fieldVisionPose = robot.field.getObject("Limelight/"+name+"/fieldVisionPose");
+
+    // Don't show stale data if this camera loses pose.
+    if (!estimate.isPresent())
+    {
+      fieldVisionDetections.setPoses(Collections.emptyList());
+      fieldVisionPose.setPoses(Collections.emptyList());
+    }
+
+
+/*     List<Pose2d> tagPoses = getTagPoses(estimate.get());     
+    fieldVisionDetections.setPoses(tagPoses);
+    fieldVisionPose.setPose(estimate.get().pose);  */
   }
 
   @Override
