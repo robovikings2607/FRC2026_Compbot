@@ -124,12 +124,12 @@ public class IntakeSubsystem extends SubsystemBase {
     return rollerMotor.getStatorCurrent().getValueAsDouble() > 100.0;
   }
 
-  public void deployIntake(double currentPos){
+  public void holdDeployPosition(double currentPos){
     pivotMotor.setNeutralMode(NeutralModeValue.Coast);
     pivotMotor.setControl(control.withPosition(currentPos));
   }
 
-  public void retractIntake(double currentPos){
+  public void holdRetractPosition(double currentPos){
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
     pivotMotor.setControl(control.withPosition(currentPos));
   }
@@ -157,7 +157,11 @@ public class IntakeSubsystem extends SubsystemBase {
     stopRollers();
   }
 
-  public boolean downOrUp(){
+  public boolean currentLimitExceeded(){
     return pivotMotor.getStatorCurrent().getValueAsDouble() > 40.0;
+  }
+
+  public double pivotPosition(){
+    return pivotMotor.getPosition().getValueAsDouble();
   }
 }

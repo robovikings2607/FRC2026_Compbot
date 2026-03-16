@@ -136,16 +136,10 @@ public class TurretSubsystem extends SubsystemBase {
       turretMotor.setControl(magicMotionRequest.withPosition(wantedEncoderPos));
     }
 
-    logNumber2("Turret/Delta", getDelta(previousSetPoint, newSetPoint));        
-    logNumber2("Turret/PreviousSetPoint", previousSetPoint);        
-    logNumber2("Turret/PreviousPosition", previousEncoderPos);        
-
-    previousSetPoint = newSetPoint;
-    previousEncoderPos = newEncoderPos;
-
-    logNumber2("Turret/NewSetPoint", newSetPoint);        
-    logNumber2("Turret/NewPosition", newEncoderPos);        
-    logNumber2("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());        
+    logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        
+    logNumber2("Turret/CurrentPose", currentEncoderPos);        
+    logNumber2("Turret/TargetPose", targetEncoderPos);        
+    logNumber2("Turret/WantedPose", wantedEncoderPos);        
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {

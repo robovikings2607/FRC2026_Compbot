@@ -153,7 +153,7 @@ public class HoodSubsystem extends SubsystemBase {
 
   public void positionControl(double angle){
     RobotLogger.logDouble("hood", angle);
-    hoodMotor.setControl(magicMotionRequest.withPosition(angle));
+    hoodMotor.setControl(control.withPosition(angle));
   }
 
   public void coastOut(){
