@@ -114,27 +114,38 @@ public class TurretSubsystem extends SubsystemBase {
 
     // This method will be called once per scheduler run
 
+    // Get the robot pose from the odometer.  These are the robot (x,y) coordinates and robot reading.
+    // These are the coordinates of the center of the robot.
     Pose2d robotPose = robot.drivetrain.getState().Pose;
-
+    // Get the robot heading from the odometer robot pose.  Extract the robot heading from the robot pose.
     double robotRotation = robotPose.getRotation().getDegrees();
+    // Get the shooter pose.  The shooter is not in the center of the robot so the (x,y) coordinates of the
+    // shooter needs to be estimated from the robot pose.
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
+    // This method returns a virtual shooting target taking into consideration the location of the robot in
+    // the field and the velocity of the robot to compensate for on-the-move shooting
     Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
-    //checks alliance and aims at corresponding hub
+    // Estimate the heading of the turret in degrees.  Zero degrees is towards the front of the robot.
+    // Positive angles are counter clockwise (CCW) and negative angles are clockwise (CW)
     double newSetPoint = getTurretSetPoint(shooterPose, goalPose, robotRotation);
 
-    double newEncoderPos = previousEncoderPos + getDelta(previousSetPoint, newSetPoint);
-
-    
-    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
+    // Check if the new set point of the turret is beyond the limits.  If not beyond the limits,
+    // then no change to the new encoder position.  But if the new encoder position is beyond the limits,
+    // the turret is rotated by 360 degrees in the opposite direction of travel.  The turret has physical
+    // retrictions and it won't rotate infinitely.
+    double newEncoderPos = 0;
+    if(newSetPoint > (TurretConstants.MAX_ANGLE)){
       newEncoderPos -= 360 * rotationsPerDegree;
     }
-    else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
+    else if(newEncoderPos < (TurretConstants.MIN_ANGLE)){
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
+    // This allows for adjustment of the turret offset angle in degrees.
     offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
 
+    // Set the motor to the new encoder position if the turret has not been deactivated
     if(isDeactivated){
       turretMotor.setControl(new CoastOut());
     }
@@ -142,6 +153,8 @@ public class TurretSubsystem extends SubsystemBase {
       turretMotor.setControl(magicMotionRequest.withPosition(newEncoderPos + TurretConstants.OFFSET));
     }
 
+    // Rumble the driver controller if the turret is getting close to the limits, both the minimum and
+    // maximum limit.
     if(turretMotor.getPosition().getValueAsDouble() > (TurretConstants.MAX_ANGLE - 3.0) * rotationsPerDegree ||
        turretMotor.getPosition().getValueAsDouble() < (TurretConstants.MIN_ANGLE + 3.0) * rotationsPerDegree){
         robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 1);
@@ -150,40 +163,24 @@ public class TurretSubsystem extends SubsystemBase {
       robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 0);
     }
 
-    logNumber2("Turret/Delta", getDelta(previousSetPoint, newSetPoint));        
-    logNumber2("Turret/PreviousSetPoint", previousSetPoint);        
-    logNumber2("Turret/PreviousPosition", previousEncoderPos);        
+    // Write key values to network tables
+    logNumber("Turret/NewSetPoint", newSetPoint);        
+    logNumber("Turret/NewPosition", newEncoderPos);        
+    logNumber("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());
 
-    previousSetPoint = newSetPoint;
-    previousEncoderPos = newEncoderPos;
-
+    // Write key values to the log
     logNumber2("Turret/NewSetPoint", newSetPoint);        
     logNumber2("Turret/NewPosition", newEncoderPos);        
     logNumber2("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());        
   }
 
+  // This method returns the angle that the turret must be set to point at the center of the hub
+  // The return angle is in degrees
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
     double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
     double robotRotationAdjustedAngle = angle - robotRotation;   
 
-    return -robotRotationAdjustedAngle * rotationsPerDegree;
-  }
-
-  private static double getDelta(double previousSetPoint, double newSetPoint){
-    double delta = 0;
-
-    if(Math.abs(previousSetPoint - newSetPoint) > 9.5){ //if turret wraps
-      delta = 10 - Math.abs(previousSetPoint - newSetPoint);
-     
-      if(previousSetPoint < newSetPoint){
-        delta = -delta;
-      }
-    }
-    else{
-      delta = newSetPoint - previousSetPoint;
-    }
-
-    return delta;
+    return -robotRotationAdjustedAngle;
   }
 
   public void fixedShot(boolean fixed){
