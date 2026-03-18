@@ -131,14 +131,15 @@ public class TurretSubsystem extends SubsystemBase {
     double newSetPoint = getTurretSetPoint(shooterPose, goalPose, robotRotation);
 
     // Check if the new set point of the turret is beyond the limits.  If not beyond the limits,
-    // then no change to the new encoder position.  But if the new encoder position is beyond the limits,
+    // then no change to the new encoder position.  But if the new setup position is beyond the limits,
     // the turret is rotated by 360 degrees in the opposite direction of travel.  The turret has physical
     // retrictions and it won't rotate infinitely.
-    double newEncoderPos = 0;
+    double newEncoderPos = newSetPoint * rotationsPerDegree;
+
     if(newSetPoint > (TurretConstants.MAX_ANGLE)){
       newEncoderPos -= 360 * rotationsPerDegree;
     }
-    else if(newEncoderPos < (TurretConstants.MIN_ANGLE)){
+    else if(newSetPoint < (TurretConstants.MIN_ANGLE)){
       newEncoderPos += 360 * rotationsPerDegree;
     }
 
