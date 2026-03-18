@@ -111,6 +111,24 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     flywheelMotor.getConfigurator().apply(configs);
   }
 
+  /*
+  * Use this method and comment out the normal configureMotor method when running SysId tests
+  * on the motor to determine the optimal Ks, Kv, and Ka values for the configureMotor method.
+  * The high speed logging is necessary. If you don't do it you'll get an error in the SysId
+  * tool when you load the data.
+  */
+  private void configureMotorForSysId() {
+    // --- THE SYSID FIX: FORCE HIGH-SPEED DATA LOGGING ---
+    // We tell the motor to send Voltage, Position, and Velocity at 250 Hz (every 4 milliseconds)
+    flywheelMotor.getMotorVoltage().setUpdateFrequency(250.0);
+    flywheelMotor.getPosition().setUpdateFrequency(250.0);
+    flywheelMotor.getVelocity().setUpdateFrequency(250.0);
+        
+    // (Optional but recommended) Wait for the CAN bus to apply the changes
+    try { Thread.sleep(250); } catch (InterruptedException e) {}
+
+  }
+
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
