@@ -21,47 +21,40 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToDepot"
+                        "pathName": "AllianceToCenterLine"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "DepotToShoot"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "ShootToBalls"
+                        "pathName": "Snake1"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "BallsToShoot"
+                        "pathName": "Snake2"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "Snake3"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "Snake4"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "Snake5"
                       }
                     }
                   ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
                 }
               }
             ]

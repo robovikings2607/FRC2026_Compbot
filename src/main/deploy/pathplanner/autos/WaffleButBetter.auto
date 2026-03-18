@@ -21,47 +21,28 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToDepot"
+                        "pathName": "WAFFLE Placeholder start"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "DepotToShoot"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "ShootToBalls"
+                        "pathName": "WAFFLE PLACEHOLDER middle"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "BallsToShoot"
+                        "pathName": "WAFFLE placeholder end"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot"
                       }
                     }
                   ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
                 }
               }
             ]

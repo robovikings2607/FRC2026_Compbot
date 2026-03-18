@@ -9,13 +9,31 @@
           "data": {
             "commands": [
               {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntake"
+                }
+              },
+              {
                 "type": "sequential",
                 "data": {
                   "commands": [
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "HubToBack"
+                        "pathName": "OppositeOverBump"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "OppositeCollect"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "OppositeNeutralToAlliance"
                       }
                     }
                   ]
