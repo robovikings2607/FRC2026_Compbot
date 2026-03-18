@@ -17,6 +17,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -50,6 +51,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final TalonFX turretMotor;
   private final RobotContainer robot;
   private MotionMagicVoltage magicMotionRequest;
+  private PositionVoltage positionVoltage;
   private double previousSetPoint, currentEncoderPos, offset;
   private boolean fixedShot = false;
   private boolean isDeactivated = false;
@@ -66,6 +68,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     configureMotor();
     magicMotionRequest = new MotionMagicVoltage(0.0);
+    positionVoltage = new PositionVoltage(0.0);
 
     logNumber2("Turret/BootUpPose", turretMotor.getPosition().getValueAsDouble());
     logNumber2("SetOffset", 0.0);    
@@ -77,16 +80,16 @@ public class TurretSubsystem extends SubsystemBase {
 
     var slot0Configs = configs.Slot0;
         slot0Configs.kS = 1.0; // Voltage output to overcome static friction
-        slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
-        slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
+        //slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
+        //slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
         slot0Configs.kP = 6.0; // A position error of 2.5 rotations requires this voltage output
         slot0Configs.kI = 0; // no output for integrated error
         slot0Configs.kD = 0.15; // A velocity error of 1 rps requires this voltage output
 
-    var motionMagicConfigs = configs.MotionMagic;
+    /* var motionMagicConfigs = configs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = 70; // Target cruise velocity of 80 rps
         motionMagicConfigs.MotionMagicAcceleration = 2800; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 80000; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        motionMagicConfigs.MotionMagicJerk = 112000; // Target jerk of 1600 rps/s/s (0.1 seconds) */
 
     //enable software limits
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
@@ -133,7 +136,7 @@ public class TurretSubsystem extends SubsystemBase {
       turretMotor.setControl(new CoastOut());
     }
     else{
-      turretMotor.setControl(magicMotionRequest.withPosition(wantedEncoderPos));
+      turretMotor.setControl(positionVoltage.withPosition(wantedEncoderPos));
     }
 
     logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        

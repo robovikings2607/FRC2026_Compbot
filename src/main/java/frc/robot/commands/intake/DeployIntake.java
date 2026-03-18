@@ -31,14 +31,13 @@ public class DeployIntake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.forcePivotDown();
+    intake.deployIntake();
     intake.runRollersUnjammed();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //Check for jam in intake
     if(intake.isJammed()){
       intake.runRollersJammed();
       timer.start();
@@ -50,11 +49,6 @@ public class DeployIntake extends Command {
     else{
       timer.reset();
       intake.runRollersUnjammed();
-    }
-
-    //Stop Voltage output and hold current position
-    if(intake.currentLimitExceeded()){
-      intake.holdDeployPosition(intake.pivotPosition());
     }
   }
 

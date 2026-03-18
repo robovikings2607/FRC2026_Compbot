@@ -53,6 +53,7 @@ public class HoodSubsystem extends SubsystemBase {
     createInterpMap();
     // zeroMotor();
     SmartDashboard.putNumber("Hood/SetPoint", 0);
+    hoodMotor.setControl(control.withPosition(HoodConstants.MAX_HOOD_POSITION/2));
   }
 
   @Override
@@ -129,6 +130,7 @@ public class HoodSubsystem extends SubsystemBase {
     //value = position of hood in desired shot angle
     hoodInterp.put(0.0, 0.0);
     hoodInterp.put(4.5, 0.0);
+    hoodInterp.put(5.0, -2.0);
 
 /*     hoodInterp.put(2.53, 0.0);
     hoodInterp.put(3.1, 0.0);
@@ -171,7 +173,7 @@ public class HoodSubsystem extends SubsystemBase {
 
   public double getGoal(double distance){
     return hoodInterp.get(distance) * rotationsPerDegree;
-    //return setPoint;
+    //return setPoint * rotationsPerDegree;
   }
 
   public double getSetPoint(){

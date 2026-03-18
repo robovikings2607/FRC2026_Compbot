@@ -33,14 +33,14 @@ public class JostlePieces extends Command {
   @Override
   public void initialize() {
     timer.start();
-    intake.forcePivotDown();
+    intake.deployIntake();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     if(isDeployed && timer.get() > 0.25){
-      intake.forcePivotUp();
+      intake.retractIntake();
       isDeployed = false;
       timer.stop();
       timer.reset();
@@ -48,7 +48,7 @@ public class JostlePieces extends Command {
     }
 
     if(!isDeployed && timer.get() > 0.25){
-      intake.forcePivotDown();
+      intake.deployIntake();
       isDeployed = true;
       timer.stop();
       timer.reset();

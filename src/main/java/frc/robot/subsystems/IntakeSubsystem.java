@@ -82,7 +82,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     configs.withCurrentLimits(
         new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(Amps.of(50))
+            .withStatorCurrentLimit(Amps.of(95))
             .withStatorCurrentLimitEnable(true)
     );
 
@@ -124,14 +124,14 @@ public class IntakeSubsystem extends SubsystemBase {
     return rollerMotor.getStatorCurrent().getValueAsDouble() > 100.0;
   }
 
-  public void holdDeployPosition(double currentPos){
+  public void deployIntake(){
     pivotMotor.setNeutralMode(NeutralModeValue.Coast);
-    pivotMotor.setControl(control.withPosition(currentPos));
+    pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_DEPLOYED));
   }
 
-  public void holdRetractPosition(double currentPos){
+  public void retractIntake(){
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
-    pivotMotor.setControl(control.withPosition(currentPos));
+    pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_RETRACTED));
   }
 
  /*  public void zeroIntake(){
@@ -148,20 +148,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void forcePivotDown(){
-    pivotMotor.setVoltage(2.0);
-    runRollersUnjammed();
-  }
-
-  public void forcePivotUp(){
     pivotMotor.setVoltage(-2.0);
-    stopRollers();
-  }
-
-  public boolean currentLimitExceeded(){
-    return pivotMotor.getStatorCurrent().getValueAsDouble() > 40.0;
-  }
-
-  public double pivotPosition(){
-    return pivotMotor.getPosition().getValueAsDouble();
+    runRollersUnjammed();
   }
 }

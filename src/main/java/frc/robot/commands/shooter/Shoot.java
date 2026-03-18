@@ -83,7 +83,7 @@ public class Shoot extends Command {
   public void end(boolean interrupted) {
     feeder.stopMotor();
     spindexer.stopMotor();
-    hood.coastOut();
+    hood.positionControl(HoodConstants.MAX_HOOD_POSITION/2);
     flywheel.coastOut();
   }
 
