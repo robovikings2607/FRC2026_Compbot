@@ -20,17 +20,20 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.utilities.GeometryUtil;
+import frc.robot.utilities.ISysIdTunable;
 import frc.robot.utilities.ShooterUtils;
+import frc.robot.utilities.SysIdBuilder;
 
 import static edu.wpi.first.units.Units.*;
 
-public class FlywheelSubsystem extends SubsystemBase {
+public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   /** Creates a new ShooterHoodSubsystem. */
-  public final TalonFX flywheelMotor;
+  public final TalonFX flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
   private final RobotContainer robot;
   private VelocityVoltage velocityControl = new VelocityVoltage(0);
   private CoastOut coastOut = new CoastOut();
@@ -41,12 +44,18 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
-    flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
     configureMotor();
     createInterpMap();
-
-    SmartDashboard.putNumber("Flywheel/Speed", 0);
+    SmartDashboard.putNumber("Flywheel/Speed", 0.0);
   }
+
+  private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
+    flywheelMotor, this, "flywheel", 7.0
+  );    
+ 
+  public SysIdRoutine getSysIdRoutine() {
+    return sysIdRoutine;
+  }    
 
   @Override
   public void periodic() {
@@ -57,8 +66,13 @@ public class FlywheelSubsystem extends SubsystemBase {
     Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
     double distance = shooterPose.getDistance(goalPose);
-    
-/*     // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
+    SmartDashboard.putNumber("Distance", distance);
+
+    //SmartDashboard.putNumber("Flywheel/Speed", flywheelMotor.getRotorVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Flywheel/WantedSpeed", getGoal(distance));
+
+    //rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
+/*     
     if(!readyToShoot){
       flywheelMotor.setControl(coastOut);
     }
@@ -80,8 +94,8 @@ public class FlywheelSubsystem extends SubsystemBase {
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
     var slot0Configs = configs.Slot0;
-          // slot0Configs.kS = 0.0; // Voltage output to overcome static friction
-          slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
+          slot0Configs.kS = 0.55; // Voltage output to overcome static friction
+          slot0Configs.kV = 0.12167; // A velocity target of 1 rps requires this voltage output.
           // slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
           slot0Configs.kP = 0.6; // A position error of 2.5 rotations requires this voltage output
           slot0Configs.kI = 0; // no output for integrated error
@@ -97,19 +111,39 @@ public class FlywheelSubsystem extends SubsystemBase {
     flywheelMotor.getConfigurator().apply(configs);
   }
 
+  /*
+  * Use this method and comment out the normal configureMotor method when running SysId tests
+  * on the motor to determine the optimal Ks, Kv, and Ka values for the configureMotor method.
+  * The high speed logging is necessary. If you don't do it you'll get an error in the SysId
+  * tool when you load the data.
+  */
+  private void configureMotorForSysId() {
+    // --- THE SYSID FIX: FORCE HIGH-SPEED DATA LOGGING ---
+    // We tell the motor to send Voltage, Position, and Velocity at 250 Hz (every 4 milliseconds)
+    flywheelMotor.getMotorVoltage().setUpdateFrequency(250.0);
+    flywheelMotor.getPosition().setUpdateFrequency(250.0);
+    flywheelMotor.getVelocity().setUpdateFrequency(250.0);
+        
+    // (Optional but recommended) Wait for the CAN bus to apply the changes
+    try { Thread.sleep(250); } catch (InterruptedException e) {}
+
+  }
+
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, -48.5);
-    flywheelInterp.put(2.53, -48.5);
-    flywheelInterp.put(3.1, -51.0);
-    flywheelInterp.put(3.5, -53.5);
-    flywheelInterp.put(4.0, -56.0);
-    flywheelInterp.put(4.5, -60.0);
-    flywheelInterp.put(5.0, -63.0);
-    flywheelInterp.put(5.5, -66.0);
-    flywheelInterp.put(6.0, -67.0);
+    flywheelInterp.put(0.0, -42.5);
+    flywheelInterp.put(2.5, -42.5);
+    flywheelInterp.put(3.0, -45.0);
+    flywheelInterp.put(3.5, -47.0);
+    flywheelInterp.put(4.0, -51.0);
+    flywheelInterp.put(4.5, -53.0);
+    flywheelInterp.put(5.0, -56.0);
   }
+    /* flywheelInterp.put(5.0, -65.0);
+    flywheelInterp.put(5.5, -68.0);
+    flywheelInterp.put(6.0, -69.0);
+  } */
 
   public void setGoal(double distance){
     rps = flywheelInterp.get(distance);
@@ -133,7 +167,7 @@ public class FlywheelSubsystem extends SubsystemBase {
   }
 
   public boolean goodToShoot(){
-    return getSpeed() < -45.0;
+    return getSpeed() < rps + 2.5;
   }
 
   public void readyShot(boolean ready){
@@ -146,5 +180,9 @@ public class FlywheelSubsystem extends SubsystemBase {
 
   public void fixedShot(boolean fixed){
     fixedShot = fixed;
+  }
+
+  public void tune(){
+    flywheelMotor.setControl(velocityControl.withVelocity(-70));
   }
 }

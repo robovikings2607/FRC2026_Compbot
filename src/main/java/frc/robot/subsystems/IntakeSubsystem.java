@@ -9,7 +9,9 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -63,8 +65,12 @@ public class IntakeSubsystem extends SubsystemBase {
     }
      */
 
+   /*  if(RobotController.getUserButton()){
+      pivotMotor.setPosition(0.0);
+    } */
+
     SmartDashboard.putBoolean("Intake/IsJammed", isJammed());
-    SmartDashboard.putNumber("Intake/Position", intakePosition);
+    SmartDashboard.putNumber("Intake/Position", pivotMotor.getPosition().getValueAsDouble());
   }
 
   public void configurePivotMotor(){
@@ -76,12 +82,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
     configs.withCurrentLimits(
         new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(Amps.of(120))
+            .withStatorCurrentLimit(Amps.of(95))
             .withStatorCurrentLimitEnable(true)
     );
 
     pivotMotor.getConfigurator().apply(configs);
-    pivotMotor.setPosition(0.0);
+    //ppivotMotor.setPosition(0.0);
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
     pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_RETRACTED));
   }
@@ -99,7 +105,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void runRollersUnjammed(){
-    rollerMotor.setVoltage(8.0);
+    rollerMotor.setVoltage(9.0);
   }
 
   public void runRollersJammed(){
@@ -136,4 +142,13 @@ public class IntakeSubsystem extends SubsystemBase {
       pivotMotor.setPosition(0.0);
     }
   } */
+
+  public TalonFX getPivotMotor(){
+    return pivotMotor;
+  }
+
+  public void forcePivotDown(){
+    pivotMotor.setVoltage(-2.0);
+    runRollersUnjammed();
+  }
 }

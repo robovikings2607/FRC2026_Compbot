@@ -19,9 +19,12 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.robot.utilities.RobotLogger;
 
 public class Telemetry {
     private final double MaxSpeed;
+
+    private int telemetryLoopCounter = 0;
 
     /**
      * Construct a telemetry object, with the specified max speed of the robot
@@ -112,6 +115,69 @@ public class Telemetry {
         fieldPub.set(m_poseArray);
 
         /* Telemeterize each module state to a Mechanism2d */
+        for (int i = 0; i < 4; ++i) {
+            m_moduleSpeeds[i].setAngle(state.ModuleStates[i].angle);
+            m_moduleDirections[i].setAngle(state.ModuleStates[i].angle);
+            m_moduleSpeeds[i].setLength(state.ModuleStates[i].speedMetersPerSecond / (2 * MaxSpeed));
+        }
+    }
+
+    /* Inside your CTRE Swerve Telemetry class telemeterize() method */
+    public void telemeterize2(SwerveDriveState state) {
+        
+        // ==========================================================
+        // 1. HARDWARE LOGGING (250Hz) 
+        // ==========================================================
+        // SignalLogger handles 250Hz effortlessly. Keep this exactly as-is 
+        // so your .hoot files have perfect, high-speed resolution.
+        SignalLogger.writeStruct("DriveState/Pose", Pose2d.struct, state.Pose);
+        SignalLogger.writeStruct("DriveState/Speeds", ChassisSpeeds.struct, state.Speeds);
+        SignalLogger.writeStructArray("DriveState/ModuleStates", SwerveModuleState.struct, state.ModuleStates);
+        SignalLogger.writeStructArray("DriveState/ModuleTargets", SwerveModuleState.struct, state.ModuleTargets);
+        SignalLogger.writeStructArray("DriveState/ModulePositions", SwerveModulePosition.struct, state.ModulePositions);
+        SignalLogger.writeDouble("DriveState/OdometryPeriod", state.OdometryPeriod, "seconds");
+
+        // ==========================================================
+        // 2. HIGH-PRIORITY SOFTWARE LOGGING (250Hz)
+        // ==========================================================
+        // We keep the robot's pose updating rapidly for smooth AdvantageScope 3D replay.
+        drivePose.set(state.Pose);
+        driveTimestamp.set(state.Timestamp);
+        driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
+
+        // ==========================================================
+        // 3. DOWNSAMPLED DASHBOARD & STRUCT LOGGING (50Hz)
+        // ==========================================================
+        telemetryLoopCounter++;
+        
+        // Run this block every 5th tick (250Hz / 5 = 50Hz)
+        if (telemetryLoopCounter >= 5) {
+
+            // Route the heavy WPILib structs through our new custom Logger!
+            RobotLogger.logStruct("DriveState/Speeds", ChassisSpeeds.struct, state.Speeds);
+            RobotLogger.logStructArray("DriveState/ModuleStates", SwerveModuleState.struct, state.ModuleStates);
+            RobotLogger.logStructArray("DriveState/ModuleTargets", SwerveModuleState.struct, state.ModuleTargets);
+            RobotLogger.logStructArray("DriveState/ModulePositions", SwerveModulePosition.struct, state.ModulePositions);
+
+            //only need to call this method if you're still using ShuffleBoard or Glass
+            //Since I'm assuming we'll be using AdvangtageScope I'll comment out for now
+            //Uncomment if you are using those tools
+            //
+            //telemeterize2Field2d(state);            
+
+            telemetryLoopCounter = 0;
+        }      
+    } 
+
+    private void telemeterize2Field2d(SwerveDriveState state) {
+        // Throttle the legacy Field2d formatting
+        fieldTypePub.set("Field2d");
+        m_poseArray[0] = state.Pose.getX();
+        m_poseArray[1] = state.Pose.getY();
+        m_poseArray[2] = state.Pose.getRotation().getDegrees();
+        fieldPub.set(m_poseArray);
+
+        // Throttle the legacy Mechanism2d math
         for (int i = 0; i < 4; ++i) {
             m_moduleSpeeds[i].setAngle(state.ModuleStates[i].angle);
             m_moduleDirections[i].setAngle(state.ModuleStates[i].angle);

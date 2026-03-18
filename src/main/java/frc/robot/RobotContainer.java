@@ -22,17 +22,24 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DoNothing;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseRollers;
 import frc.robot.commands.intake.DeployIntake;
+import frc.robot.commands.intake.ForceIntakeDown;
+import frc.robot.commands.intake.JostlePieces;
 import frc.robot.commands.intake.RetractIntake;
 import frc.robot.commands.shooter.StopShooter;
+import frc.robot.commands.shooter.ActivateTurret;
+import frc.robot.commands.shooter.DeactivateTurret;
+import frc.robot.commands.shooter.ReverseSpindexer;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -51,6 +58,7 @@ import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.utilities.AxisButton;
+import frc.robot.utilities.ISysIdTunable;
 
 public class RobotContainer {
     public Field2d field = new Field2d();
@@ -127,12 +135,18 @@ public class RobotContainer {
 
         //Shooter
         driverController.rightTriggerButton.whileTrue(new Shoot(this));
-        driverController.buttonB.onTrue(new StopShooter(this));
+        driverController.buttonA.onTrue(new StopShooter(this));
+        driverController.buttonB.onTrue(new DeactivateTurret(this));
+        driverController.buttonX.onTrue(new ActivateTurret(this));
 
         //Operator/Emergency
         operatorController.buttonY.onTrue(new RetractIntake(this));
         operatorController.buttonA.onTrue(new DeployIntake(this));
-
+        operatorController.buttonB.onTrue(new DeactivateTurret(this));
+        operatorController.buttonX.onTrue(new ActivateTurret(this));
+        operatorController.leftBumper.onTrue(new JostlePieces(this));
+        operatorController.rightBumper.whileTrue(new ReverseSpindexer(this));
+        operatorController.rightTriggerButton.onTrue(new ForceIntakeDown(this));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
@@ -141,7 +155,7 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        drivetrain.registerTelemetry(logger::telemeterize);
+        drivetrain.registerTelemetry(logger::telemeterize2);
     }
 
     public void configureNamedCommands(){
@@ -149,7 +163,46 @@ public class RobotContainer {
         NamedCommands.registerCommand("DoNothing", new DoNothing());
         NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
         NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
-        NamedCommands.registerCommand("Shoot", new Shoot(this).raceWith(new WaitCommand(5.0)));
+        NamedCommands.registerCommand("Shoot", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(5.0)));
+    }
+
+     /**
+     * VERY IMPORTANT: Put the robot up on blocks before running these!
+     * VERY IMPORTANT: Change the button bindings to those you want to trigger the 4 tests
+     * 
+     * Configure buttons to run a SysId test against a particular subsystem's motor to get
+     * the best values for that motor's PID configuration.
+     * 
+     * You always want to do this outside of the normal context of running the robot
+     * only call this method from the constructor of RobotContainer and comment out the rest
+     * of the code in that constructor
+     * 
+     * @param tuningTarget  The subsystem implementing the ISysIdTunable interface
+     *                      whose motor you want to run the Sysid tool against
+     */
+    private void configureSysIdBindings(ISysIdTunable tuningTarget) {
+        
+        SysIdRoutine routineToTune = tuningTarget.getSysIdRoutine(); 
+
+        //Quasistatic Forward
+        operatorController.buttonA.whileTrue(
+            routineToTune.quasistatic(SysIdRoutine.Direction.kForward)
+        );
+        
+        //Quasistatic Reverse
+        operatorController.buttonB.whileTrue(
+            routineToTune.quasistatic(SysIdRoutine.Direction.kReverse)
+        );
+        
+        //Dynamic Forward
+        operatorController.buttonX.whileTrue(
+            routineToTune.dynamic(SysIdRoutine.Direction.kForward)
+        );
+        
+        //Dynamic Reverse
+        operatorController.buttonY.whileTrue(
+            routineToTune.dynamic(SysIdRoutine.Direction.kReverse)
+        );
     }
 
     // Toggle low gear and high gear speeds

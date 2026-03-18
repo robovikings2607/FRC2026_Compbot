@@ -6,9 +6,12 @@ package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
 
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.utilities.RobotLogger;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -22,12 +25,26 @@ public class Robot extends TimedRobot {
 
     public Robot() {
         m_robotContainer = new RobotContainer();
+        //DataLogManager.start();
     }
+
+    @Override
+    public void robotInit() {
+        // Wakes up the Logger class and triggers its static setup block
+        RobotLogger.init(); 
+    }
+
 
     @Override
     public void robotPeriodic() {
         m_timeAndJoystickReplay.update();
-        CommandScheduler.getInstance().run(); 
+        CommandScheduler.getInstance().run();
+        
+        if(RobotController.getUserButton()){
+            m_robotContainer.hood.getMotor().setPosition(0.0);
+            m_robotContainer.turret.getMotor().setPosition(0.0);
+            m_robotContainer.intake.getPivotMotor().setPosition(0.0);
+        } 
     }
 
     @Override

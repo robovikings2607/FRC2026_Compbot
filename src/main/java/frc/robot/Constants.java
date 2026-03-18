@@ -40,11 +40,11 @@ public final class Constants {
 
   public static final class TurretConstants {
     public static final int TURRET_ID = 30;
-    
-    public static final double MAX_ANGLE = 241.2 - 10.0;  //- 16.15428;
-    public static final double MIN_ANGLE = -137.988 + 10.0; //- 16.15428;
 
-    //public static final double OFFSET = -.44873;  
+    public static final double OFFSET = 0.0;  
+
+    public static final double MAX_ANGLE = 248.2 - 20.0 + (OFFSET * 10.0/360.0);
+    public static final double MIN_ANGLE = -149.988 + 20.0 + (OFFSET * 10.0/360.0);
   }
 
   public static final class FlywheelConstants {
@@ -68,7 +68,7 @@ public final class Constants {
     public static final int ROLLER_ID = 14;
     public static final int PIVOT_ID = 13;
 
-    public static final double INTAKE_RETRACTED = 4.7; //check these later
+    public static final double INTAKE_RETRACTED = -4.7; //check these later
     public static final double INTAKE_DEPLOYED = 0.0; //check these later
   }
 
