@@ -29,6 +29,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -52,7 +53,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final RobotContainer robot;
   private MotionMagicVoltage magicMotionRequest;
   private PositionVoltage positionVoltage;
-  private double previousSetPoint, currentEncoderPos, offset;
+  private double wantedEncoderPos;
   private boolean fixedShot = false;
   private boolean isDeactivated = false;
 
@@ -116,6 +117,8 @@ public class TurretSubsystem extends SubsystemBase {
 
     // This method will be called once per scheduler run
 
+    if(turretMotor.hasResetOccurred()){}
+
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
     double robotRotation = robotPose.getRotation().getDegrees();
@@ -126,18 +129,20 @@ public class TurretSubsystem extends SubsystemBase {
     double currentEncoderPos = turretMotor.getPosition().getValueAsDouble();
     double targetEncoderPos = getTurretSetPoint(shooterPose, goalPose, robotRotation);
 
-    double wantedEncoderPos = currentEncoderPos + getDelta(currentEncoderPos, targetEncoderPos);
+    wantedEncoderPos = currentEncoderPos + getDelta(currentEncoderPos, targetEncoderPos);
 
     wantedEncoderPos = clampEncoderPos(wantedEncoderPos);
 
-    offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
-
+    //offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
     if(isDeactivated){
       turretMotor.setControl(new CoastOut());
     }
     else{
       turretMotor.setControl(positionVoltage.withPosition(wantedEncoderPos));
     }
+
+    SmartDashboard.putBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());
+    SmartDashboard.putBoolean("UserButtonPressed", RobotController.getUserButton());
 
     logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        
     logNumber2("Turret/CurrentPose", currentEncoderPos);        
