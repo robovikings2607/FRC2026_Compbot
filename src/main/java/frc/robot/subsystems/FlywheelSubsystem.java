@@ -139,6 +139,8 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     flywheelInterp.put(4.0, -51.0);
     flywheelInterp.put(4.5, -53.0);
     flywheelInterp.put(5.0, -56.0);
+    flywheelInterp.put(5.6, -57.0);
+    flywheelInterp.put(6.0, -64.0);
   }
     /* flywheelInterp.put(5.0, -65.0);
     flywheelInterp.put(5.5, -68.0);

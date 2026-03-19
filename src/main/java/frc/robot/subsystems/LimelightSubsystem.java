@@ -53,6 +53,7 @@ public class LimelightSubsystem extends SubsystemBase {
     //Right
     LimelightHelpers.setPipelineIndex(RIGHT_LIMELIGHT_NAME, 0);
     LimelightHelpers.SetIMUMode(RIGHT_LIMELIGHT_NAME, 3);
+    LimelightHelpers.SetIMUAssistAlpha(RIGHT_LIMELIGHT_NAME, 0.01);
 
     try {
         // This automatically loads the layout for the current year's game
@@ -95,7 +96,7 @@ public class LimelightSubsystem extends SubsystemBase {
   LimelightHelpers.SetRobotOrientation(LEFT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
   LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
   LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
-  
+
   leftFieldVisionDetections = robot.field.getObject("Limelight/" + LEFT_LIMELIGHT_NAME +"/visionDetections");
   leftFieldVisionPose = robot.field.getObject("Limelight/" + LEFT_LIMELIGHT_NAME + "/fieldVisionPose");
 
@@ -104,6 +105,26 @@ public class LimelightSubsystem extends SubsystemBase {
 
 
    SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets", leftLL != null ? leftLL.tagCount > 0 : false);
+
+    if(isValidUpdate(rightLL)){
+      LimelightHelpers.PoseEstimate mt2 = rightLL;
+
+      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
+      robot.drivetrain.addVisionMeasurement(
+        mt2.pose,
+        mt2.timestampSeconds
+      ); 
+
+      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
+      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
+      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
+
+      // System.out.println("has pose");
+      List<Pose2d> tagPoses = getTagPoses(mt2);     
+
+      rightFieldVisionDetections.setPoses(tagPoses);
+      rightFieldVisionPose.setPose(mt2.pose); 
+    }
 
    if(isValidUpdate(leftLL)){
       LimelightHelpers.PoseEstimate mt2 = leftLL;
@@ -126,26 +147,6 @@ public class LimelightSubsystem extends SubsystemBase {
     }
 
        SmartDashboard.putBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightLL != null ? rightLL.tagCount > 0 : false);
-
-    if(isValidUpdate(rightLL)){
-      LimelightHelpers.PoseEstimate mt2 = rightLL;
-
-      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
-      robot.drivetrain.addVisionMeasurement(
-        mt2.pose,
-        mt2.timestampSeconds
-      ); 
-
-      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
-      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
-      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
-
-      // System.out.println("has pose");
-      List<Pose2d> tagPoses = getTagPoses(mt2);     
-
-      rightFieldVisionDetections.setPoses(tagPoses);
-      rightFieldVisionPose.setPose(mt2.pose); 
-    }
   }
 
   public boolean isValidUpdate(LimelightHelpers.PoseEstimate mt2){
