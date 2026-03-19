@@ -131,8 +131,8 @@ public class RobotContainer {
 
     public RobotContainer() {
 
-        //configureBindings();
-        configureSysIdBindings();
+        configureBindings();
+        //configureSysIdBindings();
         configureNamedCommands();
         configureDefaultCommands();
 
@@ -177,7 +177,14 @@ public class RobotContainer {
             this::getFieldRelativeVelocity
         ));        
 
-
+        operatorController.rightTriggerButton.whileTrue(
+            new AimAssistDriveCommandExp(
+                this,
+                drivetrain,
+                turretExp,
+                operatorController
+            )
+        );
         driverController.buttonB.onTrue(new DeactivateTurret(this));
         driverController.buttonX.onTrue(new ActivateTurret(this));
         driverController.buttonY.onTrue(new ZeroHoodCommandExp(this).withTimeout(2.0));    
