@@ -46,7 +46,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     this.robot = robot;
     configureMotor();
     createInterpMap();
-
+    SmartDashboard.putNumber("Flywheel/Speed", 0.0);
   }
 
   private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
@@ -68,11 +68,11 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     double distance = shooterPose.getDistance(goalPose);
     SmartDashboard.putNumber("Distance", distance);
 
-    SmartDashboard.putNumber("Flywheel/Speed", flywheelMotor.getRotorVelocity().getValueAsDouble());
+    //SmartDashboard.putNumber("Flywheel/Speed", flywheelMotor.getRotorVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Flywheel/WantedSpeed", getGoal(distance));
 
-    
-/*     // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
+    //rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
+/*     
     if(!readyToShoot){
       flywheelMotor.setControl(coastOut);
     }
@@ -94,8 +94,8 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
     var slot0Configs = configs.Slot0;
-          // slot0Configs.kS = 0.0; // Voltage output to overcome static friction
-          slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
+          slot0Configs.kS = 0.55; // Voltage output to overcome static friction
+          slot0Configs.kV = 0.12167; // A velocity target of 1 rps requires this voltage output.
           // slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
           slot0Configs.kP = 0.6; // A position error of 2.5 rotations requires this voltage output
           slot0Configs.kI = 0; // no output for integrated error
@@ -111,19 +111,41 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     flywheelMotor.getConfigurator().apply(configs);
   }
 
+  /*
+  * Use this method and comment out the normal configureMotor method when running SysId tests
+  * on the motor to determine the optimal Ks, Kv, and Ka values for the configureMotor method.
+  * The high speed logging is necessary. If you don't do it you'll get an error in the SysId
+  * tool when you load the data.
+  */
+  private void configureMotorForSysId() {
+    // --- THE SYSID FIX: FORCE HIGH-SPEED DATA LOGGING ---
+    // We tell the motor to send Voltage, Position, and Velocity at 250 Hz (every 4 milliseconds)
+    flywheelMotor.getMotorVoltage().setUpdateFrequency(250.0);
+    flywheelMotor.getPosition().setUpdateFrequency(250.0);
+    flywheelMotor.getVelocity().setUpdateFrequency(250.0);
+        
+    // (Optional but recommended) Wait for the CAN bus to apply the changes
+    try { Thread.sleep(250); } catch (InterruptedException e) {}
+
+  }
+
   public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, -49.5);
-    flywheelInterp.put(2.53, -49.5);
-    flywheelInterp.put(3.1, -52.0);
-    flywheelInterp.put(3.5, -56.5);
-    flywheelInterp.put(4.0, -59.0);
-    flywheelInterp.put(4.5, -62.0);
-    flywheelInterp.put(5.0, -65.0);
+    flywheelInterp.put(0.0, -42.5);
+    flywheelInterp.put(2.5, -42.5);
+    flywheelInterp.put(3.0, -45.0);
+    flywheelInterp.put(3.5, -47.0);
+    flywheelInterp.put(4.0, -51.0);
+    flywheelInterp.put(4.5, -53.0);
+    flywheelInterp.put(5.0, -56.0);
+    flywheelInterp.put(5.6, -57.0);
+    flywheelInterp.put(6.0, -64.0);
+  }
+    /* flywheelInterp.put(5.0, -65.0);
     flywheelInterp.put(5.5, -68.0);
     flywheelInterp.put(6.0, -69.0);
-  }
+  } */
 
   public void setGoal(double distance){
     rps = flywheelInterp.get(distance);
@@ -147,7 +169,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public boolean goodToShoot(){
-    return getSpeed() < -45.0;
+    return getSpeed() < rps + 2.5;
   }
 
   public void readyShot(boolean ready){
