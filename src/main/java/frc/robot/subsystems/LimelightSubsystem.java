@@ -106,7 +106,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
    SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets", leftLL != null ? leftLL.tagCount > 0 : false);
 
-    if(isValidUpdate(rightLL)){
+    if(isValidUpdate(rightLL) && rightLL.avgTagArea > 0.1){
       LimelightHelpers.PoseEstimate mt2 = rightLL;
 
       robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
@@ -126,7 +126,7 @@ public class LimelightSubsystem extends SubsystemBase {
       rightFieldVisionPose.setPose(mt2.pose); 
     }
 
-   if(isValidUpdate(leftLL)){
+   if(isValidUpdate(leftLL) && leftLL.avgTagArea > 0.1){
       LimelightHelpers.PoseEstimate mt2 = leftLL;
 
       robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));

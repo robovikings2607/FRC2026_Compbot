@@ -53,7 +53,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final RobotContainer robot;
   private MotionMagicVoltage magicMotionRequest;
   private PositionVoltage positionVoltage;
-  private double wantedEncoderPos;
+  private double currentEncoderPos;
   private boolean fixedShot = false;
   private boolean isDeactivated = false;
 
@@ -104,7 +104,7 @@ public class TurretSubsystem extends SubsystemBase {
             new CurrentLimitsConfigs()
                 // Swerve azimuth does not require much torque output, so we can set a relatively low
                 // stator current limit to help avoid brownouts without impacting performance.
-                .withStatorCurrentLimit(Amps.of(60))
+                .withStatorCurrentLimit(Amps.of(75))
                 .withStatorCurrentLimitEnable(true)
         );
   
@@ -117,19 +117,21 @@ public class TurretSubsystem extends SubsystemBase {
 
     // This method will be called once per scheduler run
 
-    if(turretMotor.hasResetOccurred()){}
+    if(turretMotor.hasResetOccurred()){
+      turretMotor.setPosition(currentEncoderPos);
+    }
 
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
     double robotRotation = robotPose.getRotation().getDegrees();
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
-    Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
+    Translation2d goalPose = ShooterUtils.determineShootingGoal(robotPose);
 
     //checks alliance and aims at corresponding hub
-    double currentEncoderPos = turretMotor.getPosition().getValueAsDouble();
+    currentEncoderPos = turretMotor.getPosition().getValueAsDouble();
     double targetEncoderPos = getTurretSetPoint(shooterPose, goalPose, robotRotation);
 
-    wantedEncoderPos = currentEncoderPos + getDelta(currentEncoderPos, targetEncoderPos);
+    double wantedEncoderPos = currentEncoderPos + getDelta(currentEncoderPos, targetEncoderPos);
 
     wantedEncoderPos = clampEncoderPos(wantedEncoderPos);
 

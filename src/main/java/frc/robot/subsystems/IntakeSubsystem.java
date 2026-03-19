@@ -82,7 +82,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     configs.withCurrentLimits(
         new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(Amps.of(95))
+            .withStatorCurrentLimit(Amps.of(35))
             .withStatorCurrentLimitEnable(true)
     );
 

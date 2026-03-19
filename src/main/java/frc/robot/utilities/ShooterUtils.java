@@ -103,8 +103,8 @@ public final class ShooterUtils {
     double distance = GeometryUtil.getTargetDistance(shooterPose, goalPose);
     double timeOfFlight = timeOfFlightInterp().get(distance);
 
-    double virtualTargetX = goalPose.getX() - (drivetrain.getState().Speeds.vxMetersPerSecond * timeOfFlight);
-    double virtualTargetY = goalPose.getY() - (drivetrain.getState().Speeds.vyMetersPerSecond * timeOfFlight);
+    double virtualTargetX = goalPose.getX() - (drivetrain.getState().Speeds.vyMetersPerSecond * timeOfFlight);
+    double virtualTargetY = goalPose.getY() - (drivetrain.getState().Speeds.vxMetersPerSecond * timeOfFlight);
     Translation2d virtualTarget = new Translation2d(virtualTargetX, virtualTargetY);
 
     return virtualTarget;

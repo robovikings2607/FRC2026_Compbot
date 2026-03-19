@@ -129,26 +129,11 @@ public class HoodSubsystem extends SubsystemBase {
     //key = distance from goal
     //value = position of hood in desired shot angle
     hoodInterp.put(0.0, 0.0);
-    hoodInterp.put(4.5, 0.0);
-    hoodInterp.put(5.0, -2.0);
-    hoodInterp.put(5.6, -4.0);
-    hoodInterp.put(6.0, -6.0);
-
-/*     hoodInterp.put(2.53, 0.0);
-    hoodInterp.put(3.1, 0.0);
-    hoodInterp.put(3.5, -1.0);
-    hoodInterp.put(4.0, -1.0);
-    hoodInterp.put(4.5, -2.0);
-    hoodInterp.put(4.75, -3.0);
-    hoodInterp.put(5.0, -4.0);
-    hoodInterp.put(5.125, -4.25);
-    hoodInterp.put(5.25, -4.5);
-    hoodInterp.put(5.375, -4.75);
-    hoodInterp.put(5.5, -5.0);
-    hoodInterp.put(5.625, -5.5);
-    hoodInterp.put(5.75, -6.0);
-    hoodInterp.put(5.875, -6.5);
-    hoodInterp.put(6.0, -7.0); */
+    hoodInterp.put(6.0, 0.0);
+    //hoodInterp.put(4.5, 0.0);
+    //hoodInterp.put(5.0, -2.0);
+    //hoodInterp.put(5.6, -4.0);
+    //hoodInterp.put(6.0, -6.0);
   }
 
   public void setGoal(double distance){ 
