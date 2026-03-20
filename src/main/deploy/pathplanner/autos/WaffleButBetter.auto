@@ -21,13 +21,13 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "WAFFLE Placeholder start"
+                        "pathName": "AllianceToNeutral1 (LeftBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "WAFFLE PLACEHOLDER middle"
+                        "pathName": "WrapAroundCollectFuel (LeftBump)"
                       }
                     },
                     {
@@ -66,6 +66,12 @@
                       "type": "path",
                       "data": {
                         "pathName": "waffleplaceholdersequel"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "Copy of waffleplaceholdersequel"
                       }
                     }
                   ]

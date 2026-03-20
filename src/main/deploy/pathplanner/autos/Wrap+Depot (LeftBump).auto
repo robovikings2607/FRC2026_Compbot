@@ -21,31 +21,13 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral1 (LeftBump)"
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "CollectFuel (LeftBump)"
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "Copy of NeutralToAlliance1 (LeftBump)"
+                        "pathName": null
                       }
                     }
                   ]
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
           }
         }
       ]

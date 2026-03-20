@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.279549319732927,
-        "y": 5.809880952380922
+        "x": 5.242353780313837,
+        "y": 5.568231098430813
       },
       "isLocked": false,
       "linkedName": "USEwaffleplaceholdend"
     },
     {
       "anchor": {
-        "x": 2.729090136054422,
-        "y": 5.153622448979591
+        "x": 2.188830242510699,
+        "y": 5.490599144079885
       },
       "prevControl": {
-        "x": 3.594158163270343,
-        "y": 5.414634353741467
+        "x": 3.120413694721826,
+        "y": 5.568231098430814
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "WaffleNOTend"
+      "linkedName": "waffleshoot"
     }
   ],
   "rotationTargets": [
@@ -37,8 +37,8 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.11868131868131827,
-      "maxWaypointRelativePos": 0.8351648351648379,
+      "minWaypointRelativePos": 0.2052667116812938,
+      "maxWaypointRelativePos": 0.6158001350438916,
       "constraints": {
         "maxVelocity": 2.0,
         "maxAcceleration": 2.0,
@@ -61,7 +61,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": null,
