@@ -103,8 +103,7 @@ public class LimelightSubsystem extends SubsystemBase {
   rightFieldVisionDetections = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/visionDetections");
   rightFieldVisionPose = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/fieldVisionPose");
 
-
-   SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets", leftLL != null ? leftLL.tagCount > 0 : false);
+  SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets", leftLL != null ? leftLL.tagCount > 0 : false);
 
     if(isValidUpdate(rightLL)){
       LimelightHelpers.PoseEstimate mt2 = rightLL;
@@ -189,8 +188,8 @@ public class LimelightSubsystem extends SubsystemBase {
     double minTagSize = 0.1; // This number needs to be derived from testing
 
     // Eliminate if there is no pose estimation
-    if (isValidUpdate(leftCamera)) { lefteliminated = true;}
-    if (isValidUpdate(rightCamera)) { righteliminated = true;}
+    if (!isValidUpdate(leftCamera)) { lefteliminated = true;}
+    if (!isValidUpdate(rightCamera)) { righteliminated = true;}
     // Return null if neither camera has a valid pose
     if(lefteliminated && righteliminated) { return null;}
 
@@ -237,9 +236,9 @@ public class LimelightSubsystem extends SubsystemBase {
     int blackList[] = {7,6,17};
     boolean flagged = false;
 
-    for (int i = 0; i < cameraPose.rawFiducials.length; i++) {
+    for (LimelightHelpers.RawFiducial tag : cameraPose.rawFiducials) {
       for (int j=0; j < blackList.length; j++) {
-        if(cameraPose.rawFiducials[i].id == blackList[j]) {
+        if(tag.id == blackList[j]) {
           flagged = true;
           break;
         }
@@ -251,12 +250,12 @@ public class LimelightSubsystem extends SubsystemBase {
 
     private boolean hasWhiteListedTags (LimelightHelpers.PoseEstimate cameraPose) {
     
-    int whiteList[] = {2,3,4,5,8,9,10,11,18,19,20,21,24,25,26,27};
+    int whiteList[] = {9,10,13,14,15,16,25,26,29,30,31,32};
     boolean flagged = false;
 
-    for (int i = 0; i < cameraPose.rawFiducials.length; i++) {
+    for (LimelightHelpers.RawFiducial tag : cameraPose.rawFiducials) {
       for (int j=0; j < whiteList.length; j++) {
-        if(cameraPose.rawFiducials[i].id == whiteList[j]) {
+        if(tag.id == whiteList[j]) {
           flagged = true;
           break;
         }
