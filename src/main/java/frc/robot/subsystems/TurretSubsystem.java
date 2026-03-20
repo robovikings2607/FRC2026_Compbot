@@ -123,8 +123,10 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     Pose2d robotPose = robot.drivetrain.getState().Pose;
-
+    // Get the robot heading from the odometer robot pose.  Extract the robot heading from the robot pose.
     double robotRotation = robotPose.getRotation().getDegrees();
+    // Get the shooter pose.  The shooter is not in the center of the robot so the (x,y) coordinates of the
+    // shooter needs to be estimated from the robot pose.
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
     Translation2d goalPose = ShooterUtils.determineShootingGoal(robotPose);
 
@@ -141,50 +143,37 @@ public class TurretSubsystem extends SubsystemBase {
       turretMotor.setControl(new CoastOut());
     }
     else{
-      turretMotor.setControl(positionVoltage.withPosition(wantedEncoderPos));
+      turretMotor.setControl(positionVoltage.withPosition(newEncoderPos));
     }
 
-    SmartDashboard.putBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());
-    SmartDashboard.putBoolean("UserButtonPressed", RobotController.getUserButton());
+    // Rumble the driver controller if the turret is getting close to the limits, both the minimum and
+    // maximum limit.
+    if(turretMotor.getPosition().getValueAsDouble() > (TurretConstants.MAX_ANGLE - 3.0) * rotationsPerDegree ||
+       turretMotor.getPosition().getValueAsDouble() < (TurretConstants.MIN_ANGLE + 3.0) * rotationsPerDegree){
+        robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 1);
+       }
+    else{
+      robot.driverController.controller.setRumble(GenericHID.RumbleType.kBothRumble, 0);
+    }
 
-    logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        
-    logNumber2("Turret/CurrentPose", currentEncoderPos);        
-    logNumber2("Turret/TargetPose", targetEncoderPos);        
-    logNumber2("Turret/WantedPose", wantedEncoderPos);        
+    // Write key values to network tables
+    logNumber("Turret/NewSetPoint", newSetPoint);        
+    logNumber("Turret/NewPosition", newEncoderPos);        
+    logNumber("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());
+
+    // Write key values to the log
+    logNumber2("Turret/NewSetPoint", newSetPoint);        
+    logNumber2("Turret/NewPosition", newEncoderPos);        
+    logNumber2("Turret/ActualPosition", turretMotor.getPosition().getValueAsDouble());        
   }
 
+  // This method returns the angle that the turret must be set to point at the center of the hub
+  // The return angle is in degrees
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
     double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
     double robotRotationAdjustedAngle = MathUtil.inputModulus(angle - robotRotation, -180.0, 180.0);   
 
-    return -robotRotationAdjustedAngle * rotationsPerDegree;
-  }
-
-  public static double clampEncoderPos(double newEncoderPos){
-/*     if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
-      newEncoderPos -= 360 * rotationsPerDegree;
-    }
-    else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
-      newEncoderPos += 360 * rotationsPerDegree;
-    } */
-    return MathUtil.inputModulus(newEncoderPos, rotationsPerDegree * TurretConstants.MIN_ANGLE, rotationsPerDegree * TurretConstants.MAX_ANGLE);
-  }
-
-  public static double getDelta(double previousSetPoint, double newSetPoint){
-    double delta = 0;
-
-    if(Math.abs(previousSetPoint - newSetPoint) >= 10.0){ //if turret wraps
-      delta = 10 - Math.abs(previousSetPoint - newSetPoint);
-     
-      if(previousSetPoint < newSetPoint){
-        delta = -delta;
-      }
-    }
-    else{
-      delta = newSetPoint - previousSetPoint;
-    }
-
-    return delta;
+    return -robotRotationAdjustedAngle;
   }
 
   public void fixedShot(boolean fixed){
@@ -223,5 +212,4 @@ public class TurretSubsystem extends SubsystemBase {
   public void logNumber2(String key, double value){
     RobotLogger.logDouble(key, value);
   }
-
 }
