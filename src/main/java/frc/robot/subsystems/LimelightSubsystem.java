@@ -89,64 +89,47 @@ public class LimelightSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    //yaw = LimelightHelpers.getBotPose2d(LEFT_LIMELIGHT_NAME).getRotation().getDegrees();
-  yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
+    // yaw =
+    // LimelightHelpers.getBotPose2d(LEFT_LIMELIGHT_NAME).getRotation().getDegrees();
+    yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
 
-  //LimelightHelpers.SetRobotOrientation(RIGHT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
-  LimelightHelpers.SetRobotOrientation(LEFT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
-  LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
-  LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
+    // LimelightHelpers.SetRobotOrientation(RIGHT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0,
+    // 0);
+    LimelightHelpers.SetRobotOrientation(LEFT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
+    LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
+    LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
 
-  leftFieldVisionDetections = robot.field.getObject("Limelight/" + LEFT_LIMELIGHT_NAME +"/visionDetections");
-  leftFieldVisionPose = robot.field.getObject("Limelight/" + LEFT_LIMELIGHT_NAME + "/fieldVisionPose");
+    leftFieldVisionDetections = robot.field.getObject("Limelight/" + LEFT_LIMELIGHT_NAME + "/visionDetections");
+    leftFieldVisionPose = robot.field.getObject("Limelight/" + LEFT_LIMELIGHT_NAME + "/fieldVisionPose");
 
-  rightFieldVisionDetections = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/visionDetections");
-  rightFieldVisionPose = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/fieldVisionPose");
+    rightFieldVisionDetections = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/visionDetections");
+    rightFieldVisionPose = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/fieldVisionPose");
 
+    SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/X", rightLL.pose.getX());
+    SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Y", rightLL.pose.getY());
+    SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Rotation",
+    rightLL.pose.getRotation().getDegrees());
 
-   SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets", leftLL != null ? leftLL.tagCount > 0 : false);
+    SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets",
+    leftLL != null ? leftLL.tagCount > 0 : false);
+    SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/X", leftLL.pose.getX());
+    SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/Y", leftLL.pose.getY());
+    SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/Rotation", leftLL.pose.getRotation().getDegrees());
 
-    if(isValidUpdate(rightLL) && rightLL.avgTagArea > 0.1){
-      LimelightHelpers.PoseEstimate mt2 = rightLL;
+    LimelightHelpers.PoseEstimate bestPose = getBestPose(leftLL, rightLL);
 
-      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
+    if (bestPose != null) {
+      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 999999999));
       robot.drivetrain.addVisionMeasurement(
-        mt2.pose,
-        mt2.timestampSeconds
-      ); 
-
-      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
-      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
-      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
-
-      // System.out.println("has pose");
-      List<Pose2d> tagPoses = getTagPoses(mt2);     
-
-      rightFieldVisionDetections.setPoses(tagPoses);
-      rightFieldVisionPose.setPose(mt2.pose); 
+          bestPose.pose,
+          bestPose.timestampSeconds);
     }
 
-   if(isValidUpdate(leftLL) && leftLL.avgTagArea > 0.1){
-      LimelightHelpers.PoseEstimate mt2 = leftLL;
+    // System.out.println("has pose");
+    List<Pose2d> tagPoses = getTagPoses(bestPose);
 
-      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
-      robot.drivetrain.addVisionMeasurement(
-        mt2.pose,
-        mt2.timestampSeconds
-      ); 
-
-      SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
-      SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
-      SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
-
-      // System.out.println("has pose");
-      List<Pose2d> tagPoses = getTagPoses(mt2);     
-
-      leftFieldVisionDetections.setPoses(tagPoses);
-      leftFieldVisionPose.setPose(mt2.pose); 
-    }
-
-       SmartDashboard.putBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightLL != null ? rightLL.tagCount > 0 : false);
+    leftFieldVisionDetections.setPoses(tagPoses);
+    leftFieldVisionPose.setPose(bestPose.pose);
   }
 
   public boolean isValidUpdate(LimelightHelpers.PoseEstimate mt2){
@@ -175,6 +158,61 @@ public class LimelightSubsystem extends SubsystemBase {
     }
 
     return tagPoses;
+  }
+
+  private LimelightHelpers.PoseEstimate getBestPose(LimelightHelpers.PoseEstimate leftCamera,
+      LimelightHelpers.PoseEstimate rightCamera) {
+
+    boolean lefteliminated = false;
+    boolean righteliminated = false;
+    /*
+     * boolean leftHasBlackListedTags = false;
+     * boolean rightHasBlackListedTags = false;
+     * boolean leftHasWhiteListedTags = false;
+     * boolean rightHasWhiteListedTags = false;
+     */
+
+    double minTagSize = 0.1; // This number needs to be derived from testing
+
+    // Eliminate if there is no pose estimation
+    if (!isValidUpdate(leftCamera)) {
+      lefteliminated = true;
+    }
+    if (!isValidUpdate(rightCamera)) {
+      righteliminated = true;
+    }
+    // Return null if neither camera has a valid pose
+    if (lefteliminated && righteliminated) {
+      return null;
+    }
+
+    // Eliminate poses derived from small tags, i.e., tags that are too far from the
+    // robot.
+    if (leftCamera.avgTagArea < minTagSize) {
+      lefteliminated = true;
+    }
+    if (rightCamera.avgTagArea < minTagSize) {
+      righteliminated = true;
+    }
+    // Return null if neither camera has large enough tags
+    if (lefteliminated && righteliminated) {
+      return null;
+    }
+
+    // Return the pose of the camera with the largest average area and the most
+    // AprilTags used for pose estimation
+    if (leftCamera.tagCount > rightCamera.tagCount) {
+      // The left camera has more tags so we choose the left camera
+      return leftCamera;
+    } else if (rightCamera.tagCount > leftCamera.tagCount) {
+      return rightCamera;
+    } else {
+      if (rightCamera.avgTagArea > leftCamera.avgTagArea) {
+        return rightCamera;
+      } else {
+        return leftCamera;
+      }
+    }
   }
 
 }
