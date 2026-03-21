@@ -35,6 +35,7 @@ public class LimelightSubsystem extends SubsystemBase {
   FieldObject2d fieldVisionDetections, fieldVisionPose;
   FieldObject2d leftFieldVisionDetections, leftFieldVisionPose;
   FieldObject2d rightFieldVisionDetections, rightFieldVisionPose;  
+  FieldObject2d finalFieldVisionDetections, finalFieldVisionPose;  
   
   double yaw;
   String LEFT_LIMELIGHT_NAME = "limelight-left";
@@ -103,6 +104,7 @@ public class LimelightSubsystem extends SubsystemBase {
   rightFieldVisionDetections = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/visionDetections");
   rightFieldVisionPose = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/fieldVisionPose");
 
+ 
 
    SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets", leftLL != null ? leftLL.tagCount > 0 : false);
 
@@ -144,8 +146,25 @@ public class LimelightSubsystem extends SubsystemBase {
 
       leftFieldVisionDetections.setPoses(tagPoses);
       leftFieldVisionPose.setPose(mt2.pose); 
-    }
+    } 
 
+/*     LimelightHelpers.PoseEstimate mt2 = getBestPose(leftLL, rightLL);
+    if(mt2 != null){
+      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
+      robot.drivetrain.addVisionMeasurement(
+        mt2.pose,
+        mt2.timestampSeconds
+      ); 
+
+       finalFieldVisionDetections = robot.field.getObject("Limelight/Final/visionDetections");
+      finalFieldVisionPose = robot.field.getObject("Limelight/Final/fieldVisionPose"); 
+
+      List<Pose2d> tagPoses = getTagPoses(mt2);     
+
+      finalFieldVisionDetections.setPoses(tagPoses);
+      finalFieldVisionPose.setPose(mt2.pose); 
+    }
+ */
        SmartDashboard.putBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightLL != null ? rightLL.tagCount > 0 : false);
   }
 
@@ -189,14 +208,14 @@ public class LimelightSubsystem extends SubsystemBase {
     double minTagSize = 0.1; // This number needs to be derived from testing
 
     // Eliminate if there is no pose estimation
-    if (isValidUpdate(leftCamera)) { lefteliminated = true;}
-    if (isValidUpdate(rightCamera)) { righteliminated = true;}
+    if (!isValidUpdate(leftCamera)) { lefteliminated = true;}
+    if (!isValidUpdate(rightCamera)) { righteliminated = true;}
     // Return null if neither camera has a valid pose
     if(lefteliminated && righteliminated) { return null;}
 
     // Eliminate poses derived from small tags, i.e., tags that are too far from the robot.
-    if (leftCamera.avgTagArea < minTagSize) { lefteliminated = true;}
-    if (rightCamera.avgTagArea < minTagSize) { righteliminated = true;}
+    if (leftCamera.avgTagArea < minTagSize && !lefteliminated) { lefteliminated = true;}
+    if (rightCamera.avgTagArea < minTagSize && !righteliminated) { righteliminated = true;}
     // Return null if neither camera has large enough tags
     if(lefteliminated && righteliminated) { return null;}
 
