@@ -168,22 +168,38 @@ public class LimelightSubsystem extends SubsystemBase {
     
     double minTagSize = 0.1; // This number needs to be derived from testing
 
-    // Eliminate if there is no pose estimation
-    if (!isValidUpdate(leftCamera)) { lefteliminated = true;}
-    if (!isValidUpdate(rightCamera)) { righteliminated = true;}
-    // Return null if neither camera has a valid pose
+    // Eliminate if there is no pose estimation or the tag area is below the limit
+    if (isValidUpdate(leftCamera)) {
+      if (leftCamera.avgTagArea < minTagSize) {
+        lefteliminated = true;
+      }
+    } else {
+      lefteliminated = true;
+    }
+
+    if (isValidUpdate(rightCamera)) {
+      if (rightCamera.avgTagArea < minTagSize) {
+        righteliminated = true;
+      }
+    } else {
+      righteliminated = true;
+    }
+
+    // Determine if both cameras were eliminated or only one of the cameras was eliminated.
+    // If both were eliminated, return null.  And if only one was eliminated, return the camera pose
+    // that was not elimninated.
+    
     if(lefteliminated && righteliminated) { 
       return null;
     }
-
-    // Eliminate poses derived from small tags, i.e., tags that are too far from the robot.
-    if (leftCamera.avgTagArea < minTagSize) { lefteliminated = true;}
-    if (rightCamera.avgTagArea < minTagSize) { righteliminated = true;}
-    // Return null if neither camera has large enough tags
-    if(lefteliminated && righteliminated) { 
-      return null;
+    else if (lefteliminated) {
+      return rightCamera;
+    }
+    else if (righteliminated) {
+      return leftCamera;
     }
 
+    // At this point, both camera poses are valid so decide which is the best one.
     // Return the best pose out of the two cameras in this order of priority:
     // 1) Larger tag count.  If both have the same tag, then
     // 2) The camera that has a tag in the white tag list (preferred tags).  If no camera has a preferred tag, then
