@@ -53,8 +53,8 @@ public class LimelightSubsystem extends SubsystemBase {
 
     //Right
     LimelightHelpers.setPipelineIndex(RIGHT_LIMELIGHT_NAME, 0);
-    LimelightHelpers.SetIMUMode(RIGHT_LIMELIGHT_NAME, 3);
-    LimelightHelpers.SetIMUAssistAlpha(RIGHT_LIMELIGHT_NAME, 0.01);
+    LimelightHelpers.SetIMUMode(RIGHT_LIMELIGHT_NAME, 0);
+    //LimelightHelpers.SetIMUAssistAlpha(RIGHT_LIMELIGHT_NAME, 0.01);
 
     try {
         // This automatically loads the layout for the current year's game
@@ -93,7 +93,7 @@ public class LimelightSubsystem extends SubsystemBase {
     //yaw = LimelightHelpers.getBotPose2d(LEFT_LIMELIGHT_NAME).getRotation().getDegrees();
   yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
 
-  //LimelightHelpers.SetRobotOrientation(RIGHT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
+  LimelightHelpers.SetRobotOrientation(RIGHT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
   LimelightHelpers.SetRobotOrientation(LEFT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
   LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
   LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);

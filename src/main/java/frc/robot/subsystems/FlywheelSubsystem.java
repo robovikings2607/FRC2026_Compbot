@@ -184,6 +184,10 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     fixedShot = fixed;
   }
 
+  public boolean isFixed(){
+    return fixedShot;
+  }
+
   public void tune(){
     flywheelMotor.setControl(velocityControl.withVelocity(-70));
   }

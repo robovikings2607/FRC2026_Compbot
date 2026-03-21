@@ -140,6 +140,9 @@ public class TurretSubsystem extends SubsystemBase {
     if(isDeactivated){
       turretMotor.setControl(new CoastOut());
     }
+    else if(fixedShot){
+      turretMotor.setControl(positionVoltage.withPosition(0.0));
+    }
     else{
       turretMotor.setControl(positionVoltage.withPosition(wantedEncoderPos));
     }
@@ -148,7 +151,7 @@ public class TurretSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("UserButtonPressed", RobotController.getUserButton());
 
     logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        
-    logNumber2("Turret/CurrentPose", currentEncoderPos);        
+    logNumber("Turret/CurrentPose", currentEncoderPos);        
     logNumber2("Turret/TargetPose", targetEncoderPos);        
     logNumber2("Turret/WantedPose", wantedEncoderPos);        
   }
@@ -214,6 +217,10 @@ public class TurretSubsystem extends SubsystemBase {
 
   public TalonFX getMotor(){
     return turretMotor;
+  }
+
+  public boolean isFixed(){
+    return fixedShot;
   }
 
   public void logNumber(String key, double value){

@@ -73,6 +73,12 @@
                       "data": {
                         "pathName": "AllianceToDepot (LeftBump)"
                       }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "DepotToShoot"
+                      }
                     }
                   ]
                 }

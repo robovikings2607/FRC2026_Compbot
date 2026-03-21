@@ -63,7 +63,10 @@ public class Shoot extends Command {
 /*        if(fixedShot){
         flywheelMotor.setControl(velocityControl.withVelocity(50));
       } */
-    if(ShooterUtils.inNeutralZone(robotPose)){
+    if(flywheel.isFixed()){
+      flywheel.velocityControl(-50.0); //guessing
+    }
+    else if(ShooterUtils.inNeutralZone(robotPose)){
       flywheel.velocityControl(-80.0);
       hood.positionControl(HoodConstants.MAX_HOOD_POSITION);
     }
