@@ -14,6 +14,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -261,6 +262,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         } catch (Exception ex) {
             DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
         }
+    }
+
+    public void configureLogging(edu.wpi.first.wpilibj.smartdashboard.Field2d field) {
+        var pathObject = field.getObject("PathPlanner Path");
+        var targetObject = field.getObject("PathPlanner Target");
+
+        PathPlannerLogging.setLogActivePathCallback(pathObject::setPoses);
+
+        PathPlannerLogging.setLogTargetPoseCallback(pose -> {
+            targetObject.setPose(pose);
+            double errorMeters = getState().Pose.getTranslation().getDistance(pose.getTranslation());
+            SmartDashboard.putNumber("PathPlanner/CrossTrackError", errorMeters);
+        });
     }
 
     // Method that returns True if robot is in the Red alliance and False if the robot is in the Blue alliance

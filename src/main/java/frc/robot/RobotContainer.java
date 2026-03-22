@@ -156,6 +156,7 @@ public class RobotContainer {
         );
 
         drivetrain.registerTelemetry(logger::telemeterize2);
+        drivetrain.configureLogging(field);
     }
 
     public void configureNamedCommands(){
