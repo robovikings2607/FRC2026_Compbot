@@ -8,6 +8,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.StatusSignal;
 
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
@@ -31,6 +32,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private RobotContainer robot;
 
+  private StatusSignal rollerMotorStatorCurrent; 
+
   public IntakeSubsystem(RobotContainer robot) {
     this.robot = robot;
 
@@ -43,6 +46,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     configurePivotMotor();
     configureRollerMotor();
+    rollerMotorStatorCurrent = rollerMotor.getStatorCurrent();
     // zeroIntake();
   }
 
@@ -121,7 +125,8 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public boolean isJammed(){
-    return rollerMotor.getStatorCurrent().getValueAsDouble() > 100.0;
+    rollerMotorStatorCurrent.refresh();
+    return rollerMotorStatorCurrent.getValueAsDouble() > 100.0;
   }
 
   public void deployIntake(){
