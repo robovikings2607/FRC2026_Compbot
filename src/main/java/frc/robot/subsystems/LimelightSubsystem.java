@@ -50,6 +50,7 @@ public class LimelightSubsystem extends SubsystemBase {
     //Left
     LimelightHelpers.setPipelineIndex(LEFT_LIMELIGHT_NAME, 0);
     LimelightHelpers.SetIMUMode(LEFT_LIMELIGHT_NAME, 0);
+    //LimelightHelpers.SetIMUAssistAlpha(RIGHT_LIMELIGHT_NAME, 0.01);
 
     //Right
     LimelightHelpers.setPipelineIndex(RIGHT_LIMELIGHT_NAME, 0);
