@@ -177,39 +177,64 @@ public class LimelightSubsystem extends SubsystemBase {
     return tagPoses;
   }
 
-  private LimelightHelpers.PoseEstimate getBestPose(LimelightHelpers.PoseEstimate leftCamera, LimelightHelpers.PoseEstimate rightCamera) {
+    private LimelightHelpers.PoseEstimate getBestPose(LimelightHelpers.PoseEstimate leftCamera, LimelightHelpers.PoseEstimate rightCamera) {
     
     boolean lefteliminated = false;
     boolean righteliminated = false;
-/*     boolean leftHasBlackListedTags = false;
-    boolean rightHasBlackListedTags = false;
-    boolean leftHasWhiteListedTags = false;
-    boolean rightHasWhiteListedTags = false; */
     
     double minTagSize = 0.1; // This number needs to be derived from testing
 
-    // Eliminate if there is no pose estimation
-    if (isValidUpdate(leftCamera)) { lefteliminated = true;}
-    if (isValidUpdate(rightCamera)) { righteliminated = true;}
-    // Return null if neither camera has a valid pose
-    if(lefteliminated && righteliminated) { return null;}
+    // Eliminate if there is no pose estimation or the tag area is below the limit
+    if (isValidUpdate(leftCamera)) {
+      if (leftCamera.avgTagArea < minTagSize) {
+        lefteliminated = true;
+      }
+    } else {
+      lefteliminated = true;
+    }
 
-    // Eliminate poses derived from small tags, i.e., tags that are too far from the robot.
-    if (leftCamera.avgTagArea < minTagSize) { lefteliminated = true;}
-    if (rightCamera.avgTagArea < minTagSize) { righteliminated = true;}
-    // Return null if neither camera has large enough tags
-    if(lefteliminated && righteliminated) { return null;}
+    if (isValidUpdate(rightCamera)) {
+      if (rightCamera.avgTagArea < minTagSize) {
+        righteliminated = true;
+      }
+    } else {
+      righteliminated = true;
+    }
 
-    // Return the pose of the camera with the largest average area and the most AprilTags used for pose
-    // estimation
+    // Determine if both cameras were eliminated or only one of the cameras was eliminated.
+    // If both were eliminated, return null.  And if only one was eliminated, return the camera pose
+    // that was not elimninated.
+    
+    if(lefteliminated && righteliminated) { 
+      return null;
+    }
+    else if (lefteliminated) {
+      return rightCamera;
+    }
+    else if (righteliminated) {
+      return leftCamera;
+    }
+
+    // At this point, both camera poses are valid so decide which is the best one.
+    // Return the best pose out of the two cameras in this order of priority:
+    // 1) Larger tag count.  If both have the same tag, then
+    // 2) The camera that has a tag in the white tag list (preferred tags).  If no camera has a preferred tag, then
+    // 3) The camera with the larger tag area.
+
     if (leftCamera.tagCount > rightCamera.tagCount) {
       // The left camera has more tags so we choose the left camera
       return leftCamera;
     }
     else if (rightCamera.tagCount > leftCamera.tagCount) {
+      // The right camera has more tags so we choose the right camera
       return rightCamera;
       }
     else {
+      // Both cameras have the same number of tags, so which one has a preferred tag.
+      if(hasWhiteListedTags(leftCamera)) { return leftCamera;}
+      if(hasWhiteListedTags(rightCamera)) {return rightCamera;}
+
+      // No camera has preferred tag, then select the camera with the largest average tag area.
       if(rightCamera.avgTagArea > leftCamera.avgTagArea) {
         return rightCamera;
       }
@@ -218,28 +243,16 @@ public class LimelightSubsystem extends SubsystemBase {
       }
     }
   }
-/* 
-    // Check if camera used black listed tags to estimate pose
-    if (hasBlackListedTags(leftCamera)) { leftHasBlackListedTags = true;}
-    if (hasBlackListedTags(rightCamera)) { rightHasBlackListedTags = true;}
 
-    // Check if camera used white listed tags to estimate pose
-    if (hasWhiteListedTags(leftCamera)) { leftHasWhiteListedTags = true;}
-    if (hasWhiteListedTags(rightCamera)) { rightHasWhiteListedTags = true;}
-
-    //
-
-    return bestPose;
-  } */
-
+  // This method checks if any of the tags in the camera pose is a forbidden tag
   private boolean hasBlackListedTags (LimelightHelpers.PoseEstimate cameraPose) {
     
     int blackList[] = {7,6,17};
     boolean flagged = false;
 
-    for (int i = 0; i < cameraPose.rawFiducials.length; i++) {
+    for (LimelightHelpers.RawFiducial tag : cameraPose.rawFiducials) {
       for (int j=0; j < blackList.length; j++) {
-        if(cameraPose.rawFiducials[i].id == blackList[j]) {
+        if(tag.id == blackList[j]) {
           flagged = true;
           break;
         }
@@ -249,14 +262,15 @@ public class LimelightSubsystem extends SubsystemBase {
     return flagged;
   }
 
-    private boolean hasWhiteListedTags (LimelightHelpers.PoseEstimate cameraPose) {
-    
-    int whiteList[] = {2,3,4,5,8,9,10,11,18,19,20,21,24,25,26,27};
+  // This method checks if any of the tags in the camera pose is a preferred tag
+  private boolean hasWhiteListedTags(LimelightHelpers.PoseEstimate cameraPose) {
+
+    int whiteList[] = { 9, 10, 25, 26 };  // For now, these are the tags on the hubs
     boolean flagged = false;
 
-    for (int i = 0; i < cameraPose.rawFiducials.length; i++) {
-      for (int j=0; j < whiteList.length; j++) {
-        if(cameraPose.rawFiducials[i].id == whiteList[j]) {
+    for (LimelightHelpers.RawFiducial tag : cameraPose.rawFiducials) {
+      for (int j = 0; j < whiteList.length; j++) {
+        if (tag.id == whiteList[j]) {
           flagged = true;
           break;
         }
