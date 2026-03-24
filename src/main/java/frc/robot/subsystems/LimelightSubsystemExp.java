@@ -96,8 +96,9 @@ public class LimelightSubsystemExp extends SubsystemBase {
   }
 
 /**
- * Dynamically calculates the standard deviation (trust) matrix based on distance and tag count.
+ * Dynamically calculates the standard deviation (trust) matrix based on area and tag count.
  */
+
 private Matrix<N3, N1> calculateStdDevs(
     LimelightHelpers.PoseEstimate estimate, 
     Pose2d currentOdometryPose,
@@ -108,27 +109,35 @@ private Matrix<N3, N1> calculateStdDevs(
     
     double jumpDistance = currentOdometryPose.getTranslation().getDistance(estimate.pose.getTranslation());
     
-      if (estimate.tagCount >= 2) {
-          // Multi-tag tracking is incredibly stable. We trust X, Y, and Heading heavily.
-          xyStdDev = 0.2; 
-          thetaStdDev = 0.2; 
-      } else {
+    if (estimate.tagCount >= 2) {
+        // Multi-tag tracking is incredibly stable. We trust X, Y, and Heading heavily.
+        xyStdDev = 0.2; 
+        thetaStdDev = 0.2; 
+    } else {
         // If we have jumped more than a meter or 
         // are spinning faster than 720 degrees per second, the camera is blurred. Ignore it!
         if (jumpDistance <= 1.0 && currentSpinRate < (4.0 * Math.PI)) {
-          // Single tag: Accuracy drops off exponentially as the robot moves further away.
-          // We scale the X/Y standard deviation proportionally to the distance squared.
-          double distance = estimate.avgTagDist;
+            
+            double tagArea = 0.0;
+            
+            // Extract the area (ta) of the primary tag being tracked
+            if (estimate.rawFiducials.length > 0) {
+                tagArea = estimate.rawFiducials[0].ta;
+            }
+            
+            // Protect against division by zero 
+            if (tagArea > 0.0) {
+                // Area Proxy Math: As area shrinks (due to distance or skew), the penalty grows.
+                // You will need to tune the '0.5' numerator based on your camera resolution.
+                xyStdDev = 0.5 + (0.5 / tagArea); 
+            }
           
-          // Base standard deviation + (distance squared * scaling factor)
-          xyStdDev = 0.5 + (Math.pow(distance, 2) * 0.1);
-          
-          // Single tag heading is notoriously noisy. Setting it to an exceptionally high 
-          // number tells the Kalman filter to completely ignore the vision heading and 
-          // rely purely on the robot's gyroscope.
-          thetaStdDev = 9999999; 
+            // Single tag heading is notoriously noisy. Setting it to an exceptionally high 
+            // number tells the Kalman filter to completely ignore the vision heading and 
+            // rely purely on the robot's gyroscope.
+            thetaStdDev = 9999999; 
         }
-      }
+    }
 
     // Returns a 3x1 matrix containing [X standard deviation, Y standard deviation, Theta standard deviation]
     return VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev);
