@@ -134,16 +134,23 @@ public class TurretSubsystem extends SubsystemBase {
 
     // Check if the new set point of the turret is beyond the limits.  If not beyond the limits,
     // then no change to the new set position.  But if the new setup position is beyond the limits,
-    // the turret is rotated to the other limit in the opposite direction of travel.  The turret has physical
+    // the turret is rotated towards the other limit in the opposite direction of travel.  The turret has physical
     // retrictions and it won't rotate infinitely.
+    // This is done this way because the MIN and MAX angles are not separated by 360 degrees.  The separation
+    // is less than 360 degrees.  The calculations below take that into consideration and avoid a new set position
+    // in the gap between MIN and MAX angles.
 
-    if(newSetPoint > (TurretConstants.MAX_ANGLE)){
-      newSetPoint = TurretConstants.MIN_ANGLE;
+    if (newSetPoint > (TurretConstants.MAX_ANGLE)) {
+      newSetPoint -= 360;
+      if (newSetPoint < TurretConstants.MIN_ANGLE) {
+        newSetPoint = TurretConstants.MIN_ANGLE;
+      }
+    } else if (newSetPoint < (TurretConstants.MIN_ANGLE)) {
+      newSetPoint += 360;
+      if (newSetPoint > TurretConstants.MAX_ANGLE) {
+        newSetPoint = TurretConstants.MAX_ANGLE;
+      }
     }
-    else if(newSetPoint < (TurretConstants.MIN_ANGLE)){
-      newSetPoint = TurretConstants.MAX_ANGLE;
-    }
-
     // Convert angle to encoder rotations
     double newEncoderPos = newSetPoint * rotationsPerDegree;
 
