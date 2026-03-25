@@ -152,7 +152,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     // Set the motor to the new encoder position if the turret has not been deactivated
     if(isDeactivated){
-      // Hold the turret at the current position
+      // Hold the turret at the current position so it won't move as robot moves or shoots
       turretMotor.setControl(positionVoltage.withPosition(turretMotor.getPosition().getValueAsDouble()));
     }
     else{
@@ -184,6 +184,7 @@ public class TurretSubsystem extends SubsystemBase {
   // The return angle is in degrees
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
     double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
+    angle -= robotRotation;
     return angle;
   }
 
