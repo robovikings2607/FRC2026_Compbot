@@ -150,7 +150,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     // Set the motor to the new encoder position if the turret has not been deactivated
     if(isDeactivated){
-      turretMotor.setControl(new CoastOut());
+      turretMotor.setControl(positionVoltage.withPosition(turretMotor.getPosition().getValueAsDouble()));
     }
     else{
       turretMotor.setControl(positionVoltage.withPosition(newEncoderPos));
