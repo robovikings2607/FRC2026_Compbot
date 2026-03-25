@@ -133,23 +133,26 @@ public class TurretSubsystem extends SubsystemBase {
     double newSetPoint = getTurretSetPoint(shooterPose, goalPose, robotRotation);
 
     // Check if the new set point of the turret is beyond the limits.  If not beyond the limits,
-    // then no change to the new encoder position.  But if the new setup position is beyond the limits,
-    // the turret is rotated by 360 degrees in the opposite direction of travel.  The turret has physical
+    // then no change to the new set position.  But if the new setup position is beyond the limits,
+    // the turret is rotated to the other limit in the opposite direction of travel.  The turret has physical
     // retrictions and it won't rotate infinitely.
-    double newEncoderPos = newSetPoint * rotationsPerDegree;
 
     if(newSetPoint > (TurretConstants.MAX_ANGLE)){
-      newEncoderPos -= 360 * rotationsPerDegree;
+      newSetPoint = TurretConstants.MIN_ANGLE;
     }
     else if(newSetPoint < (TurretConstants.MIN_ANGLE)){
-      newEncoderPos += 360 * rotationsPerDegree;
+      newSetPoint = TurretConstants.MAX_ANGLE;
     }
+
+    // Convert angle to encoder rotations
+    double newEncoderPos = newSetPoint * rotationsPerDegree;
 
     // This allows for adjustment of the turret offset angle in degrees.
     double offset = SmartDashboard.getNumber("Turret/Offset", 0.0);
 
     // Set the motor to the new encoder position if the turret has not been deactivated
     if(isDeactivated){
+      // Hold the turret at the current position
       turretMotor.setControl(positionVoltage.withPosition(turretMotor.getPosition().getValueAsDouble()));
     }
     else{
@@ -181,9 +184,7 @@ public class TurretSubsystem extends SubsystemBase {
   // The return angle is in degrees
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
     double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
-    double robotRotationAdjustedAngle = MathUtil.inputModulus(angle - robotRotation, -180.0, 180.0);   
-
-    return -robotRotationAdjustedAngle;
+    return angle;
   }
 
   public void fixedShot(boolean fixed){
