@@ -83,6 +83,7 @@ public final class ShooterUtils {
   public static InterpolatingDoubleTreeMap timeOfFlightInterp(){
     InterpolatingDoubleTreeMap interp = new InterpolatingDoubleTreeMap();
     
+    //almost certainly wrong
     interp.put(0.0, 0.7);
     interp.put(2.5, 0.7);
     interp.put(3.0, 0.8);
@@ -100,12 +101,14 @@ public final class ShooterUtils {
     Translation2d goalPose = determineShootingGoal(robotPose);
     Translation2d shooterPose = getShooterPose(robotPose);
 
-    double distance = GeometryUtil.getTargetDistance(shooterPose, goalPose);
+    double distance = shooterPose.getDistance(goalPose);
     double timeOfFlight = timeOfFlightInterp().get(distance);
 
-    double virtualTargetX = goalPose.getX() - (drivetrain.getState().Speeds.vyMetersPerSecond * timeOfFlight);
-    double virtualTargetY = goalPose.getY() - (drivetrain.getState().Speeds.vxMetersPerSecond * timeOfFlight);
-    Translation2d virtualTarget = new Translation2d(virtualTargetX, virtualTargetY);
+    double updatedPoseX = drivetrain.getState().Speeds.vyMetersPerSecond * timeOfFlight;
+    double updatedPoseY = drivetrain.getState().Speeds.vxMetersPerSecond * timeOfFlight;
+    Translation2d updatedPose = new Translation2d(updatedPoseX, updatedPoseY).unaryMinus(); //check  if unaryminus is need
+
+    Translation2d virtualTarget = goalPose.plus(updatedPose); //check if could be minus
 
     return virtualTarget;
   }
