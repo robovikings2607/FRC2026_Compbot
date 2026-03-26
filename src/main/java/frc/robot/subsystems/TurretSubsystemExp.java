@@ -68,6 +68,10 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
         180.0
     );
 
+    if (optimizedTargetDegrees < TurretConstants.MIN_ANGLE) {
+      optimizedTargetDegrees += 360;
+    }
+
     unclampedTargetAngleDegrees = optimizedTargetDegrees; 
 
     // Clamp the setpoint to your physical soft limits 
