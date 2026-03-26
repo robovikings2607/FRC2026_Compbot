@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LeftWrapShot"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
@@ -40,8 +40,8 @@
       "minWaypointRelativePos": 0.23497636731938054,
       "maxWaypointRelativePos": 0.6212018906144485,
       "constraints": {
-        "maxVelocity": 2.0,
-        "maxAcceleration": 3.0,
+        "maxVelocity": 2.5,
+        "maxAcceleration": 3.5,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,

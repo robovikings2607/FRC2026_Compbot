@@ -21,19 +21,19 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral1 (LeftBump)"
+                        "pathName": "AllianceToNeutral1 (RightBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "WrapAroundCollectFuel (LeftBump)"
+                        "pathName": "Copy of WrapAroundCollectFuel (LeftBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "WrapToAlliance (LeftBump)"
+                        "pathName": "Copy of WrapToAlliance (LeftBump)"
                       }
                     }
                   ]
@@ -65,19 +65,13 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Rotate"
+                        "pathName": "AllianceToNeutral2 (RightBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToDepot (LeftBump)"
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "DepotToShoot"
+                        "pathName": "NeutralToAlliance2 (RightBump)"
                       }
                     }
                   ]

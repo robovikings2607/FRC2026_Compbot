@@ -35,6 +35,7 @@ public class LimelightSubsystem extends SubsystemBase {
   FieldObject2d fieldVisionDetections, fieldVisionPose;
   FieldObject2d leftFieldVisionDetections, leftFieldVisionPose;
   FieldObject2d rightFieldVisionDetections, rightFieldVisionPose;  
+  FieldObject2d finalFieldVisionDetections, finalFieldVisionPose;  
   
   double yaw;
   String LEFT_LIMELIGHT_NAME = "limelight-left";
@@ -49,11 +50,12 @@ public class LimelightSubsystem extends SubsystemBase {
     //Left
     LimelightHelpers.setPipelineIndex(LEFT_LIMELIGHT_NAME, 0);
     LimelightHelpers.SetIMUMode(LEFT_LIMELIGHT_NAME, 0);
+    //LimelightHelpers.SetIMUAssistAlpha(RIGHT_LIMELIGHT_NAME, 0.01);
 
     //Right
     LimelightHelpers.setPipelineIndex(RIGHT_LIMELIGHT_NAME, 0);
-    LimelightHelpers.SetIMUMode(RIGHT_LIMELIGHT_NAME, 3);
-    LimelightHelpers.SetIMUAssistAlpha(RIGHT_LIMELIGHT_NAME, 0.01);
+    LimelightHelpers.SetIMUMode(RIGHT_LIMELIGHT_NAME, 0);
+    //LimelightHelpers.SetIMUAssistAlpha(RIGHT_LIMELIGHT_NAME, 0.01);
 
     try {
         // This automatically loads the layout for the current year's game
@@ -92,7 +94,7 @@ public class LimelightSubsystem extends SubsystemBase {
     //yaw = LimelightHelpers.getBotPose2d(LEFT_LIMELIGHT_NAME).getRotation().getDegrees();
   yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
 
-  //LimelightHelpers.SetRobotOrientation(RIGHT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
+  LimelightHelpers.SetRobotOrientation(RIGHT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
   LimelightHelpers.SetRobotOrientation(LEFT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
   LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
   LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
@@ -103,6 +105,7 @@ public class LimelightSubsystem extends SubsystemBase {
   rightFieldVisionDetections = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/visionDetections");
   rightFieldVisionPose = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/fieldVisionPose");
 
+ 
 
    SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets", leftLL != null ? leftLL.tagCount > 0 : false);
 
@@ -144,8 +147,25 @@ public class LimelightSubsystem extends SubsystemBase {
 
       leftFieldVisionDetections.setPoses(tagPoses);
       leftFieldVisionPose.setPose(mt2.pose); 
-    }
+    } 
 
+/*     LimelightHelpers.PoseEstimate mt2 = getBestPose(leftLL, rightLL);
+    if(mt2 != null){
+      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
+      robot.drivetrain.addVisionMeasurement(
+        mt2.pose,
+        mt2.timestampSeconds
+      ); 
+
+       finalFieldVisionDetections = robot.field.getObject("Limelight/Final/visionDetections");
+      finalFieldVisionPose = robot.field.getObject("Limelight/Final/fieldVisionPose"); 
+
+      List<Pose2d> tagPoses = getTagPoses(mt2);     
+
+      finalFieldVisionDetections.setPoses(tagPoses);
+      finalFieldVisionPose.setPose(mt2.pose); 
+    }
+ */
        SmartDashboard.putBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightLL != null ? rightLL.tagCount > 0 : false);
   }
 
@@ -184,43 +204,20 @@ public class LimelightSubsystem extends SubsystemBase {
     
     double minTagSize = 0.1; // This number needs to be derived from testing
 
-    // Eliminate if there is no pose estimation or the tag area is below the limit
-    if (isValidUpdate(leftCamera)) {
-      if (leftCamera.avgTagArea < minTagSize) {
-        lefteliminated = true;
-      }
-    } else {
-      lefteliminated = true;
-    }
+    // Eliminate if there is no pose estimation
+    if (!isValidUpdate(leftCamera)) { lefteliminated = true;}
+    if (!isValidUpdate(rightCamera)) { righteliminated = true;}
+    // Return null if neither camera has a valid pose
+    if(lefteliminated && righteliminated) { return null;}
 
-    if (isValidUpdate(rightCamera)) {
-      if (rightCamera.avgTagArea < minTagSize) {
-        righteliminated = true;
-      }
-    } else {
-      righteliminated = true;
-    }
+    // Eliminate poses derived from small tags, i.e., tags that are too far from the robot.
+    if (leftCamera.avgTagArea < minTagSize && !lefteliminated) { lefteliminated = true;}
+    if (rightCamera.avgTagArea < minTagSize && !righteliminated) { righteliminated = true;}
+    // Return null if neither camera has large enough tags
+    if(lefteliminated && righteliminated) { return null;}
 
-    // Determine if both cameras were eliminated or only one of the cameras was eliminated.
-    // If both were eliminated, return null.  And if only one was eliminated, return the camera pose
-    // that was not elimninated.
-    
-    if(lefteliminated && righteliminated) { 
-      return null;
-    }
-    else if (lefteliminated) {
-      return rightCamera;
-    }
-    else if (righteliminated) {
-      return leftCamera;
-    }
-
-    // At this point, both camera poses are valid so decide which is the best one.
-    // Return the best pose out of the two cameras in this order of priority:
-    // 1) Larger tag count.  If both have the same tag, then
-    // 2) The camera that has a tag in the white tag list (preferred tags).  If no camera has a preferred tag, then
-    // 3) The camera with the larger tag area.
-
+    // Return the pose of the camera with the largest average area and the most AprilTags used for pose
+    // estimation
     if (leftCamera.tagCount > rightCamera.tagCount) {
       // The left camera has more tags so we choose the left camera
       return leftCamera;

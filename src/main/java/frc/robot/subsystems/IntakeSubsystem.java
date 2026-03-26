@@ -105,7 +105,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void runRollersUnjammed(){
-    rollerMotor.setVoltage(9.0);
+    rollerMotor.setVoltage(10.5);
   }
 
   public void runRollersJammed(){
@@ -148,7 +148,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void forcePivotDown(){
-    pivotMotor.setVoltage(-2.0);
+    pivotMotor.setVoltage(2.0);
     runRollersUnjammed();
   }
 }

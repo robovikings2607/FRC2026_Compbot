@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.852425106990014,
-        "y": 5.878758915834522
+        "x": 2.5769900142653355,
+        "y": 5.6070470756062765
       },
       "isLocked": false,
       "linkedName": "LeftWrapShot"
     },
     {
       "anchor": {
-        "x": 0.6620684736091293,
-        "y": 5.969329529243937
+        "x": 2.2794008559201138,
+        "y": 5.6070470756062765
       },
       "prevControl": {
-        "x": 1.2649339621726003,
-        "y": 5.920416327015829
+        "x": 2.034255686997384,
+        "y": 5.558018041821731
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "WaffleAutonEnd"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
+    "maxVelocity": 5.0,
     "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -50,5 +50,5 @@
     "velocity": 0,
     "rotation": -0.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

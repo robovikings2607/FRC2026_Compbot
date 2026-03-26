@@ -20,11 +20,20 @@ public class FixShooter extends InstantCommand {
   HoodSubsystem hood;
   FlywheelSubsystem flywheel;
 
-  public FixShooter() {
+  public FixShooter(RobotContainer robot) {
     // Use addRequirements() here to declare subsystem dependencies.
+    this.robot = robot;
+    turret = robot.turret;
+    hood = robot.hood;
+    flywheel = robot.flywheel;
+
+    addRequirements(turret, hood, flywheel);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    turret.fixedShot(!turret.isFixed());
+    flywheel.fixedShot(!flywheel.isFixed());
+  }
 }
