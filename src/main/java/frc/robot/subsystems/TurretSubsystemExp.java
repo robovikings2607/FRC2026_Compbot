@@ -87,6 +87,10 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
   }
 
   public Translation2d getTurretFieldPosition(Pose2d robotPose) {
+    return getTurretPose(robotPose).getTranslation();
+  }
+
+  public Pose2d getTurretPose(Pose2d robotPose) {
 
     Pose2d turretPose = GeometryUtil.getOffsetPose(
       robotPose,
@@ -94,7 +98,7 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
       Rotation2d.fromDegrees(BOT_TO_TURRET_ANGLE_DEGREES)
     );    
 
-    return turretPose.getTranslation();
+    return turretPose;
   }
 
 

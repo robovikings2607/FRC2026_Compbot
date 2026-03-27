@@ -51,10 +51,10 @@ public class TrackHubTargetExp extends Command {
         FieldLocations.BLUE_HUB : FieldLocations.RED_HUB;
         
         
-            Translation2d turretCoordinates = turret.getTurretFieldPosition(robotPose); 
+            Pose2d turretPose = turret.getTurretPose(robotPose); 
 
             AimingSolution solution = aimingMap.calculateMovingAimingSolution(
-                turretCoordinates, 
+                turretPose, 
                 hubCoordinates, 
                 robotVelocity
             );
