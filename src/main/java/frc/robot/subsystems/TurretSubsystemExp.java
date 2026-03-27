@@ -68,6 +68,8 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
    */
   public void trackTarget(Translation2d fieldRelativeTarget, Pose2d robotPose) {
       
+    double actualAngleDegrees = GeometryUtil.getMotorRotationsAsDegrees(motor.getPosition().getValueAsDouble(), GEAR_RATIO);
+        
     Translation2d turretFieldPosition = getTurretFieldPosition(robotPose);
 
     // 2. Vector Math: Calculate the line from the Turret to the Target
@@ -96,8 +98,6 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
 
     double targetRotations = GeometryUtil.getDegreesAsMotorRotations(safelyClampedAngleDegrees, GEAR_RATIO);      
    
-    double actualAngleDegrees = GeometryUtil.getMotorRotationsAsDegrees(motor.getPosition().getValueAsDouble(), GEAR_RATIO);
-
     SetAgressiveMotorPosition(targetRotations, "Turret/newSetPointRotations");
 
     drawTurretAngles(safelyClampedAngleDegrees, actualAngleDegrees);
