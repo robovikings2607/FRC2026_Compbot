@@ -12,7 +12,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.utilities.GeometryUtil;
@@ -27,6 +32,17 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
   private final double TARGET_ERR_TOLERANCE_ROTATIONS = 0.01;    
   private double unclampedTargetAngleDegrees = 0.0;
   private final VoltageOut voltageRequest = new VoltageOut(0.0);
+  private final Mechanism2d mech = new Mechanism2d(60, 60);
+  private final MechanismRoot2d mechRoot = mech.getRoot("TurretCenter", 30, 30);
+
+  // Target ligament (Red) - set it slightly thinner (weight 3)
+  private final MechanismLigament2d targetLigament = 
+    mechRoot.append(new MechanismLigament2d("TargetAngleDegrees", 20, 0, 3, new Color8Bit(Color.kRed)));
+
+  // Actual ligament (Green) - set it thicker (weight 6)
+  private final MechanismLigament2d actualLigament = 
+    mechRoot.append(new MechanismLigament2d("ActualAngleDegrees", 20, 0, 6, new Color8Bit(Color.kGreen)));
+
 
   
   
@@ -36,6 +52,7 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
     configureMotor();
 
     SmartDashboard.putNumber("Turret/MotorCurrent", motor.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putData("Turret Viz", mech);
   }
 
 
@@ -75,11 +92,20 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
     unclampedTargetAngleDegrees = optimizedTargetDegrees; 
 
     // Clamp the setpoint to your physical soft limits 
-    double safelyClampedDegrees = MathUtil.clamp(optimizedTargetDegrees, TurretConstants.MIN_ANGLE, TurretConstants.MAX_ANGLE);
+    double safelyClampedAngleDegrees = MathUtil.clamp(optimizedTargetDegrees, TurretConstants.MIN_ANGLE, TurretConstants.MAX_ANGLE);
 
-    double targetRotations = GeometryUtil.getDegreesAsMotorRotations(safelyClampedDegrees, GEAR_RATIO);      
+    double targetRotations = GeometryUtil.getDegreesAsMotorRotations(safelyClampedAngleDegrees, GEAR_RATIO);      
    
+    double actualAngleDegrees = GeometryUtil.getMotorRotationsAsDegrees(motor.getPosition().getValueAsDouble(), GEAR_RATIO);
+
     SetAgressiveMotorPosition(targetRotations, "Turret/newSetPointRotations");
+
+    drawTurretAngles(safelyClampedAngleDegrees, actualAngleDegrees);
+  }
+
+  private void drawTurretAngles(double targetAngle, double actualAngle) {
+    targetLigament.setAngle(targetAngle);
+    actualLigament.setAngle(actualAngle); 
   }
 
   public double getUnclampedTargetAngleDegrees() {
