@@ -12,7 +12,7 @@ import frc.robot.utilities.GeometryUtil;
 public class ShooterUtilTest {
 
     @Test
-    public void testRobot270Target10Degrees() {
+    public void testRobot350TargetMinus150Degrees() {
         System.out.println("DEBUGGING TURRET:");   
         
         // 1. The Robot Pose
