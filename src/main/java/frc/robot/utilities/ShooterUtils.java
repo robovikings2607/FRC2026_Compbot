@@ -15,7 +15,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.RobotContainer;
 
 /** Add your docs here. */
@@ -109,4 +111,53 @@ public final class ShooterUtils {
 
     return virtualTarget;
   }
+
+  /*
+   * test the angle returned from turret logic
+  */
+  public static double testTurretAngle1(Pose2d robotPose, Translation2d goalPose) {
+    // Get the robot heading from the odometer robot pose.  Extract the robot heading from the robot pose.
+    double robotRotation = robotPose.getRotation().getDegrees();
+    // Get the shooter pose.  The shooter is not in the center of the robot so the (x,y) coordinates of the
+    // shooter needs to be estimated from the robot pose.
+    Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
+ 
+    // Estimate the heading of the turret in degrees.  Zero degrees is towards the front of the robot.
+    // Positive angles are counter clockwise (CCW) and negative angles are clockwise (CW)
+    double newTurretAngle = getTurretSetPoint(shooterPose, goalPose, robotRotation);
+
+    // Check if the new set point of the turret is beyond the limits.  If not beyond the limits,
+    // then no change to the new set position.  But if the new setup position is beyond the limits,
+    // the turret is rotated towards the other limit in the opposite direction of travel.  The turret has physical
+    // retrictions and it won't rotate infinitely.
+    // This is done this way because the MIN and MAX angles are not separated by 360 degrees.  The separation
+    // is less than 360 degrees.  The calculations below take that into consideration and avoid a new set position
+    // in the gap between MIN and MAX angles.
+
+
+    System.out.println("Turret Angle before wrap logic: " + newTurretAngle);
+    
+    if (newTurretAngle > (TurretConstants.MAX_ANGLE)) {
+      newTurretAngle -= 360;
+      if (newTurretAngle < TurretConstants.MIN_ANGLE) {
+        newTurretAngle = TurretConstants.MIN_ANGLE;
+      }
+    } else if (newTurretAngle < (TurretConstants.MIN_ANGLE)) {
+      newTurretAngle += 360;
+      if (newTurretAngle > TurretConstants.MAX_ANGLE) {
+        newTurretAngle = TurretConstants.MAX_ANGLE;
+      }
+    }
+
+    return newTurretAngle;
+  }
+
+  // This method returns the angle that the turret must be set to point at the center of the hub
+  // The return angle is in degrees
+  private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
+    double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
+    angle -= robotRotation;
+    return angle;
+  }
+
 }
