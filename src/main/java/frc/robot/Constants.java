@@ -67,6 +67,7 @@ public final class Constants {
   public static final class IntakeConstants {
     public static final int ROLLER_ID = 14;
     public static final int PIVOT_ID = 13;
+    public static final int ENCODER_ID = 25;
 
     public static final double INTAKE_RETRACTED = -14.0; //check these later
     public static final double INTAKE_DEPLOYED = 0.0; //check these later

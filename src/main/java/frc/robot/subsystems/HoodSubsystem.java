@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import java.util.Dictionary;
 
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
@@ -34,6 +36,7 @@ import static edu.wpi.first.units.Units.*;
 public class HoodSubsystem extends SubsystemBase {
   /** Creates a new HoodSubsystem. */
   private TalonFX hoodMotor;
+  private TalonSRX hoodMotor2;
   private RobotContainer robot;
 
   private final PositionVoltage control = new PositionVoltage(0);
@@ -45,9 +48,10 @@ public class HoodSubsystem extends SubsystemBase {
   private boolean readyToShoot = false;
   private boolean fixedShot = false;
 
-
   public HoodSubsystem(RobotContainer robot) {
     this.robot = robot;
+
+    hoodMotor2 = new TalonSRX(0);
 
     configureMotor();
     createInterpMap();
@@ -143,6 +147,7 @@ public class HoodSubsystem extends SubsystemBase {
   public void positionControl(double angle){
     RobotLogger.logDouble("hood", angle);
     hoodMotor.setControl(control.withPosition(angle));
+    hoodMotor2.set(TalonSRXControlMode.Position, angle);
   }
 
   public void coastOut(){

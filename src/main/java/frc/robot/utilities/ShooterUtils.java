@@ -4,11 +4,14 @@
 
 package frc.robot.utilities;
 
+import com.ctre.phoenix6.hardware.Pigeon2;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -108,5 +111,47 @@ public final class ShooterUtils {
     Translation2d virtualTarget = new Translation2d(virtualTargetX, virtualTargetY);
 
     return virtualTarget;
+  }
+
+  public static Translation2d stuypulesShootOnMove(CommandSwerveDrivetrain drivetrain, Pose2d robotPose){
+    Translation2d goalPose = determineShootingGoal(robotPose);
+    Translation2d shooterPose = getShooterPose(robotPose);
+    Translation2d vituralPose = goalPose;
+
+    double distance = shooterPose.getDistance(goalPose);
+    double timeOfFlight = timeOfFlightInterp().get(distance);
+
+    double vx = drivetrain.getState().Speeds.vxMetersPerSecond;
+    double vy = drivetrain.getState().Speeds.vyMetersPerSecond;
+
+    for(int i = 0; i < 10; i++){
+      double dx = vx * timeOfFlight;
+      double dy = vy * timeOfFlight;
+
+      vituralPose = new Translation2d(goalPose.getX() - dx, goalPose.getY() - dy);
+      distance = shooterPose.getDistance(vituralPose);
+
+      if(Math.abs(timeOfFlightInterp().get(distance) - timeOfFlight) < 0.01){
+        break;
+      }
+
+      timeOfFlight = timeOfFlightInterp().get(distance);
+    }
+
+    ChassisSpeeds robotRelativeChassisSpeeds = drivetrain.getState().Speeds;
+    ChassisSpeeds fieldRelativeChassisSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeChassisSpeeds, 
+                                                                                    drivetrain.getState().Pose.getRotation());
+
+    Pigeon2 gyro = drivetrain.getPigeon2();
+    double ax = gyro.getAccelerationX().getValueAsDouble() * 9.81;
+    double ay = gyro.getAccelerationY().getValueAsDouble() * 9.81;
+
+    double omega = robotRelativeChassisSpeeds.omegaRadiansPerSecond;
+
+    double updateDelay = 0.05;
+
+    
+
+    return vituralPose;
   }
 }
