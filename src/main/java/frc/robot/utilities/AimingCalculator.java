@@ -72,7 +72,7 @@ public AimingSolution calculateMovingAimingSolution(
 
       // 4. Compensate Flywheel Speed
       // If moving toward (+), subtract RPM. If moving away (-), add RPM.
-      double RPS_PER_MPS_FACTOR = 50.0 / 60.0; // Tune this on the field
+      double RPS_PER_MPS_FACTOR = 6.27; // Tune this on the field
       double compensatedRPS = baseState.rps - (radialVelocityMPS * RPS_PER_MPS_FACTOR);
 
 
