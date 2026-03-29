@@ -10,6 +10,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
@@ -115,14 +116,19 @@ public final class ShooterUtils {
 
   public static Translation2d stuypulesShootOnMove(CommandSwerveDrivetrain drivetrain, Pose2d robotPose){
     Translation2d goalPose = determineShootingGoal(robotPose);
-    Translation2d shooterPose = getShooterPose(robotPose);
+    // Translation2d shooterPose = getShooterPose(robotPose);
+    Translation2d shooterPose = futureShooterPose(drivetrain, robotPose, true);
     Translation2d vituralPose = goalPose;
 
     double distance = shooterPose.getDistance(goalPose);
     double timeOfFlight = timeOfFlightInterp().get(distance);
 
-    double vx = drivetrain.getState().Speeds.vxMetersPerSecond;
-    double vy = drivetrain.getState().Speeds.vyMetersPerSecond;
+    // double vx = drivetrain.getState().Speeds.vxMetersPerSecond;
+    // double vy = drivetrain.getState().Speeds.vyMetersPerSecond;
+
+    double[] v = tangentialVelocities(drivetrain, robotPose, true);
+    double vx = v[0];
+    double vy = v[1];
 
     for(int i = 0; i < 10; i++){
       double dx = vx * timeOfFlight;
@@ -138,9 +144,11 @@ public final class ShooterUtils {
       timeOfFlight = timeOfFlightInterp().get(distance);
     }
 
+    return vituralPose;
+  }
+
+  public static Translation2d futureShooterPose(CommandSwerveDrivetrain drivetrain, Pose2d robotPose, boolean useAccel){
     ChassisSpeeds robotRelativeChassisSpeeds = drivetrain.getState().Speeds;
-    ChassisSpeeds fieldRelativeChassisSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeChassisSpeeds, 
-                                                                                    drivetrain.getState().Pose.getRotation());
 
     Pigeon2 gyro = drivetrain.getPigeon2();
     double ax = gyro.getAccelerationX().getValueAsDouble() * 9.81;
@@ -150,8 +158,57 @@ public final class ShooterUtils {
 
     double updateDelay = 0.05;
 
-    
+    Pose2d futureRobotPose = robotPose.exp(
+      new Twist2d(
+        robotRelativeChassisSpeeds.vxMetersPerSecond * updateDelay,
+        robotRelativeChassisSpeeds.vyMetersPerSecond * updateDelay,
+        omega * updateDelay
+      ));
 
-    return vituralPose;
+    if(useAccel){
+      futureRobotPose = robotPose.exp(
+        new Twist2d (
+            robotRelativeChassisSpeeds.vxMetersPerSecond * updateDelay + 0.5 * ax * updateDelay*updateDelay,
+            robotRelativeChassisSpeeds.vyMetersPerSecond * updateDelay + 0.5 * ay * updateDelay*updateDelay,
+            omega * updateDelay
+        )
+      );
+    }
+
+    return getShooterPose(futureRobotPose);
+  }
+
+  public static double[] tangentialVelocities(CommandSwerveDrivetrain drivetrain, Pose2d robotPose, boolean useAccel){
+    ChassisSpeeds robotRelativeChassisSpeeds = drivetrain.getState().Speeds;
+    ChassisSpeeds fieldRelativeChassisSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeChassisSpeeds, 
+                                                                                    drivetrain.getState().Pose.getRotation());
+    
+    double[] velocities = new double[2];
+
+    Translation2d shooterPose = getShooterPose(robotPose);
+        
+    double updateDelay = 0.05;
+    double omega = robotRelativeChassisSpeeds.omegaRadiansPerSecond;
+
+    Pigeon2 gyro = drivetrain.getPigeon2();
+    double ax = gyro.getAccelerationX().getValueAsDouble() * 9.81;
+    double ay = gyro.getAccelerationY().getValueAsDouble() * 9.81;
+
+    Translation2d r = shooterPose.minus(robotPose.getTranslation());
+
+    double vx = fieldRelativeChassisSpeeds.vxMetersPerSecond - omega * r.getY();
+    double vy = fieldRelativeChassisSpeeds.vyMetersPerSecond - omega * r.getX();
+
+    if(useAccel){
+      Translation2d fieldAccel = new Translation2d(ax, ay).rotateBy(robotPose.getRotation());
+
+      vx += fieldAccel.getX() * updateDelay;
+      vy += fieldAccel.getY() * updateDelay;
+    }
+
+    velocities[0] = vx;
+    velocities[1] = vy;
+
+    return velocities;
   }
 }
