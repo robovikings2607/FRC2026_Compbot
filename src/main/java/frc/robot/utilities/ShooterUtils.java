@@ -152,12 +152,63 @@ public final class ShooterUtils {
     return newTurretAngle;
   }
 
+    /*
+   * test the angle returned from turret logic
+  */
+  public static double testTurretAngle2(Pose2d robotPose, Translation2d goalPose) {
+        
+    Translation2d fieldRelativeTarget = goalPose;
+
+    Translation2d turretFieldPosition = getTurretFieldPosition(robotPose);
+
+    // 2. Vector Math: Calculate the line from the Turret to the Target
+    Translation2d turretToTargetVector = fieldRelativeTarget.minus(turretFieldPosition);
+
+    Rotation2d fieldAngleToTarget = turretToTargetVector.getAngle();
+
+    Rotation2d robotRelativeAngle = fieldAngleToTarget.minus(robotPose.getRotation());
+
+    Rotation2d motorTargetAngle = robotRelativeAngle.minus(Rotation2d.fromDegrees(0));
+
+    double optimizedTargetDegrees = MathUtil.inputModulus(
+        motorTargetAngle.getDegrees(), 
+        -180.0, 
+        180.0
+    );
+
+    System.out.println("Turret Angle before wrap logic: " + optimizedTargetDegrees);
+
+    if (optimizedTargetDegrees < TurretConstants.MIN_ANGLE) {
+      optimizedTargetDegrees += 360;
+    }
+
+    // Clamp the setpoint to your physical soft limits 
+    double safelyClampedAngleDegrees = MathUtil.clamp(optimizedTargetDegrees, TurretConstants.MIN_ANGLE, TurretConstants.MAX_ANGLE);
+
+    return safelyClampedAngleDegrees;
+  }
+
   // This method returns the angle that the turret must be set to point at the center of the hub
   // The return angle is in degrees
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
     double angle = GeometryUtil.getTargetAngle(turretCenter, hubCenter);
     angle -= robotRotation;
     return angle;
+  }
+
+  public static Translation2d getTurretFieldPosition(Pose2d robotPose) {
+    return getTurretPose(robotPose).getTranslation();
+  }
+
+  public static Pose2d getTurretPose(Pose2d robotPose) {
+
+    Pose2d turretPose = GeometryUtil.getOffsetPose(
+      robotPose,
+      ShooterConstants.BOT_TO_SHOOTER_DISTANCE,
+      new Rotation2d(ShooterConstants.BOT_TO_SHOOTER_ANGLE)
+    );    
+
+    return turretPose;
   }
 
 }
