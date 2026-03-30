@@ -58,6 +58,9 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
         new CurrentLimitsConfigs()
             .withStatorCurrentLimit(Amps.of(85))
             .withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(Amps.of(40))
+            .withSupplyCurrentLowerLimit(Amps.of(10))
+            .withSupplyCurrentLimitEnable(true)
     );
 
     var slot0Configs = configs.Slot0;

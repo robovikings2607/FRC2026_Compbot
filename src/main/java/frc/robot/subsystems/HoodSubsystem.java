@@ -13,14 +13,18 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -37,7 +41,10 @@ public class HoodSubsystem extends SubsystemBase {
   /** Creates a new HoodSubsystem. */
   private TalonFX hoodMotor;
   private TalonSRX hoodMotor2;
+  private CANcoder encoder;
   private RobotContainer robot;
+
+  private PhoenixPIDController pid = new PhoenixPIDController(0.0, 0.0, 0.0);
 
   private final PositionVoltage control = new PositionVoltage(0);
   private final CoastOut coastOut = new CoastOut();
@@ -52,6 +59,7 @@ public class HoodSubsystem extends SubsystemBase {
     this.robot = robot;
 
     hoodMotor2 = new TalonSRX(0);
+    encoder = new CANcoder(0);
 
     configureMotor();
     createInterpMap();
@@ -87,6 +95,10 @@ public class HoodSubsystem extends SubsystemBase {
       hoodMotor.setPosition(0.0);
     } */
 
+    double output = pid.calculate(encoder.getPosition().getValueAsDouble(), setPoint, Timer.getFPGATimestamp());
+
+    hoodMotor2.set(TalonSRXControlMode.PercentOutput, output);
+
     SmartDashboard.putNumber("Hood/Positioj", hoodMotor.getPosition().getValueAsDouble());
   }
 
@@ -121,6 +133,9 @@ public class HoodSubsystem extends SubsystemBase {
             new CurrentLimitsConfigs()
                 .withStatorCurrentLimit(Amps.of(60))
                 .withStatorCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(Amps.of(40))
+                .withSupplyCurrentLowerLimit(Amps.of(10))
+                .withSupplyCurrentLimitEnable(true)
         );
 
     hoodMotor.getConfigurator().apply(configs);
@@ -147,7 +162,7 @@ public class HoodSubsystem extends SubsystemBase {
   public void positionControl(double angle){
     RobotLogger.logDouble("hood", angle);
     hoodMotor.setControl(control.withPosition(angle));
-    hoodMotor2.set(TalonSRXControlMode.Position, angle);
+    //hoodMotor2.set(TalonSRXControlMode.Position, angle);
   }
 
   public void coastOut(){

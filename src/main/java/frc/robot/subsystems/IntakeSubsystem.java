@@ -97,6 +97,9 @@ public class IntakeSubsystem extends SubsystemBase {
         new CurrentLimitsConfigs()
             .withStatorCurrentLimit(Amps.of(35))
             .withStatorCurrentLimitEnable(true)
+             .withSupplyCurrentLimit(Amps.of(40))
+            .withSupplyCurrentLowerLimit(Amps.of(10))
+            .withSupplyCurrentLimitEnable(true)
     );
 
     pivotMotor.getConfigurator().apply(configs);
@@ -114,6 +117,9 @@ public class IntakeSubsystem extends SubsystemBase {
             // stator current limit to help avoid brownouts without impacting performance.
             .withStatorCurrentLimit(Amps.of(120))
             .withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(Amps.of(40))
+            .withSupplyCurrentLowerLimit(Amps.of(10))
+            .withSupplyCurrentLimitEnable(true)
     );
   }
 
