@@ -105,6 +105,9 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
             new CurrentLimitsConfigs()
                 .withStatorCurrentLimit(Amps.of(120))
                 .withStatorCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(Amps.of(40))
+                .withSupplyCurrentLowerLimit(Amps.of(10))
+                .withSupplyCurrentLimitEnable(true)
         );
 
     flywheelMotor.setNeutralMode(NeutralModeValue.Coast);

@@ -1,14 +1,19 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityDutyCycle;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -19,14 +24,18 @@ import frc.robot.Constants.IntakeConstants;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.security.Timestamp;
+
 public class IntakeSubsystem extends SubsystemBase {
 
   private final TalonFX rollerMotor;
   private final TalonFX pivotMotor;
+  private final CANcoder pivotEncoder;
 
   private PositionVoltage control  = new PositionVoltage(0);
+  private PhoenixPIDController pid = new PhoenixPIDController(0, 0, 0);
 
-  private double intakePosition;
+  private double intakePosition, output;
   private boolean isDeployed, isUp;
 
   private RobotContainer robot;
@@ -36,6 +45,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     rollerMotor = new TalonFX(IntakeConstants.ROLLER_ID);
     pivotMotor = new TalonFX(IntakeConstants.PIVOT_ID);
+    pivotEncoder = new CANcoder(IntakeConstants.ENCODER_ID);
 
     intakePosition = IntakeConstants.INTAKE_RETRACTED;
     isDeployed = false;
@@ -69,6 +79,9 @@ public class IntakeSubsystem extends SubsystemBase {
       pivotMotor.setPosition(0.0);
     } */
 
+    output = pid.calculate(pivotEncoder.getAbsolutePosition().getValueAsDouble(), intakePosition, Timer.getFPGATimestamp());
+    pivotMotor.set(output);
+
     SmartDashboard.putBoolean("Intake/IsJammed", isJammed());
     SmartDashboard.putNumber("Intake/Position", pivotMotor.getPosition().getValueAsDouble());
   }
@@ -84,6 +97,9 @@ public class IntakeSubsystem extends SubsystemBase {
         new CurrentLimitsConfigs()
             .withStatorCurrentLimit(Amps.of(35))
             .withStatorCurrentLimitEnable(true)
+             .withSupplyCurrentLimit(Amps.of(40))
+            .withSupplyCurrentLowerLimit(Amps.of(10))
+            .withSupplyCurrentLimitEnable(true)
     );
 
     pivotMotor.getConfigurator().apply(configs);
@@ -101,6 +117,9 @@ public class IntakeSubsystem extends SubsystemBase {
             // stator current limit to help avoid brownouts without impacting performance.
             .withStatorCurrentLimit(Amps.of(120))
             .withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(Amps.of(40))
+            .withSupplyCurrentLowerLimit(Amps.of(10))
+            .withSupplyCurrentLimitEnable(true)
     );
   }
 
@@ -126,12 +145,14 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public void deployIntake(){
     pivotMotor.setNeutralMode(NeutralModeValue.Coast);
-    pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_DEPLOYED));
+    intakePosition = IntakeConstants.INTAKE_DEPLOYED;
+    //pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_DEPLOYED));
   }
 
   public void retractIntake(){
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
-    pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_RETRACTED));
+    intakePosition = IntakeConstants.INTAKE_RETRACTED;
+    //pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_RETRACTED));
   }
 
  /*  public void zeroIntake(){

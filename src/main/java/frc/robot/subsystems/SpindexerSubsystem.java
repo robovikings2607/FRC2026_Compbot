@@ -50,6 +50,9 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
             // stator current limit to help avoid brownouts without impacting performance.
             .withStatorCurrentLimit(Amps.of(120))
             .withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(Amps.of(40))
+            .withSupplyCurrentLowerLimit(Amps.of(10))
+            .withSupplyCurrentLimitEnable(true)
     );
 
     //TODO JJF: Get the real numbers for these values through tuning
