@@ -70,9 +70,34 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
       
     double actualAngleDegrees = GeometryUtil.getMotorRotationsAsDegrees(motor.getPosition().getValueAsDouble(), GEAR_RATIO);
         
+    unclampedTargetAngleDegrees = calcUnclampedTurretAngleToTargetDegrees(fieldRelativeTarget, robotPose);
+
+    double safelyClampedAngleDegrees = MathUtil.clamp(unclampedTargetAngleDegrees, TurretConstants.MIN_ANGLE, TurretConstants.MAX_ANGLE);
+
+    double targetRotations = GeometryUtil.getDegreesAsMotorRotations(safelyClampedAngleDegrees, GEAR_RATIO);      
+   
+    SetAgressiveMotorPosition(targetRotations, "Turret/newSetPointRotations");
+
+    drawTurretAngles(safelyClampedAngleDegrees, actualAngleDegrees);
+  }
+
+  /*
+   * Calculates the turret angle to the target
+   * Note: This angle will be in the range (0,360) to account for the need
+   * to subsequently convert the angle to motor rotations where you may need
+   * more than the rotation equivalent of 180 degrees depending on the physical
+   * limits of the turret
+
+   * The returned angle may exceed the physical limits of the turret. Recommend clamping
+   * the results of this method before converting to motor rotations to avoid
+   * exceeding the turret limits
+  */
+  public static double calcUnclampedTurretAngleToTargetDegrees(
+    Translation2d fieldRelativeTarget, 
+    Pose2d robotPose) {
+      
     Translation2d turretFieldPosition = getTurretFieldPosition(robotPose);
 
-    // 2. Vector Math: Calculate the line from the Turret to the Target
     Translation2d turretToTargetVector = fieldRelativeTarget.minus(turretFieldPosition);
 
     Rotation2d fieldAngleToTarget = turretToTargetVector.getAngle();
@@ -81,26 +106,21 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
 
     Rotation2d motorTargetAngle = robotRelativeAngle.minus(Rotation2d.fromDegrees(ZERO_MOTOR_POSITION_ANGLE_DEGREES));
 
-    double optimizedTargetDegrees = MathUtil.inputModulus(
+    double targetDegrees = MathUtil.inputModulus(
         motorTargetAngle.getDegrees(), 
         -180.0, 
         180.0
     );
 
-    if (optimizedTargetDegrees < TurretConstants.MIN_ANGLE) {
-      optimizedTargetDegrees += 360;
+    if (targetDegrees < TurretConstants.MIN_ANGLE) {
+      targetDegrees += 360;
     }
 
-    unclampedTargetAngleDegrees = optimizedTargetDegrees; 
+    if (targetDegrees > TurretConstants.MAX_ANGLE) {
+      targetDegrees -= 360;
+    }
 
-    // Clamp the setpoint to your physical soft limits 
-    double safelyClampedAngleDegrees = MathUtil.clamp(optimizedTargetDegrees, TurretConstants.MIN_ANGLE, TurretConstants.MAX_ANGLE);
-
-    double targetRotations = GeometryUtil.getDegreesAsMotorRotations(safelyClampedAngleDegrees, GEAR_RATIO);      
-   
-    SetAgressiveMotorPosition(targetRotations, "Turret/newSetPointRotations");
-
-    drawTurretAngles(safelyClampedAngleDegrees, actualAngleDegrees);
+    return targetDegrees;
   }
 
   private void drawTurretAngles(double targetAngle, double actualAngle) {
@@ -112,11 +132,11 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
     return unclampedTargetAngleDegrees;
   }
 
-  public Translation2d getTurretFieldPosition(Pose2d robotPose) {
+  public static Translation2d getTurretFieldPosition(Pose2d robotPose) {
     return getTurretPose(robotPose).getTranslation();
   }
 
-  public Pose2d getTurretPose(Pose2d robotPose) {
+  public static Pose2d getTurretPose(Pose2d robotPose) {
 
     Pose2d turretPose = GeometryUtil.getOffsetPose(
       robotPose,
