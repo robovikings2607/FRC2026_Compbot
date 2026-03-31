@@ -70,7 +70,12 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
       
     double actualAngleDegrees = GeometryUtil.getMotorRotationsAsDegrees(motor.getPosition().getValueAsDouble(), GEAR_RATIO);
         
-    unclampedTargetAngleDegrees = calcUnclampedTurretAngleToTargetDegrees(fieldRelativeTarget, robotPose);
+    unclampedTargetAngleDegrees = calcUnclampedTurretAngleToTargetDegrees(
+      fieldRelativeTarget, 
+      robotPose,
+      TurretConstants.MIN_ANGLE,
+      TurretConstants.MAX_ANGLE
+    );
 
     double safelyClampedAngleDegrees = MathUtil.clamp(unclampedTargetAngleDegrees, TurretConstants.MIN_ANGLE, TurretConstants.MAX_ANGLE);
 
@@ -94,7 +99,10 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
   */
   public static double calcUnclampedTurretAngleToTargetDegrees(
     Translation2d fieldRelativeTarget, 
-    Pose2d robotPose) {
+    Pose2d robotPose,
+    double minAngleDegrees,
+    double maxAngleDegrees
+  ) {
       
     Translation2d turretFieldPosition = getTurretFieldPosition(robotPose);
 
@@ -112,11 +120,11 @@ public class TurretSubsystemExp extends ShooterComponentSubsystemExp {
         180.0
     );
 
-    if (targetDegrees < TurretConstants.MIN_ANGLE) {
+    if (targetDegrees < minAngleDegrees) {
       targetDegrees += 360;
     }
 
-    if (targetDegrees > TurretConstants.MAX_ANGLE) {
+    if (targetDegrees > maxAngleDegrees) {
       targetDegrees -= 360;
     }
 
