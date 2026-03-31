@@ -21,6 +21,7 @@ public class AimingCalculator {
         shotMap.put(2.0, new ShooterState(45.0, 30.0, 0.35));
         shotMap.put(3.0, new ShooterState(52.0, 40.0, 0.45));
         shotMap.put(4.5, new ShooterState(60.0, 48.0, 0.55));
+        shotMap.put(5.0, new ShooterState(60.0, 58.0, 0.65));        
     }
 
     /**
