@@ -52,23 +52,16 @@ public final class Constants {
   }
 
   public static final class HoodConstants {
-    public static final int HOOD_ID = 18;
+    public static final int MOTOR_ID = 18;
     public static final int ENCODER_ID = 20;
 
-    //new values with encoder
     public static final double ENCODER_MAGNET_OFFSET = 0.716064;
-    public static final double ENCODER_ZERO = 0.0;
+    public static final double ENCODER_MIN = 0.0;
     public static final double ENCODER_MAX = -0.831299;
 
-    //old values
-    public static final double MAX_HOOD_ANGLE = -24.7887; //check these later
-    public static final double MIN_HOOD_ANGLE = 0.0; //check these later
-
-    public static final double MAX_HOOD_POSITION = -1.04434;
-    public static final double MIN_HOOD_POSITION = 0.0;
-    
-    public static final double MAX_SHOT_ANGLE = 90.0 - 38.2; //check these later 
-    public static final double MIN_SHOT_ANGLE = 90.0 - 59.91; //check these later
+    public static final double P = 7.0;
+    public static final double I = 0.0;
+    public static final double D = 0.0;
   }
 
   public static final class IntakeConstants {

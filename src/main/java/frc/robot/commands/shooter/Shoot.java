@@ -16,6 +16,7 @@ import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
+import frc.robot.subsystems.HoodSubsystem.HoodStates;
 import frc.robot.utilities.ShooterUtils;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -42,7 +43,6 @@ public class Shoot extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    hood.readyShot(true);
     flywheel.readyShot(true);
   }
 
@@ -57,25 +57,23 @@ public class Shoot extends Command {
     double distance = shooterPose.getDistance(goalPose);
 
     double rps = flywheel.getGoal(distance);
-    //double angle = hood.getGoal(distance);
 
-    // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
-/*        if(fixedShot){
-        flywheelMotor.setControl(velocityControl.withVelocity(50));
-      } */
     if(flywheel.isFixed()){
       flywheel.velocityControl(-50.0); //guessing
+      hood.setState(HoodStates.FIXED);
     }
     else if(ShooterUtils.inNeutralZone(robotPose)){
       flywheel.velocityControl(-80.0);
-      //hood.positionControl(HoodConstants.MAX_HOOD_POSITION);
+      hood.setState(HoodStates.FERRYING);
     }
     else{
       flywheel.velocityControl(rps);
-      //hood.positionControl(angle);
+      hood.setState(HoodStates.SHOOTING);
     }
 
-    if(flywheel.goodToShoot()){
+    hood.controlMotor(distance);
+
+    if(flywheel.goodToShoot() && hood.goodToShoot()){
       feeder.runMotor();
       spindexer.runMotor();
     }
@@ -86,7 +84,7 @@ public class Shoot extends Command {
   public void end(boolean interrupted) {
     feeder.stopMotor();
     spindexer.stopMotor();
-    //hood.positionControl(HoodConstants.MAX_HOOD_POSITION/2);
+    hood.stopMotor();
     flywheel.coastOut();
   }
 
