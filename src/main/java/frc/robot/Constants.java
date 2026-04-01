@@ -53,7 +53,14 @@ public final class Constants {
 
   public static final class HoodConstants {
     public static final int HOOD_ID = 18;
+    public static final int ENCODER_ID = 20;
 
+    //new values with encoder
+    public static final double ENCODER_MAGNET_OFFSET = 0.716064;
+    public static final double ENCODER_ZERO = 0.0;
+    public static final double ENCODER_MAX = -0.831299;
+
+    //old values
     public static final double MAX_HOOD_ANGLE = -24.7887; //check these later
     public static final double MIN_HOOD_ANGLE = 0.0; //check these later
 
@@ -67,10 +74,11 @@ public final class Constants {
   public static final class IntakeConstants {
     public static final int ROLLER_ID = 14;
     public static final int PIVOT_ID = 13;
-    public static final int ENCODER_ID = 25;
+    public static final int ENCODER_ID = 19;
 
-    public static final double INTAKE_RETRACTED = -14.0; //check these later
-    public static final double INTAKE_DEPLOYED = 0.0; //check these later
+    //new values with encoder
+    public static final double INTAKE_RETRACTED = 0.419434; //check these later
+    public static final double INTAKE_DEPLOYED = 0.247314; //check these later
   }
 
   public static final class FeederConstants {
@@ -83,6 +91,12 @@ public final class Constants {
     public static final int SPINDEXER_ID = 15;
 
     public static final double SPINDEXER_SPEED = 12.0; //check this later
+  }
+
+  public static final class KickerConstants {
+    public static final int KICKER_ID = 22;
+
+    public static final double KICKER_SPEED = 6.0;
   }
 
   public static final class ClimberConstants {

@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -30,13 +31,14 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private final TalonFX rollerMotor;
   private final TalonFX pivotMotor;
-  private final CANcoder pivotEncoder;
+  private final CANcoder encoder;
 
   private PositionVoltage control  = new PositionVoltage(0);
   private PhoenixPIDController pid = new PhoenixPIDController(0, 0, 0);
 
   private double intakePosition, output;
   private boolean isDeployed, isUp;
+  private boolean tuning = false;
 
   private RobotContainer robot;
 
@@ -45,7 +47,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     rollerMotor = new TalonFX(IntakeConstants.ROLLER_ID);
     pivotMotor = new TalonFX(IntakeConstants.PIVOT_ID);
-    pivotEncoder = new CANcoder(IntakeConstants.ENCODER_ID);
+    encoder = new CANcoder(IntakeConstants.ENCODER_ID);
 
     intakePosition = IntakeConstants.INTAKE_RETRACTED;
     isDeployed = false;
@@ -53,7 +55,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
     configurePivotMotor();
     configureRollerMotor();
-    // zeroIntake();
+
+    SmartDashboard.putBoolean("Intake/Pivot/Tuning/EnableTuning", tuning);
+    SmartDashboard.putNumber("Intake/Pivot/Tuning/P", 0);
+    SmartDashboard.putNumber("Intake/Pivot/Tuning/I", 0);
+    SmartDashboard.putNumber("Intake/Pivot/Tuning/D", 0);
+    SmartDashboard.putNumber("Intake/Pivot/Tuning/Goal", 0);
   }
 
   @Override
@@ -79,11 +86,18 @@ public class IntakeSubsystem extends SubsystemBase {
       pivotMotor.setPosition(0.0);
     } */
 
-    output = pid.calculate(pivotEncoder.getAbsolutePosition().getValueAsDouble(), intakePosition, Timer.getFPGATimestamp());
+    if(tuning){
+      pid.setP(SmartDashboard.getNumber("Intake/Pivot/Tuning/P", 0));
+      pid.setI(SmartDashboard.getNumber("Intake/Pivot/Tuning/I", 0));
+      pid.setD(SmartDashboard.getNumber("Intake/Pivot/Tuning/D", 0));
+      intakePosition = SmartDashboard.getNumber("Intake/Pivot/Tuning/Goal", 0);
+    }
+
+    output = pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), intakePosition, Timer.getFPGATimestamp());
     pivotMotor.set(output);
 
-    SmartDashboard.putBoolean("Intake/IsJammed", isJammed());
-    SmartDashboard.putNumber("Intake/Position", pivotMotor.getPosition().getValueAsDouble());
+    SmartDashboard.putBoolean("Intake/Rollers/IsJammed", isJammed());
+    SmartDashboard.putNumber("Intake/Pivot/Position", encoder.getAbsolutePosition().getValueAsDouble());
   }
 
   public void configurePivotMotor(){
@@ -121,6 +135,12 @@ public class IntakeSubsystem extends SubsystemBase {
             .withSupplyCurrentLowerLimit(Amps.of(10))
             .withSupplyCurrentLimitEnable(true)
     );
+  }
+
+  public void configureEncoder(){
+    CANcoderConfiguration configs = new CANcoderConfiguration();
+
+    
   }
 
   public void runRollersUnjammed(){

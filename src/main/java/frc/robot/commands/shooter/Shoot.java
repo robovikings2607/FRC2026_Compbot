@@ -57,7 +57,7 @@ public class Shoot extends Command {
     double distance = shooterPose.getDistance(goalPose);
 
     double rps = flywheel.getGoal(distance);
-    double angle = hood.getGoal(distance);
+    //double angle = hood.getGoal(distance);
 
     // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
 /*        if(fixedShot){
@@ -68,11 +68,11 @@ public class Shoot extends Command {
     }
     else if(ShooterUtils.inNeutralZone(robotPose)){
       flywheel.velocityControl(-80.0);
-      hood.positionControl(HoodConstants.MAX_HOOD_POSITION);
+      //hood.positionControl(HoodConstants.MAX_HOOD_POSITION);
     }
     else{
       flywheel.velocityControl(rps);
-      hood.positionControl(angle);
+      //hood.positionControl(angle);
     }
 
     if(flywheel.goodToShoot()){
@@ -86,7 +86,7 @@ public class Shoot extends Command {
   public void end(boolean interrupted) {
     feeder.stopMotor();
     spindexer.stopMotor();
-    hood.positionControl(HoodConstants.MAX_HOOD_POSITION/2);
+    //hood.positionControl(HoodConstants.MAX_HOOD_POSITION/2);
     flywheel.coastOut();
   }
 

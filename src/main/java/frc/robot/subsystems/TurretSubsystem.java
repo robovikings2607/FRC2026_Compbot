@@ -61,7 +61,7 @@ public class TurretSubsystem extends SubsystemBase {
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
 
-    turretMotor = new TalonFX(TurretConstants.TURRET_ID);
+    turretMotor = new TalonFX(99);
 
     //turretMotor.setPosition(0);
     //previousSetPoint = turretMotor.getPosition().getValueAsDouble();

@@ -8,6 +8,8 @@ import java.util.Dictionary;
 
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
@@ -39,33 +41,36 @@ import static edu.wpi.first.units.Units.*;
 
 public class HoodSubsystem extends SubsystemBase {
   /** Creates a new HoodSubsystem. */
-  private TalonFX hoodMotor;
-  private TalonSRX hoodMotor2;
+  private TalonSRX hoodMotor;
   private CANcoder encoder;
   private RobotContainer robot;
 
-  private PhoenixPIDController pid = new PhoenixPIDController(0.0, 0.0, 0.0);
+  private PhoenixPIDController pid = new PhoenixPIDController(7.0, 0.0, 0.0);
 
   private final PositionVoltage control = new PositionVoltage(0);
   private final CoastOut coastOut = new CoastOut();
   private static final double gearRatio = ((350.0/50.0)*(26.0/12.0));
   private static final double rotationsPerDegree = gearRatio/360.0;
-  private double setPoint, goal;
+  private double setPoint = 0;
   private InterpolatingDoubleTreeMap hoodInterp = new InterpolatingDoubleTreeMap();
   private boolean readyToShoot = false;
   private boolean fixedShot = false;
+  private boolean tuning = true;
 
   public HoodSubsystem(RobotContainer robot) {
     this.robot = robot;
 
-    hoodMotor2 = new TalonSRX(0);
-    encoder = new CANcoder(0);
-
     configureMotor();
+    configureEncoder();
     createInterpMap();
     // zeroMotor();
     SmartDashboard.putNumber("Hood/SetPoint", 0);
-    hoodMotor.setControl(control.withPosition(HoodConstants.MAX_HOOD_POSITION/2));
+    SmartDashboard.putBoolean("Hood/Tuning/EnableTuning", tuning);
+    SmartDashboard.putNumber("Hood/Tuning/P", 0);
+    SmartDashboard.putNumber("Hood/Tuning/I", 0);
+    SmartDashboard.putNumber("Hood/Tuning/D", 0);
+    SmartDashboard.putNumber("Hood/Tuning/Goal", 0);
+    //hoodMotor.setControl(control.withPosition(HoodConstants.MAX_HOOD_POSITION/2));
   }
 
   @Override
@@ -95,58 +100,37 @@ public class HoodSubsystem extends SubsystemBase {
       hoodMotor.setPosition(0.0);
     } */
 
-    double output = pid.calculate(encoder.getPosition().getValueAsDouble(), setPoint, Timer.getFPGATimestamp());
+    if(tuning){
+      pid.setP(SmartDashboard.getNumber("Hood/Tuning/P", 0));
+      pid.setI(SmartDashboard.getNumber("Hood/Tuning/I", 0));
+      pid.setD(SmartDashboard.getNumber("Hood/Tuning/D", 0));
+      setPoint = SmartDashboard.getNumber("Hood/Tuning/Goal", 0);
+    }
 
-    hoodMotor2.set(TalonSRXControlMode.PercentOutput, output);
-
-    SmartDashboard.putNumber("Hood/Positioj", hoodMotor.getPosition().getValueAsDouble());
+    double output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), setPoint, Timer.getFPGATimestamp());
+    SmartDashboard.putNumber("Hood/Output", output);
+    hoodMotor.set(TalonSRXControlMode.PercentOutput, output);
   }
 
 
   public void configureMotor(){
-    hoodMotor = new TalonFX(HoodConstants.HOOD_ID);
+    hoodMotor = new TalonSRX(HoodConstants.HOOD_ID);  
+    TalonSRXConfiguration configs = new TalonSRXConfiguration();
+  }
 
-    TalonFXConfiguration configs = new TalonFXConfiguration();
+  public void configureEncoder(){
+    encoder = new CANcoder(HoodConstants.ENCODER_ID);
+    CANcoderConfiguration configs = new CANcoderConfiguration();
 
-    var slot0Configs = configs.Slot0;
-  /*       slot0Configs.kS = 1.0; // Voltage output to overcome static friction
-        slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
-        slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output */
-        slot0Configs.kP = 7.2; // A position error of 2.5 rotations requires this voltage outputp
-        slot0Configs.kI = 0.0; // no output for integrated error
-        slot0Configs.kD = 0.0; // A velocity error of 1 rps requires this voltage output
+    configs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.0;
+    configs.MagnetSensor.MagnetOffset = HoodConstants.ENCODER_MAGNET_OFFSET;
 
-  /*   var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 80; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 160; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds) */
-
-     //enable software limits
-    configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-
-    //limits (in rotations)
-    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = HoodConstants.MIN_HOOD_ANGLE * rotationsPerDegree;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = HoodConstants.MAX_HOOD_ANGLE * rotationsPerDegree; 
-  
-    configs.withCurrentLimits(
-            new CurrentLimitsConfigs()
-                .withStatorCurrentLimit(Amps.of(60))
-                .withStatorCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(Amps.of(40))
-                .withSupplyCurrentLowerLimit(Amps.of(10))
-                .withSupplyCurrentLimitEnable(true)
-        );
-
-    hoodMotor.getConfigurator().apply(configs);
-    hoodMotor.setNeutralMode(NeutralModeValue.Brake);
-
-    //hoodMotor.setPosition(0);
+    encoder.getConfigurator().apply(configs);
   }
 
   public void createInterpMap(){
     //key = distance from goal
-    //value = position of hood in desired shot angle
+    //value = position of hood in encoder values
     hoodInterp.put(0.0, 0.0);
     hoodInterp.put(6.0, 0.0);
     //hoodInterp.put(4.5, 0.0);
@@ -156,10 +140,27 @@ public class HoodSubsystem extends SubsystemBase {
   }
 
   public void setGoal(double distance){ 
-    setPoint = hoodInterp.get(distance) * rotationsPerDegree;
+    setPoint = hoodInterp.get(distance);
   }
 
-  public void positionControl(double angle){
+  
+  public double getGoal(){
+    return setPoint;
+  }
+
+  public void readyShot(boolean ready){
+    readyToShoot = ready;
+  }
+
+  public void fixedShot(boolean fixed){
+    fixedShot = fixed;
+  }
+
+  public TalonSRX getMotor(){
+    return hoodMotor;
+  }
+
+   /*public void positionControl(double angle){
     RobotLogger.logDouble("hood", angle);
     hoodMotor.setControl(control.withPosition(angle));
     //hoodMotor2.set(TalonSRXControlMode.Position, angle);
@@ -176,26 +177,10 @@ public class HoodSubsystem extends SubsystemBase {
       hoodMotor.set(0);
       hoodMotor.setPosition(HoodConstants.MIN_HOOD_ANGLE * rotationsPerDegree);
     }
-  }
-
+  } */
+/* 
   public double getGoal(double distance){
     return hoodInterp.get(distance) * rotationsPerDegree;
     //return setPoint * rotationsPerDegree;
-  }
-
-  public double getSetPoint(){
-    return setPoint;
-  }
-
-  public void readyShot(boolean ready){
-    readyToShoot = ready;
-  }
-
-  public void fixedShot(boolean fixed){
-    fixedShot = fixed;
-  }
-
-  public TalonFX getMotor(){
-    return hoodMotor;
-  }
+  } */
 }
