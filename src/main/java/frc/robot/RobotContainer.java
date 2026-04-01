@@ -106,6 +106,7 @@ public class RobotContainer {
 
         configureBindings();
         configureNamedCommands();
+        createTuningToggles();
 
         autoChooser = AutoBuilder.buildAutoChooser();
         
@@ -169,6 +170,10 @@ public class RobotContainer {
         NamedCommands.registerCommand("Shoot", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(6.0)));
     }
 
+    public void createTuningToggles(){
+        SmartDashboard.putBoolean("Tuning/EnablePIDTuning", false);
+        SmartDashboard.putBoolean("Tuning/EnableDistanceTuning", false);
+    }
      /**
      * VERY IMPORTANT: Put the robot up on blocks before running these!
      * VERY IMPORTANT: Change the button bindings to those you want to trigger the 4 tests

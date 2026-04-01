@@ -70,7 +70,8 @@ public class HoodSubsystem extends SubsystemBase {
     SHOOTING,
     FERRYING,
     FIXED,
-    TUNING
+    PID_TUNING,
+    DISTANCE_TUNING
   }
 
   public void setState(HoodStates state){
@@ -91,16 +92,33 @@ public class HoodSubsystem extends SubsystemBase {
   }
   public void createFerryingInterpMap(){
     //key = distance from goal
-    //value = position of hood in encoder values
+    //value = position of hood in degrees
     ferryingInterp = new InterpolatingDoubleTreeMap();
 
     ferryingInterp.put(0.0, 0.0);
     ferryingInterp.put(6.0, 0.0);
   }
 
-  public void setGoal(InterpolatingDoubleTreeMap interp, double distance){ 
+  public double degreesToEncoderTick(double degrees){
+    return degrees/360 * HoodConstants.GEAR_RATIO;
+  }
+
+  public double encoderTicksToDegrees(double ticks){
+    return ticks/HoodConstants.GEAR_RATIO * 360;
+  }
+
+  public void setGoalFromInterp(InterpolatingDoubleTreeMap interp, double distance){ 
     goal = interp.get(distance);
-    MathUtil.clamp(goal, HoodConstants.ENCODER_MAX, HoodConstants.ENCODER_MIN);
+    MathUtil.clamp(goal, HoodConstants.MAX_ANGLE, HoodConstants.MIN_ANGLE);
+    goal = degreesToEncoderTick(goal);
+  }
+
+  public void setGoalInDegrees(double degrees){
+    goal = degreesToEncoderTick(degrees);
+  }
+
+  public void setGoalInTicks(double ticks){
+    goal = ticks;
   }
 
   public double getGoal(){
@@ -108,29 +126,34 @@ public class HoodSubsystem extends SubsystemBase {
   }
 
   public void shootingControl(double distance){
-    setGoal(shootingInterp, distance);
+    setGoalFromInterp(shootingInterp, distance);
     output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
     motor.set(TalonSRXControlMode.PercentOutput, output);
   }  
   
   public void ferryingControl(double distance){
-    setGoal(ferryingInterp, distance);
+    setGoalFromInterp(ferryingInterp, distance);
     output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
     motor.set(TalonSRXControlMode.PercentOutput, output);
   }  
   
   public void fixedControl(){
-    setGoal(shootingInterp, 3.0);
+    setGoalFromInterp(shootingInterp, 3.0);
     output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
     motor.set(TalonSRXControlMode.PercentOutput, output);
   }
 
-  public void tuningControl(){
-    pid.setP(SmartDashboard.getNumber("Hood/Tuning/P", 0));
-    pid.setI(SmartDashboard.getNumber("Hood/Tuning/I", 0));
-    pid.setD(SmartDashboard.getNumber("Hood/Tuning/D", 0));
-    goal = SmartDashboard.getNumber("Hood/Tuning/Goal", 0);
+  public void PIDTuningControl(){
+    pid.setP(SmartDashboard.getNumber("Hood/Tuning/PID/P", 0));
+    pid.setI(SmartDashboard.getNumber("Hood/Tuning/PID/I", 0));
+    pid.setD(SmartDashboard.getNumber("Hood/Tuning/PID/D", 0));
+    setGoalInDegrees(SmartDashboard.getNumber("Hood/Tuning/Goal(Degrees)", 0));
+    output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
+    motor.set(TalonSRXControlMode.PercentOutput, output);
+  }
 
+  public void disatnceTuningControl(){
+    setGoalInDegrees(SmartDashboard.getNumber("Hood/Tuning/Goal(Degrees)", 0));
     output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
     motor.set(TalonSRXControlMode.PercentOutput, output);
   }
@@ -149,8 +172,11 @@ public class HoodSubsystem extends SubsystemBase {
         fixedControl();
         break;
 
-      case TUNING:
-        tuningControl();
+      case PID_TUNING:
+        PIDTuningControl();
+
+      case DISTANCE_TUNING:
+        disatnceTuningControl();
     
       default:
         shootingControl(distance);
@@ -169,15 +195,10 @@ public class HoodSubsystem extends SubsystemBase {
   }
 
   public void createTuningData(){
-    SmartDashboard.putBoolean("Hood/Tuning/EnableTuning", false);
-    SmartDashboard.putNumber("Hood/Tuning/P", 0);
-    SmartDashboard.putNumber("Hood/Tuning/I", 0);
-    SmartDashboard.putNumber("Hood/Tuning/D", 0);
-    SmartDashboard.putNumber("Hood/Tuning/Goal", 0);
-  }
-
-  public boolean tuningEnabled(){
-    return SmartDashboard.getBoolean("Hood/Tuning/EnableTuning", false);
+    SmartDashboard.putNumber("Hood/Tuning/PID/P", 0);
+    SmartDashboard.putNumber("Hood/Tuning/PID/I", 0);
+    SmartDashboard.putNumber("Hood/Tuning/PID/D", 0);
+    SmartDashboard.putNumber("Hood/Tuning/Goal(Degrees)", 0);
   }
 
   public boolean goodToShoot(){

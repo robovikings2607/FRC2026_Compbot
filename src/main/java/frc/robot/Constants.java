@@ -62,6 +62,11 @@ public final class Constants {
     public static final double P = 7.0;
     public static final double I = 0.0;
     public static final double D = 0.0;
+
+    public static final double GEAR_RATIO = 350.0/25.0;
+
+    public static final double MIN_ANGLE = ENCODER_MIN/GEAR_RATIO * 360;
+    public static final double MAX_ANGLE = ENCODER_MAX/GEAR_RATIO * 360;
   }
 
   public static final class IntakeConstants {

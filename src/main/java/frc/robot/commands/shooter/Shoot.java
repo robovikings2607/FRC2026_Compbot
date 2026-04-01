@@ -58,7 +58,13 @@ public class Shoot extends Command {
 
     double rps = flywheel.getGoal(distance);
 
-    if(flywheel.isFixed()){
+    if(SmartDashboard.getBoolean("Tuning/EnablePIDTuning", false)){
+      hood.setState(HoodStates.PID_TUNING);
+    }
+    else if(SmartDashboard.getBoolean("Tuning/EnableDistanceTuning", false)){
+      hood.setState(HoodStates.DISTANCE_TUNING);
+    }
+    else if(flywheel.isFixed()){
       flywheel.velocityControl(-50.0); //guessing
       hood.setState(HoodStates.FIXED);
     }
