@@ -26,7 +26,7 @@ public class HoodSubsystem extends SubsystemBase {
   private CANcoder encoder;
   private PhoenixPIDController pid;
   private InterpolatingDoubleTreeMap shootingInterp, ferryingInterp;
-  private HoodStates state = HoodStates.SHOOTING;
+  private HoodState state = HoodState.SHOOTING;
   private double goal, output;
 
   public HoodSubsystem(RobotContainer robot) {
@@ -66,7 +66,7 @@ public class HoodSubsystem extends SubsystemBase {
     pid.setTolerance(0.002); //quates to +- 0.05 degrees of error, may need to change
   }
 
-  public enum HoodStates{
+  public enum HoodState{
     SHOOTING,
     FERRYING,
     FIXED,
@@ -74,27 +74,25 @@ public class HoodSubsystem extends SubsystemBase {
     DISTANCE_TUNING
   }
 
-  public void setState(HoodStates state){
+  public void setState(HoodState state){
     this.state = state;
   }
 
-  public HoodStates getState(){
+  public HoodState getState(){
     return state;
   }
 
   public void createShootingInterpMap(){
+    shootingInterp = new InterpolatingDoubleTreeMap();
     //key = distance from goal
     //value = position of hood in encoder values
-    shootingInterp = new InterpolatingDoubleTreeMap();
-
     shootingInterp.put(0.0, 0.0);
     shootingInterp.put(6.0, 0.0);
   }
   public void createFerryingInterpMap(){
+    ferryingInterp = new InterpolatingDoubleTreeMap();
     //key = distance from goal
     //value = position of hood in degrees
-    ferryingInterp = new InterpolatingDoubleTreeMap();
-
     ferryingInterp.put(0.0, 0.0);
     ferryingInterp.put(6.0, 0.0);
   }
@@ -186,7 +184,7 @@ public class HoodSubsystem extends SubsystemBase {
 
   public void updateLoggingData(){
     SmartDashboard.putNumber("Hood/Output", output);
-    SmartDashboard.putNumber("Hood/Goal", goal);
+    SmartDashboard.putNumber("Hood/Goal(Degrees)", goal);
     SmartDashboard.putNumber("Hood/StatorCurrent", motor.getStatorCurrent());
     SmartDashboard.putNumber("Hood/SupplyCurrent", motor.getSupplyCurrent());
     SmartDashboard.putNumber("Hood/Voltage", motor.getMotorOutputVoltage());

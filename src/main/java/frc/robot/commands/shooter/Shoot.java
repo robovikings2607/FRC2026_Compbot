@@ -7,8 +7,6 @@ package frc.robot.commands.shooter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.HoodConstants;
@@ -16,7 +14,8 @@ import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
-import frc.robot.subsystems.HoodSubsystem.HoodStates;
+import frc.robot.subsystems.FlywheelSubsystem.FlywheelState;
+import frc.robot.subsystems.HoodSubsystem.HoodState;
 import frc.robot.utilities.ShooterUtils;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -43,7 +42,7 @@ public class Shoot extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    flywheel.readyShot(true);
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -56,27 +55,28 @@ public class Shoot extends Command {
 
     double distance = shooterPose.getDistance(goalPose);
 
-    double rps = flywheel.getGoal(distance);
-
     if(SmartDashboard.getBoolean("Tuning/EnablePIDTuning", false)){
-      hood.setState(HoodStates.PID_TUNING);
+      hood.setState(HoodState.PID_TUNING);
+      flywheel.setState(FlywheelState.PID_TUNING);
     }
     else if(SmartDashboard.getBoolean("Tuning/EnableDistanceTuning", false)){
-      hood.setState(HoodStates.DISTANCE_TUNING);
+      hood.setState(HoodState.DISTANCE_TUNING);
+      flywheel.setState(FlywheelState.DISTANCE_TUNING);
     }
-    else if(flywheel.isFixed()){
-      flywheel.velocityControl(-50.0); //guessing
-      hood.setState(HoodStates.FIXED);
+    else if(false){ //add boolean check later
+      hood.setState(HoodState.FIXED);
+      flywheel.setState(FlywheelState.FIXED);
     }
     else if(ShooterUtils.inNeutralZone(robotPose)){
-      flywheel.velocityControl(-80.0);
-      hood.setState(HoodStates.FERRYING);
+      hood.setState(HoodState.FERRYING);
+      flywheel.setState(FlywheelState.FERRYING);
     }
     else{
-      flywheel.velocityControl(rps);
-      hood.setState(HoodStates.SHOOTING);
+      hood.setState(HoodState.SHOOTING);
+      flywheel.setState(FlywheelState.SHOOTING);
     }
 
+    flywheel.controlMotor(distance);
     hood.controlMotor(distance);
 
     if(flywheel.goodToShoot() && hood.goodToShoot()){

@@ -48,7 +48,13 @@ public final class Constants {
   }
 
   public static final class FlywheelConstants {
-    public static final int FLYWHEEL_ID = 17;
+    public static final int MOTOR_ID = 17;
+
+    public static final double S = 0.55;
+    public static final double V = 0.12167;
+    public static final double P = 6.0;
+    public static final double I = 0.0;
+    public static final double D = 0.0;
   }
 
   public static final class HoodConstants {
