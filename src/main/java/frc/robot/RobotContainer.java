@@ -67,8 +67,10 @@ import frc.robot.subsystems.HoodSubsystemExp;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.LimelightSubsystemExp;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.SpindexerSubsystemExp;
+import frc.robot.subsystems.StdDevVisionUpdateStrategy;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TurretSubsystemExp;
 import edu.wpi.first.wpilibj.XboxController;
@@ -128,6 +130,8 @@ public class RobotContainer {
     public final FlywheelSubsystemExp flywheelExp = new FlywheelSubsystemExp(this);
     public final FeederSubsystemExp feederExp = new FeederSubsystemExp(this);    
     public final SpindexerSubsystemExp spindexerExp = new SpindexerSubsystemExp(this);        
+    public final LimelightSubsystemExp limelightExp = new LimelightSubsystemExp(this, 
+        new StdDevVisionUpdateStrategy());            
 
     public RobotContainer() {
 
