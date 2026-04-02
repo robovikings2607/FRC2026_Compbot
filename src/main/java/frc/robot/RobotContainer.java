@@ -62,6 +62,7 @@ import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.FeederSubsystemExp;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.FlywheelSubsystemExp;
+import frc.robot.subsystems.FusedPoseVisionUpdateStrategy;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.HoodSubsystemExp;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -130,8 +131,10 @@ public class RobotContainer {
     public final FlywheelSubsystemExp flywheelExp = new FlywheelSubsystemExp(this);
     public final FeederSubsystemExp feederExp = new FeederSubsystemExp(this);    
     public final SpindexerSubsystemExp spindexerExp = new SpindexerSubsystemExp(this);        
+    //public final LimelightSubsystemExp limelightExp = new LimelightSubsystemExp(this, 
+        //new StdDevVisionUpdateStrategy());            
     public final LimelightSubsystemExp limelightExp = new LimelightSubsystemExp(this, 
-        new StdDevVisionUpdateStrategy());            
+        new FusedPoseVisionUpdateStrategy());            
 
     public RobotContainer() {
 

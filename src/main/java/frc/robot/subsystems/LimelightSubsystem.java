@@ -36,8 +36,8 @@ public class LimelightSubsystem extends SubsystemBase {
   FieldObject2d rightFieldVisionDetections, rightFieldVisionPose;  
   
   double yaw;
-  String LEFT_LIMELIGHT_NAME = "limelight-left";
-  String RIGHT_LIMELIGHT_NAME = "limelight-right";
+  public static final String LEFT_LIMELIGHT_NAME = "limelight-left";
+  public static final String RIGHT_LIMELIGHT_NAME = "limelight-right";
   private AprilTagFieldLayout tagLayout;
 
 
