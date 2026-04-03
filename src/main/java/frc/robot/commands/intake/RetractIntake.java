@@ -7,6 +7,7 @@ package frc.robot.commands.intake;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.IntakeState;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -27,7 +28,7 @@ public class RetractIntake extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.retractIntake();
-    intake.stopRollers();
+    intake.setState(IntakeState.RETRACTED);
+    intake.controlIntake();
   }
 }

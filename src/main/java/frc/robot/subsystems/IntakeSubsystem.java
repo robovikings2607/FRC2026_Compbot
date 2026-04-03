@@ -22,6 +22,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private final TalonFX pivotMotor = new TalonFX(PivotConstants.MOTOR_ID);
   private final CANcoder encoder = new CANcoder(PivotConstants.MOTOR_ID);
   private final PhoenixPIDController pid = new PhoenixPIDController(PivotConstants.P, PivotConstants.I, PivotConstants.D);
+  private final Timer timer = new Timer();
   private double output;
   private IntakeState state = IntakeState.RETRACTED;
   private PivotState pivotState = PivotState.RETRACTED;
@@ -78,6 +79,7 @@ public class IntakeSubsystem extends SubsystemBase {
   public enum IntakeState{
     DEPLOYED,
     RETRACTED,
+    REVERSE,
     PID_TUNING
   }
 
@@ -104,8 +106,10 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public enum RollerState{
-    UNJAMMED,
+    NORMAL,
     JAMMED,
+    REVERSE,
+    UNJAM,
     OFF
   }
 
@@ -158,12 +162,18 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   //Roller Controls
-  public void unjammedControl(){
-    rollerMotor.setVoltage(RollerConstants.UNJAMMED_SPEED);
+  public void normalRollerControl(){
+    rollerMotor.setVoltage(RollerConstants.NORMAL_SPEED);
   }
 
-  public void jammedControl(){
+  public void jammedRollerControl(){
     rollerMotor.setVoltage(RollerConstants.JAMMED_SPEED);
+    timer.restart();
+  }
+
+  public void reverseRollerControl(){
+    rollerMotor.setVoltage(-RollerConstants.NORMAL_SPEED);
+    timer.reset();
   }
 
   public void stopRollers(){
@@ -176,18 +186,32 @@ public class IntakeSubsystem extends SubsystemBase {
         stopRollers();
         break;
     
-      case UNJAMMED:
-        unjammedControl();
+      case NORMAL:
+        normalRollerControl();
         if(isJammed()){
           rollerState = RollerState.JAMMED;
         }
         break;
 
       case JAMMED:
-        jammedControl();
+        jammedRollerControl();
         if(!isJammed()){
-          rollerState = RollerState.UNJAMMED;
+          rollerState = RollerState.NORMAL;
         }
+        else if(timer.get() > 1.0){
+          rollerState = RollerState.UNJAM;
+        }
+        break;
+
+      case UNJAM:
+        reverseControl();
+        if(!isJammed()){
+          rollerState = RollerState.NORMAL;
+        }
+        break;
+    
+      case REVERSE:
+        reverseControl();
         break;
 
       default:
@@ -206,7 +230,22 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public void deployControl(){
     setPivotState(PivotState.DEPLOYED);
-    setRollerState(RollerState.UNJAMMED);
+    setRollerState(RollerState.NORMAL);
+    controlPivot();
+    controlRoller();
+  }
+
+  public void reverseControl(){
+    setPivotState(PivotState.DEPLOYED);
+    setRollerState(RollerState.REVERSE);
+    controlPivot();
+    controlRoller();
+  }
+
+
+  public void PIDTuningControl(){
+    setPivotState(PivotState.PID_TUNING);
+    setRollerState(RollerState.OFF);
     controlPivot();
     controlRoller();
   }
@@ -222,7 +261,11 @@ public class IntakeSubsystem extends SubsystemBase {
         break;
 
       case PID_TUNING:
+        PIDTuningControl();
+        break;
 
+      case REVERSE:
+        reverseControl();
         break;
     
       default:

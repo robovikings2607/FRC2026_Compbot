@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.IntakeState;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DeployIntake extends Command {
@@ -31,25 +32,13 @@ public class DeployIntake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.deployIntake();
-    intake.runRollersUnjammed();
+    intake.setState(IntakeState.DEPLOYED);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(intake.isJammed()){
-      intake.runRollersJammed();
-      timer.start();
-
-      if(timer.get() > 1.0){
-        intake.reverseRollers();
-      }
-    }
-    else{
-      timer.reset();
-      intake.runRollersUnjammed();
-    }
+    intake.controlIntake();
   }
 
   // Called once the command ends or is interrupted.

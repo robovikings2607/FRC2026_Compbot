@@ -118,7 +118,7 @@ public final class Constants {
     public static final int MOTOR_ID = 14;
 
     //Roller Speeds (in volts)
-    public static final double UNJAMMED_SPEED = 10.5;
+    public static final double NORMAL_SPEED = 10.5;
     public static final double JAMMED_SPEED = 12.0;
 
     //Current Limits
