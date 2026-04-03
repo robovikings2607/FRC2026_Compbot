@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -22,7 +23,8 @@ import static edu.wpi.first.units.Units.*;
 
 public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   /** Creates a new SpinDexerSubSystem. */
-  private TalonFX motor;
+  private final TalonFX motor = new TalonFX(SpindexerConstants.MOTOR_ID);
+  private SpindexerState state = SpindexerState.OFF;
 
   public SpindexerSubsystem(RobotContainer robot) {
     configureMotor();
@@ -34,33 +36,73 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void configureMotor(){
-    motor = new TalonFX(SpindexerConstants.SPINDEXER_ID);
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
     configs.withCurrentLimits(
         new CurrentLimitsConfigs()
             // Swerve azimuth does not require much torque output, so we can set a relatively low
             // stator current limit to help avoid brownouts without impacting performance.
-            .withStatorCurrentLimit(Amps.of(120))
+            .withStatorCurrentLimit(Amps.of(SpindexerConstants.STATOR_LIMIT))
             .withStatorCurrentLimitEnable(true)
-            .withSupplyCurrentLimit(Amps.of(40))
-            .withSupplyCurrentLowerLimit(Amps.of(10))
+            .withSupplyCurrentLimit(Amps.of(SpindexerConstants.SUPPLY_LIMIT))
+            .withSupplyCurrentLowerLimit(Amps.of(SpindexerConstants.SUPPLY_LOWER_LIMIT))
             .withSupplyCurrentLimitEnable(true)
     );
 
     motor.getConfigurator().apply(configs);
   }
 
-  public void runMotor() {
-    motor.setVoltage(SpindexerConstants.SPINDEXER_SPEED);
+  public enum SpindexerState{
+    FORWARD,
+    REVERSE,
+    OFF
   }
 
+  public void setState(SpindexerState state){
+    this.state = state;
+  }
+
+  public SpindexerState getState(){
+    return state;
+  }
+
+  public void forwardControl() {
+    motor.setVoltage(SpindexerConstants.SPEED);
+  }
+  
+  public void reverseControl() {
+    motor.setVoltage(-SpindexerConstants.SPEED);
+  }
+  
   public void stopMotor() {
     motor.stopMotor();
   }
 
-  public void reverseMotor() {
-    motor.setVoltage(-SpindexerConstants.SPINDEXER_SPEED);
+  public void controlMotor(){
+    switch (state) {
+      case FORWARD:
+        forwardControl();
+        break;
+
+      case REVERSE:
+        reverseControl();
+        break;
+
+      case OFF:
+        stopMotor();
+        break;
+    
+      default:
+        stopMotor();
+        break;
+    }
+  }
+
+  public void updateLoggingData(){
+    SmartDashboard.putNumber("Spindexer/Voltage", motor.getMotorVoltage().getValueAsDouble());
+    SmartDashboard.putNumber("Spindexer/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("Spindexer/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
+    SmartDashboard.putString("Spindexer/State", state.name());
   }
 
   private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(

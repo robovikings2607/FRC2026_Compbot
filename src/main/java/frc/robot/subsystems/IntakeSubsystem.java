@@ -167,7 +167,7 @@ public class IntakeSubsystem extends SubsystemBase {
         break;
 
       case FORCED_DOWN:
-
+        forceDownControl();
         break;
 
       default:

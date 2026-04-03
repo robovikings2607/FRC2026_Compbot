@@ -139,10 +139,15 @@ public final class Constants {
 
   public static final class SpindexerConstants {
     //CAN ID
-    public static final int SPINDEXER_ID = 15;
+    public static final int MOTOR_ID = 15;
 
     //Speed (in volts)
-    public static final double SPINDEXER_SPEED = 12.0; 
+    public static final double SPEED = 12.0; 
+
+    //Current Limits
+    public static final double STATOR_LIMIT = 30.0;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
   }
 
   public static final class KickerConstants {

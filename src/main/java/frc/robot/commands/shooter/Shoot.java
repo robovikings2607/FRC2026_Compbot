@@ -16,6 +16,7 @@ import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem.FlywheelState;
 import frc.robot.subsystems.HoodSubsystem.HoodState;
+import frc.robot.subsystems.SpindexerSubsystem.SpindexerState;
 import frc.robot.utilities.ShooterUtils;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -79,16 +80,15 @@ public class Shoot extends Command {
       flywheel.setState(FlywheelState.SHOOTING);
     }
 
-    flywheel.controlMotor(distance);
-    hood.controlMotor(distance);
+    controlShooting(distance);
 
     if(pidTuningEnabled){
       return;
     }
 
     if(flywheel.goodToShoot() && hood.goodToShoot()){
-      feeder.runMotor();
-      spindexer.runMotor();
+      spindexer.setState(SpindexerState.FORWARD);
+      controlFeeding();
     }
   }
 
@@ -96,17 +96,26 @@ public class Shoot extends Command {
   @Override
   public void end(boolean interrupted) {
     feeder.stopMotor();
-    spindexer.stopMotor();
+    spindexer.setState(SpindexerState.OFF);
     hood.setState(HoodState.OFF);
     flywheel.setState(FlywheelState.OFF);
     
-    hood.controlMotor(0);
-    flywheel.controlMotor(0);
+    controlShooting(0);
+    controlFeeding();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+  public void controlShooting(double distance){
+    hood.controlMotor(distance);
+    flywheel.controlMotor(distance);
+  }
+
+  public void controlFeeding(){
+    spindexer.controlMotor();
   }
 }
