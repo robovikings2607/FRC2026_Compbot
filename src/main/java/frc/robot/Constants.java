@@ -93,10 +93,9 @@ public final class Constants {
     public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
   }
 
-  public static final class IntakeConstants {
+  public static final class PivotConstants {
     //CAN IDs
-    public static final int ROLLER_ID = 14;
-    public static final int PIVOT_ID = 13;
+    public static final int MOTOR_ID = 13;
     public static final int ENCODER_ID = 19;
 
     //Positions (in encoder ticks)
@@ -107,6 +106,26 @@ public final class Constants {
     public static final double P = 0.0;
     public static final double I = 0.0;
     public static final double D = 0.0;    
+
+    //Current Limits
+    public static final double STATOR_LIMIT = 35.0;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
+  }
+
+  public static final class RollerConstants{
+    //CAN ID
+    public static final int MOTOR_ID = 14;
+
+    //Roller Speeds (in volts)
+    public static final double UNJAMMED_SPEED = 10.5;
+    public static final double JAMMED_SPEED = 12.0;
+
+    //Current Limits
+    public static final double STATOR_LIMIT = 120.0;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
+    public static final double JAMMED_THRESHOLD = 100.0;
   }
 
   public static final class FeederConstants {

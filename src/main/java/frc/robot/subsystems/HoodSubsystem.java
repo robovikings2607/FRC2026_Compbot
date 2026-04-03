@@ -94,6 +94,7 @@ public class HoodSubsystem extends SubsystemBase {
     shootingInterp.put(0.0, 0.0);
     shootingInterp.put(6.0, 0.0);
   }
+
   public void createFerryingInterpMap(){
     //key = distance from goal
     //value = position of hood in degrees
@@ -189,6 +190,8 @@ public class HoodSubsystem extends SubsystemBase {
   public void updateLoggingData(){
     SmartDashboard.putNumber("Hood/Output", output);
     SmartDashboard.putNumber("Hood/Goal(Degrees)", goal);
+    SmartDashboard.putNumber("Hood/CurrentDegrees", encoderTicksToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
+    SmartDashboard.putNumber("Hood/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
     SmartDashboard.putNumber("Hood/StatorCurrent", motor.getStatorCurrent());
     SmartDashboard.putNumber("Hood/SupplyCurrent", motor.getSupplyCurrent());
     SmartDashboard.putNumber("Hood/Voltage", motor.getMotorOutputVoltage());

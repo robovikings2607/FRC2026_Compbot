@@ -82,6 +82,10 @@ public class Shoot extends Command {
     flywheel.controlMotor(distance);
     hood.controlMotor(distance);
 
+    if(pidTuningEnabled){
+      return;
+    }
+
     if(flywheel.goodToShoot() && hood.goodToShoot()){
       feeder.runMotor();
       spindexer.runMotor();

@@ -13,7 +13,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -29,7 +28,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   private RobotContainer robot;
   private final TalonFX motor = new TalonFX(FlywheelConstants.MOTOR_ID);
   private final TalonFXConfiguration configs = new TalonFXConfiguration();
-  private final VelocityVoltage velocityVoltage = new VelocityVoltage(0.0);
+  private final VelocityVoltage pid = new VelocityVoltage(0.0);
   private final CoastOut coastOut = new CoastOut();
   private final InterpolatingDoubleTreeMap shootingInterp = new InterpolatingDoubleTreeMap(); 
   private final InterpolatingDoubleTreeMap ferryingInterp = new InterpolatingDoubleTreeMap();
@@ -132,17 +131,17 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
 
   public void shootingControl(double distance){
     goal = shootingInterp.get(distance);
-    motor.setControl(velocityVoltage.withVelocity(goal));
+    motor.setControl(pid.withVelocity(goal));
   }
 
   public void ferryingControl(double distance){
     goal = ferryingInterp.get(distance);
-    motor.setControl(velocityVoltage.withVelocity(goal));
+    motor.setControl(pid.withVelocity(goal));
   }
 
   public void fixedControl(){
     goal = shootingInterp.get(3.0);
-    motor.setControl(velocityVoltage.withVelocity(goal));
+    motor.setControl(pid.withVelocity(goal));
   }
 
   public void PIDTuningControl(){
@@ -152,12 +151,12 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     configs.Slot0.kI = SmartDashboard.getNumber("Flywheel/Tuning/PID/I", 0);
     configs.Slot0.kD = SmartDashboard.getNumber("Flywheel/Tuning/PID/D", 0);
     goal = SmartDashboard.getNumber("Flywheel/Tuning/Goal(RPS)", 0.0);
-    motor.setControl(velocityVoltage.withVelocity(goal));
+    motor.setControl(pid.withVelocity(goal));
   }
 
   public void distanceTuningControl(){
     goal = SmartDashboard.getNumber("Flywheel/Tuning/Goal(RPS)", 0.0);
-    motor.setControl(velocityVoltage.withVelocity(goal));
+    motor.setControl(pid.withVelocity(goal));
   }
 
   public void coastOut(){
