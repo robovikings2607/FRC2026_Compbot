@@ -64,12 +64,14 @@ public class HoodSubsystem extends SubsystemBase {
     configureEncoder();
     createInterpMap();
     // zeroMotor();
-    SmartDashboard.putNumber("Hood/SetPoint", 0);
-    SmartDashboard.putBoolean("Hood/Tuning/EnableTuning", tuning);
-    SmartDashboard.putNumber("Hood/Tuning/P", 0);
-    SmartDashboard.putNumber("Hood/Tuning/I", 0);
-    SmartDashboard.putNumber("Hood/Tuning/D", 0);
-    SmartDashboard.putNumber("Hood/Tuning/Goal", 0);
+
+    RobotLogger.logDouble("Hood/SetPoint", 0);                            
+    RobotLogger.logBoolean("Hood/Tuning/EnableTuning", tuning);                            
+    RobotLogger.logDouble("Hood/Tuning/P", 0);                            
+    RobotLogger.logDouble("Hood/Tuning/I", 0);                            
+    RobotLogger.logDouble("Hood/Tuning/D", 0);                            
+    RobotLogger.logDouble("Hood/Tuning/Goal", 0);                            
+
     //hoodMotor.setControl(control.withPosition(HoodConstants.MAX_HOOD_POSITION/2));
   }
 
@@ -108,7 +110,7 @@ public class HoodSubsystem extends SubsystemBase {
     }
 
     double output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), setPoint, Timer.getFPGATimestamp());
-    SmartDashboard.putNumber("Hood/Output", output);
+    RobotLogger.logDouble("Hood/Output", output);                                
     hoodMotor.set(TalonSRXControlMode.PercentOutput, output);
   }
 

@@ -26,6 +26,7 @@ import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.ShooterUtils;
 import frc.robot.utilities.SysIdBuilder;
 
@@ -46,7 +47,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     this.robot = robot;
     configureMotor();
     createInterpMap();
-    SmartDashboard.putNumber("Flywheel/Speed", 0.0);
+    RobotLogger.logDouble("Flywheel/Speed", 0.0);                
   }
 
   private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
@@ -66,10 +67,12 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
     double distance = shooterPose.getDistance(goalPose);
-    SmartDashboard.putNumber("Distance", distance);
+    RobotLogger.logDouble("Distance", distance);                    
 
-    //SmartDashboard.putNumber("Flywheel/Speed", flywheelMotor.getRotorVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Flywheel/WantedSpeed", getGoal(distance));
+
+    //RobotLogger.logDouble("Flywheel/Speed", flywheelMotor.getRotorVelocity().getValueAsDouble());                        
+    RobotLogger.logDouble("Flywheel/WantedSpeed", getGoal(distance));                            
+    
 
     //rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
 /*     

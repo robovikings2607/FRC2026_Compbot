@@ -60,9 +60,10 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.utilities.AxisButton;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.RobotLogger;
 
 public class RobotContainer {
-    public Field2d field = new Field2d();
+    //public Field2d field = new Field2d();
 
     private double MaxSpeed = 1 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -109,14 +110,14 @@ public class RobotContainer {
 
         autoChooser = AutoBuilder.buildAutoChooser();
         
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-        SmartDashboard.putData("Field!!!", field);
+        RobotLogger.putMatchData("Auto Chooser", autoChooser);                
     }
 
     private void configureBindings() {
  
-        SmartDashboard.putBoolean("FieldCentricMode", fieldCentricDrive);
-        SmartDashboard.putBoolean("HighGear", !lowGear);
+        RobotLogger.logBoolean("FieldCentricMode", fieldCentricDrive);
+        RobotLogger.logBoolean("HighGear", !lowGear);        
+
 
         // Initialize the swerve drive to be controlled by the driver's controller
         setDrivetrainMode();
@@ -212,7 +213,7 @@ public class RobotContainer {
     public void toggleHiLoGear() {
         lowGear = !lowGear;
         driveSpeedScale = (lowGear ? slowGear : highGear);
-        SmartDashboard.putBoolean("HighGear", !lowGear);
+        RobotLogger.logBoolean("HighGear", !lowGear);
     }
 
     public boolean isLowGear(){
@@ -240,7 +241,7 @@ public class RobotContainer {
             allianceSign = Constants.Simulation.simAlliance;
         }
 
-        SmartDashboard.putNumber("AllianceSign", allianceSign);
+        RobotLogger.logDouble("AllianceSign", allianceSign);
 
         return allianceSign;
     }
@@ -250,14 +251,14 @@ public class RobotContainer {
     // If it is robot centric, change it to field centric
     public void toggleDriveMode() {
         setFieldCentric(!fieldCentricDrive);
-        SmartDashboard.putBoolean("FieldCentricMode", fieldCentricDrive);
+        RobotLogger.logBoolean("FieldCentricMode", fieldCentricDrive);        
         // setDrivetrainMode();
     }
 
      // Set the swerve mode drive to field centric (true) or robot centric (false)
     public void setFieldCentric(boolean state) {
         fieldCentricDrive = state;
-        SmartDashboard.putBoolean("FieldCentricMode", fieldCentricDrive);
+        RobotLogger.logBoolean("FieldCentricMode", fieldCentricDrive);                
         setDrivetrainMode();
     }
 

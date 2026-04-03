@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.SysIdBuilder;
 import frc.robot.Constants.FeederConstants;
 
@@ -33,7 +34,7 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
   public FeederSubsystem(RobotContainer robot) {
     feederMotor = new TalonFX(FeederConstants.FEEDER_ID);
     configureMotor();
-    SmartDashboard.putNumber("Feeder/Speed", 0.0);
+    RobotLogger.logDouble("Feeder/Speed", 0.0);            
   }
 
   private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(

@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.Constants.IntakeConstants;
 
 import static edu.wpi.first.units.Units.*;
@@ -56,11 +57,12 @@ public class IntakeSubsystem extends SubsystemBase {
     configurePivotMotor();
     configureRollerMotor();
 
-    SmartDashboard.putBoolean("Intake/Pivot/Tuning/EnableTuning", tuning);
-    SmartDashboard.putNumber("Intake/Pivot/Tuning/P", 0);
-    SmartDashboard.putNumber("Intake/Pivot/Tuning/I", 0);
-    SmartDashboard.putNumber("Intake/Pivot/Tuning/D", 0);
-    SmartDashboard.putNumber("Intake/Pivot/Tuning/Goal", 0);
+    RobotLogger.logBoolean("Intake/Pivot/Tuning/EnableTuning", tuning);
+    RobotLogger.logDouble("Intake/Pivot/Tuning/P", 0);
+    RobotLogger.logDouble("Intake/Pivot/Tuning/I", 0);    
+    RobotLogger.logDouble("Intake/Pivot/Tuning/D", 0);    
+    RobotLogger.logDouble("Intake/Pivot/Tuning/Goal", 0);    
+
   }
 
   @Override
@@ -96,8 +98,8 @@ public class IntakeSubsystem extends SubsystemBase {
     output = pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), intakePosition, Timer.getFPGATimestamp());
     pivotMotor.set(output);
 
-    SmartDashboard.putBoolean("Intake/Rollers/IsJammed", isJammed());
-    SmartDashboard.putNumber("Intake/Pivot/Position", encoder.getAbsolutePosition().getValueAsDouble());
+    RobotLogger.logBoolean("Intake/Rollers/IsJammed", isJammed());    
+    RobotLogger.logDouble("Intake/Pivot/Position", encoder.getAbsolutePosition().getValueAsDouble());            
   }
 
   public void configurePivotMotor(){

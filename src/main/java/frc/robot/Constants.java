@@ -14,6 +14,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
 public final class Constants { 
+  public static final Pose2d EMPTY_POSE = new Pose2d();
+
   public static final class Simulation {
     public static final Pose2d LEFT_BOTTOM_CORNER = new Pose2d(new Translation2d(-8.2423, -4.0513), new Rotation2d());  // 2023 game LEFT_BOTTOM_CORNER was at -8.2423, -4.0513
     public static final int simAlliance = 1; // 1 for Red Alliance and -1 for Blue Alliance

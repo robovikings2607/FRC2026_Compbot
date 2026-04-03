@@ -72,9 +72,9 @@ public class TurretSubsystem extends SubsystemBase {
     magicMotionRequest = new MotionMagicVoltage(0.0);
     positionVoltage = new PositionVoltage(0.0);
 
-    logNumber2("Turret/BootUpPose", turretMotor.getPosition().getValueAsDouble());
-    logNumber2("SetOffset", 0.0);    
-    //logNumber2("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());        
+    RobotLogger.logDouble("Turret/BootUpPos", turretMotor.getPosition().getValueAsDouble());
+    RobotLogger.logDouble("SetOffset", 0.0);    
+    RobotLogger.logDouble("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());        
   }
 
   private void configureMotor() {
@@ -150,13 +150,13 @@ public class TurretSubsystem extends SubsystemBase {
       turretMotor.setControl(positionVoltage.withPosition(wantedEncoderPos));
     }
 
-    SmartDashboard.putBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());
-    SmartDashboard.putBoolean("UserButtonPressed", RobotController.getUserButton());
+    RobotLogger.logBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());            
+    RobotLogger.logBoolean("UserButtonPressed", RobotController.getUserButton());                    
 
-    logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        
-    logNumber("Turret/CurrentPose", currentEncoderPos);        
-    logNumber2("Turret/TargetPose", targetEncoderPos);        
-    logNumber2("Turret/WantedPose", wantedEncoderPos);        
+    RobotLogger.logDouble("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));    
+    RobotLogger.logDouble("Turret/CurrentPos", currentEncoderPos);    
+    RobotLogger.logDouble("Turret/TargetPos", targetEncoderPos);    
+    RobotLogger.logDouble("Turret/WantedPos", wantedEncoderPos);                
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
@@ -224,14 +224,6 @@ public class TurretSubsystem extends SubsystemBase {
 
   public boolean isFixed(){
     return fixedShot;
-  }
-
-  public void logNumber(String key, double value){
-    SmartDashboard.putNumber(key, value);
-  }
-
-  public void logNumber2(String key, double value){
-    RobotLogger.logDouble(key, value);
   }
 
 }
