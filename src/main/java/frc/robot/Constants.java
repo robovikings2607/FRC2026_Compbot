@@ -102,6 +102,9 @@ public final class Constants {
     public static final double RETRACTED = 0.419434;
     public static final double DEPLOYED = 0.247314;
 
+    //Speed (in volts)
+    public static final double FORCE_DOWN_SPEED = 2.0;
+
     //PID Values
     public static final double P = 0.0;
     public static final double I = 0.0;
@@ -111,13 +114,14 @@ public final class Constants {
     public static final double STATOR_LIMIT = 35.0;
     public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
     public static final double SUPPLY_LOWER_LIMIT = 10.0;
+    public static final double FORCED_DOWN_THRESHOLD = 20.0;
   }
 
   public static final class RollerConstants{
     //CAN ID
     public static final int MOTOR_ID = 14;
 
-    //Roller Speeds (in volts)
+    //Speeds (in volts)
     public static final double NORMAL_SPEED = 10.5;
     public static final double JAMMED_SPEED = 12.0;
 

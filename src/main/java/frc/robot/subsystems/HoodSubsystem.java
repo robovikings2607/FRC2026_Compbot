@@ -77,7 +77,8 @@ public class HoodSubsystem extends SubsystemBase {
     FERRYING,
     FIXED,
     PID_TUNING,
-    DISTANCE_TUNING
+    DISTANCE_TUNING,
+    OFF
   }
 
   public void setState(HoodState state){
@@ -161,6 +162,10 @@ public class HoodSubsystem extends SubsystemBase {
     motor.set(TalonSRXControlMode.PercentOutput, output);
   }
 
+  public void stopMotor(){
+    motor.set(TalonSRXControlMode.PercentOutput, 0.0);;
+  }
+
   public void controlMotor(double distance){
     switch (state) {
       case SHOOTING:
@@ -177,9 +182,15 @@ public class HoodSubsystem extends SubsystemBase {
 
       case PID_TUNING:
         PIDTuningControl();
+        break;
 
       case DISTANCE_TUNING:
         disatnceTuningControl();
+        break;
+
+      case OFF:
+        stopMotor();
+        break;
     
       default:
         shootingControl(distance);
@@ -208,10 +219,6 @@ public class HoodSubsystem extends SubsystemBase {
 
   public boolean goodToShoot(){
     return pid.atSetpoint();
-  }
-
-  public void stopMotor(){
-    motor.set(TalonSRXControlMode.PercentOutput, 0.0);;
   }
 
   public TalonSRX getMotor(){

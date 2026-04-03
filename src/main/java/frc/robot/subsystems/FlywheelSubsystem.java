@@ -96,7 +96,8 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     FERRYING,
     FIXED,
     PID_TUNING,
-    DISTANCE_TUNING
+    DISTANCE_TUNING,
+    OFF
   }
 
   public void setState(FlywheelState state){
@@ -183,6 +184,10 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
 
       case DISTANCE_TUNING:
         distanceTuningControl();
+        break;
+
+      case OFF:
+        coastOut();
         break;
     
       default:

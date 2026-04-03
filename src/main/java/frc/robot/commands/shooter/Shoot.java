@@ -97,8 +97,11 @@ public class Shoot extends Command {
   public void end(boolean interrupted) {
     feeder.stopMotor();
     spindexer.stopMotor();
-    hood.stopMotor();
-    flywheel.coastOut();
+    hood.setState(HoodState.OFF);
+    flywheel.setState(FlywheelState.OFF);
+    
+    hood.controlMotor(0);
+    flywheel.controlMotor(0);
   }
 
   // Returns true when the command should end.

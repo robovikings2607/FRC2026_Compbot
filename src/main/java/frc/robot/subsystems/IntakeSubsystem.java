@@ -80,6 +80,7 @@ public class IntakeSubsystem extends SubsystemBase {
     DEPLOYED,
     RETRACTED,
     REVERSE,
+    FORCED_DOWN,
     PID_TUNING
   }
 
@@ -94,6 +95,7 @@ public class IntakeSubsystem extends SubsystemBase {
   public enum PivotState{
     DEPLOYED,
     RETRACTED,
+    FORCED_DOWN,
     PID_TUNING
   }
   
@@ -132,6 +134,15 @@ public class IntakeSubsystem extends SubsystemBase {
     pivotMotor.set(output);
   }
 
+  public void forceDownControl(){
+    if(pivotMotor.getStatorCurrent().getValueAsDouble() > PivotConstants.FORCED_DOWN_THRESHOLD){
+      pivotMotor.stopMotor();
+    }
+    else{
+      pivotMotor.setVoltage(PivotConstants.FORCE_DOWN_SPEED);
+    }
+  }
+
   public void PIDTuningPivotControl(){
     pid.setP(SmartDashboard.getNumber("Intake/Pivot/Tuning/PID/P", 0));
     pid.setI(SmartDashboard.getNumber("Intake/Pivot/Tuning/PID/I", 0));
@@ -153,6 +164,10 @@ public class IntakeSubsystem extends SubsystemBase {
     
       case DEPLOYED:
         deployPivotControl();
+        break;
+
+      case FORCED_DOWN:
+
         break;
 
       default:
