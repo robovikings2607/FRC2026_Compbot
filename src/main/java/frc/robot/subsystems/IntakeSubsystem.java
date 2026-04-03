@@ -49,7 +49,7 @@ public class IntakeSubsystem extends SubsystemBase {
     pivotMotor = new TalonFX(IntakeConstants.PIVOT_ID);
     encoder = new CANcoder(IntakeConstants.ENCODER_ID);
 
-    intakePosition = IntakeConstants.INTAKE_RETRACTED;
+    intakePosition = IntakeConstants.RETRACTED;
     isDeployed = false;
     isUp = false;
 
@@ -119,7 +119,7 @@ public class IntakeSubsystem extends SubsystemBase {
     pivotMotor.getConfigurator().apply(configs);
     //ppivotMotor.setPosition(0.0);
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
-    pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_RETRACTED));
+    pivotMotor.setControl(control.withPosition(IntakeConstants.RETRACTED));
   }
 
   public void configureRollerMotor(){
@@ -165,13 +165,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public void deployIntake(){
     pivotMotor.setNeutralMode(NeutralModeValue.Coast);
-    intakePosition = IntakeConstants.INTAKE_DEPLOYED;
+    intakePosition = IntakeConstants.DEPLOYED;
     //pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_DEPLOYED));
   }
 
   public void retractIntake(){
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
-    intakePosition = IntakeConstants.INTAKE_RETRACTED;
+    intakePosition = IntakeConstants.RETRACTED;
     //pivotMotor.setControl(control.withPosition(IntakeConstants.INTAKE_RETRACTED));
   }
 

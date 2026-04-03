@@ -86,6 +86,6 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void reverseMotor() {
-    feederMotor.setVoltage(-FeederConstants.FEEDER_SPEED);;
+    //feederMotor.setVoltage(-FeederConstants.FEEDER_SPEED);;
   }
 }

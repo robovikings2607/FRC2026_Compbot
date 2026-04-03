@@ -55,11 +55,14 @@ public class Shoot extends Command {
 
     double distance = shooterPose.getDistance(goalPose);
 
-    if(SmartDashboard.getBoolean("Tuning/EnablePIDTuning", false)){
+    boolean pidTuningEnabled = SmartDashboard.getBoolean("Tuning/EnablePIDTuning", false);
+    boolean distanceTuningEnabled = SmartDashboard.getBoolean("Tuning/EnableDistanceTuning", false);
+
+    if(pidTuningEnabled){
       hood.setState(HoodState.PID_TUNING);
       flywheel.setState(FlywheelState.PID_TUNING);
     }
-    else if(SmartDashboard.getBoolean("Tuning/EnableDistanceTuning", false)){
+    else if(distanceTuningEnabled){
       hood.setState(HoodState.DISTANCE_TUNING);
       flywheel.setState(FlywheelState.DISTANCE_TUNING);
     }
@@ -83,7 +86,7 @@ public class Shoot extends Command {
       feeder.runMotor();
       spindexer.runMotor();
     }
-    }
+  }
 
   // Called once the command ends or is interrupted.
   @Override

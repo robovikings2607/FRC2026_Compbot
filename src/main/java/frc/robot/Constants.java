@@ -48,58 +48,85 @@ public final class Constants {
   }
 
   public static final class FlywheelConstants {
+    //CAN ID
     public static final int MOTOR_ID = 17;
 
+    //PID Values
     public static final double S = 0.55;
     public static final double V = 0.12167;
     public static final double P = 6.0;
     public static final double I = 0.0;
     public static final double D = 0.0;
+
+    //Current Limits
+    public static final double STATOR_LIMIT = 120.0;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
   }
 
   public static final class HoodConstants {
+    //CAN IDs
     public static final int MOTOR_ID = 18;
     public static final int ENCODER_ID = 20;
 
-    public static final double ENCODER_MAGNET_OFFSET = 0.716064;
+    //Encoder 
+    public static final double DISCONTINUITY_POINT = 0.0;
+    public static final double MAGNET_OFFSET = 0.716064;
     public static final double ENCODER_MIN = 0.0;
     public static final double ENCODER_MAX = -0.831299;
 
+    //PID Values
     public static final double P = 7.0;
     public static final double I = 0.0;
     public static final double D = 0.0;
+    public static final double TOLERANCE = 0.002; //equates to +/- 0.05 degrees of error, may need to change
 
-    public static final double GEAR_RATIO = 350.0/25.0;
+    public static final double GEAR_RATIO = 350.0/25.0; //Hood Gear:Shaft Gear
 
+    //Degree Calculations
     public static final double MIN_ANGLE = ENCODER_MIN/GEAR_RATIO * 360;
     public static final double MAX_ANGLE = ENCODER_MAX/GEAR_RATIO * 360;
+
+    //Current Limits
+    public static final int PEAK_LIMIT = 0; //0 to make the current limit single threshold
+    public static final int CONTINUOUS_LIMIT = 60;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
   }
 
   public static final class IntakeConstants {
+    //CAN IDs
     public static final int ROLLER_ID = 14;
     public static final int PIVOT_ID = 13;
     public static final int ENCODER_ID = 19;
 
-    //new values with encoder
-    public static final double INTAKE_RETRACTED = 0.419434; //check these later
-    public static final double INTAKE_DEPLOYED = 0.247314; //check these later
+    //Positions (in encoder ticks)
+    public static final double RETRACTED = 0.419434;
+    public static final double DEPLOYED = 0.247314;
+
+    //PID Values
+    public static final double P = 0.0;
+    public static final double I = 0.0;
+    public static final double D = 0.0;    
   }
 
   public static final class FeederConstants {
+    //CAN ID
     public static final int FEEDER_ID = 16;
-
-    public static final double FEEDER_SPEED = 10.0; //check this later
   }
 
   public static final class SpindexerConstants {
+    //CAN ID
     public static final int SPINDEXER_ID = 15;
 
-    public static final double SPINDEXER_SPEED = 12.0; //check this later
+    //Speed (in volts)
+    public static final double SPINDEXER_SPEED = 12.0; 
   }
 
   public static final class KickerConstants {
+    //CAN ID
     public static final int KICKER_ID = 22;
 
+    //Speed (in volts)
     public static final double KICKER_SPEED = 6.0;
   }
 

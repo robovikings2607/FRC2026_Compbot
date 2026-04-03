@@ -13,6 +13,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -25,20 +26,21 @@ import static edu.wpi.first.units.Units.*;
 
 public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   /** Creates a new FlywheelSubsystem. */
-  private TalonFX motor;
-  private TalonFXConfiguration configs;
   private RobotContainer robot;
-  private VelocityVoltage velocityVoltage;
-  private CoastOut coastOut;
-  private double goal;
-  private InterpolatingDoubleTreeMap shootingInterp, ferryingInterp;
+  private final TalonFX motor = new TalonFX(FlywheelConstants.MOTOR_ID);
+  private final TalonFXConfiguration configs = new TalonFXConfiguration();
+  private final VelocityVoltage velocityVoltage = new VelocityVoltage(0.0);
+  private final CoastOut coastOut = new CoastOut();
+  private final InterpolatingDoubleTreeMap shootingInterp = new InterpolatingDoubleTreeMap(); 
+  private final InterpolatingDoubleTreeMap ferryingInterp = new InterpolatingDoubleTreeMap();
   private FlywheelState state = FlywheelState.SHOOTING;
+  private double goal;
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
 
     configureMotor();
-    configureControlModes();
+    //configureControlModes();
     createShootingInterpMap();
     createFerryingInterpMap();
     createTuningData();
@@ -51,9 +53,6 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void configureMotor(){ 
-    motor = new TalonFX(FlywheelConstants.MOTOR_ID);
-    configs = new TalonFXConfiguration();
-
     Slot0Configs slot0Configs = configs.Slot0;
           slot0Configs.kS = FlywheelConstants.S; // Voltage output to overcome static friction
           slot0Configs.kV = FlywheelConstants.V; // A velocity target of 1 rps requires this voltage output.
@@ -63,10 +62,10 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
 
     configs.withCurrentLimits(
             new CurrentLimitsConfigs()
-                .withStatorCurrentLimit(Amps.of(120))
+                .withStatorCurrentLimit(Amps.of(FlywheelConstants.STATOR_LIMIT))
                 .withStatorCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(Amps.of(40))
-                .withSupplyCurrentLowerLimit(Amps.of(10))
+                .withSupplyCurrentLimit(Amps.of(FlywheelConstants.SUPPLY_LIMIT))
+                .withSupplyCurrentLowerLimit(Amps.of(FlywheelConstants.SUPPLY_LOWER_LIMIT))
                 .withSupplyCurrentLimitEnable(true)
         );
 
@@ -74,10 +73,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     motor.getConfigurator().apply(configs);
   }
 
-  public void configureControlModes(){
-    velocityVoltage = new VelocityVoltage(0.0);
-    coastOut = new CoastOut();
-  }
+  public void configureControlModes(){}
 
   /*
   * Use this method and comment out the normal configureMotor method when running SysId tests
@@ -113,7 +109,6 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void createShootingInterpMap(){
-    shootingInterp = new InterpolatingDoubleTreeMap();
     //key = distance from goal
     //value = speed of flywheel in rps 
     shootingInterp.put(0.0, 0.0);
@@ -121,7 +116,6 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void createFerryingInterpMap(){
-    ferryingInterp = new InterpolatingDoubleTreeMap();
     //key = distance from goal
     //value = speed of flywheel in rps
     shootingInterp.put(0.0, 0.0);
@@ -227,5 +221,9 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
  
   public SysIdRoutine getSysIdRoutine() {
     return sysIdRoutine;
-  }    
+  } 
+  
+  public TalonFX getMotor(){
+    return motor;
+  }
 }

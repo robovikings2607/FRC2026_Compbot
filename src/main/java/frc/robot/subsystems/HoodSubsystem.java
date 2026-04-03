@@ -4,9 +4,11 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 
@@ -22,10 +24,11 @@ import frc.robot.Constants.HoodConstants;
 public class HoodSubsystem extends SubsystemBase {
   /** Creates a new HoodSubsystem. */
   private RobotContainer robot;
-  private TalonSRX motor;
-  private CANcoder encoder;
-  private PhoenixPIDController pid;
-  private InterpolatingDoubleTreeMap shootingInterp, ferryingInterp;
+  private final TalonSRX motor = new TalonSRX(HoodConstants.MOTOR_ID);
+  private final CANcoder encoder = new CANcoder(HoodConstants.ENCODER_ID);
+  private final PhoenixPIDController pid = new PhoenixPIDController(HoodConstants.P, HoodConstants.I, HoodConstants.D);
+  private final InterpolatingDoubleTreeMap shootingInterp = new InterpolatingDoubleTreeMap();
+  private final InterpolatingDoubleTreeMap ferryingInterp = new InterpolatingDoubleTreeMap();
   private HoodState state = HoodState.SHOOTING;
   private double goal, output;
 
@@ -47,23 +50,26 @@ public class HoodSubsystem extends SubsystemBase {
   }
 
   public void configureMotor(){
-    motor = new TalonSRX(HoodConstants.MOTOR_ID);  
+    SupplyCurrentLimitConfiguration supply = new SupplyCurrentLimitConfiguration();
+    supply.currentLimit = HoodConstants.SUPPLY_LIMIT;
+
+    motor.configPeakCurrentLimit(HoodConstants.PEAK_LIMIT);
+    motor.configContinuousCurrentLimit(HoodConstants.CONTINUOUS_LIMIT);
+    motor.configSupplyCurrentLimit(supply);
   }
 
   public void configureEncoder(){
-    encoder = new CANcoder(HoodConstants.ENCODER_ID);
     CANcoderConfiguration configs = new CANcoderConfiguration();
 
     //ensures no jump discontinuity occurs
-    configs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.0;
-    configs.MagnetSensor.MagnetOffset = HoodConstants.ENCODER_MAGNET_OFFSET;
+    configs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = HoodConstants.DISCONTINUITY_POINT;
+    configs.MagnetSensor.MagnetOffset = HoodConstants.MAGNET_OFFSET;
 
     encoder.getConfigurator().apply(configs);
   }
 
   public void configurePID(){
-    pid = new PhoenixPIDController(HoodConstants.P, HoodConstants.I, HoodConstants.D);
-    pid.setTolerance(0.002); //quates to +- 0.05 degrees of error, may need to change
+    pid.setTolerance(HoodConstants.TOLERANCE);
   }
 
   public enum HoodState{
@@ -83,14 +89,12 @@ public class HoodSubsystem extends SubsystemBase {
   }
 
   public void createShootingInterpMap(){
-    shootingInterp = new InterpolatingDoubleTreeMap();
     //key = distance from goal
     //value = position of hood in encoder values
     shootingInterp.put(0.0, 0.0);
     shootingInterp.put(6.0, 0.0);
   }
   public void createFerryingInterpMap(){
-    ferryingInterp = new InterpolatingDoubleTreeMap();
     //key = distance from goal
     //value = position of hood in degrees
     ferryingInterp.put(0.0, 0.0);
@@ -209,5 +213,9 @@ public class HoodSubsystem extends SubsystemBase {
 
   public TalonSRX getMotor(){
     return motor;
+  }
+
+  public CANcoder getEncoder(){
+    return encoder;
   }
 }

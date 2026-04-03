@@ -21,20 +21,12 @@ import frc.robot.Constants.SpindexerConstants;
 import static edu.wpi.first.units.Units.*;
 
 public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
-  private int reverse;
   /** Creates a new SpinDexerSubSystem. */
- private TalonFX spindexerMotor;
+  private TalonFX motor;
+
   public SpindexerSubsystem(RobotContainer robot) {
-    spindexerMotor = new TalonFX(SpindexerConstants.SPINDEXER_ID);
+    configureMotor();
   }
-
-  private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
-      spindexerMotor, this, "spindexer", 4.5
-  );    
-
-   public SysIdRoutine getSysIdRoutine() {
-    return sysIdRoutine;
-  }    
 
   @Override
   public void periodic() {
@@ -42,6 +34,7 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void configureMotor(){
+    motor = new TalonFX(SpindexerConstants.SPINDEXER_ID);
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
     configs.withCurrentLimits(
@@ -55,27 +48,27 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
             .withSupplyCurrentLimitEnable(true)
     );
 
-    //TODO JJF: Get the real numbers for these values through tuning
-    var slot0Configs = configs.Slot0;
-        slot0Configs.kS = 0.0; // Voltage output to overcome static friction
-        slot0Configs.kV = 0.0; // A velocity target of 1 rps requires this voltage output.
-        slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
-        slot0Configs.kP = 0; // A position error of x rotations requires this voltage output
-        slot0Configs.kI = 0; // no output for integrated error
-        slot0Configs.kD = 0.0; // A velocity error of 1 rps requires this voltage output
-
-    spindexerMotor.getConfigurator().apply(configs);
+    motor.getConfigurator().apply(configs);
   }
 
   public void runMotor() {
-    spindexerMotor.setVoltage(SpindexerConstants.SPINDEXER_SPEED);
+    motor.setVoltage(SpindexerConstants.SPINDEXER_SPEED);
   }
 
   public void stopMotor() {
-    spindexerMotor.setVoltage(0);
+    motor.stopMotor();
   }
 
   public void reverseMotor() {
-    spindexerMotor.setVoltage(-SpindexerConstants.SPINDEXER_SPEED);
+    motor.setVoltage(-SpindexerConstants.SPINDEXER_SPEED);
   }
+
+  private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
+      motor, this, "spindexer", 4.5
+  );    
+
+   public SysIdRoutine getSysIdRoutine() {
+    return sysIdRoutine;
+  }    
+
 }

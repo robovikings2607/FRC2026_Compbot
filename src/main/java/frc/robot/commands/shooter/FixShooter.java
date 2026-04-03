@@ -34,6 +34,5 @@ public class FixShooter extends InstantCommand {
   @Override
   public void initialize() {
     turret.fixedShot(!turret.isFixed());
-    flywheel.fixedShot(!flywheel.isFixed());
   }
 }
