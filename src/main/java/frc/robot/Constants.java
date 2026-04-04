@@ -134,7 +134,22 @@ public final class Constants {
 
   public static final class FeederConstants {
     //CAN ID
-    public static final int FEEDER_ID = 16;
+    public static final int MOTOR_ID = 16;
+
+    //Speed (in rps)
+    public static final double SPEED = 75.0;
+
+    //PID Values
+    public static final double S = 0.0;
+    public static final double V = 0.1075;
+    public static final double P = 0.5;
+    public static final double I = 0.0;
+    public static final double D = 0.0;
+
+    //Current Limits
+    public static final double STATOR_LIMIT = 85.0;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
   }
 
   public static final class SpindexerConstants {

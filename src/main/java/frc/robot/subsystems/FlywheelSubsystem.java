@@ -68,7 +68,8 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
                 .withSupplyCurrentLimitEnable(true)
         );
 
-    motor.setNeutralMode(NeutralModeValue.Coast);
+    configs.withSlot0(slot0Configs);
+
     motor.getConfigurator().apply(configs);
   }
 
@@ -217,6 +218,10 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
 
   public boolean goodToShoot(){
     return getSpeed() < goal + 2.5;
+  }
+
+  public double percentOfGoal(){
+    return motor.getVelocity().getValueAsDouble() / goal;
   }
   
   private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(

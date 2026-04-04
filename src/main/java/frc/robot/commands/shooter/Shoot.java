@@ -14,6 +14,7 @@ import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
+import frc.robot.subsystems.FeederSubsystem.FeederState;
 import frc.robot.subsystems.FlywheelSubsystem.FlywheelState;
 import frc.robot.subsystems.HoodSubsystem.HoodState;
 import frc.robot.subsystems.SpindexerSubsystem.SpindexerState;
@@ -87,6 +88,7 @@ public class Shoot extends Command {
     }
 
     if(flywheel.goodToShoot() && hood.goodToShoot()){
+      feeder.setState(FeederState.FORWARD);
       spindexer.setState(SpindexerState.FORWARD);
       controlFeeding();
     }
@@ -95,7 +97,7 @@ public class Shoot extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    feeder.stopMotor();
+    feeder.setState(FeederState.OFF);
     spindexer.setState(SpindexerState.OFF);
     hood.setState(HoodState.OFF);
     flywheel.setState(FlywheelState.OFF);
@@ -116,6 +118,7 @@ public class Shoot extends Command {
   }
 
   public void controlFeeding(){
+    feeder.configureMotor();
     spindexer.controlMotor();
   }
 }
