@@ -61,24 +61,19 @@ public class Shoot extends Command {
     boolean distanceTuningEnabled = SmartDashboard.getBoolean("Tuning/EnableDistanceTuning", false);
 
     if(pidTuningEnabled){
-      hood.setState(HoodState.PID_TUNING);
-      flywheel.setState(FlywheelState.PID_TUNING);
+      setPIDTuningStates();
     }
     else if(distanceTuningEnabled){
-      hood.setState(HoodState.DISTANCE_TUNING);
-      flywheel.setState(FlywheelState.DISTANCE_TUNING);
+      setDistanceTuningStates();
     }
-    else if(false){ //add boolean check later
-      hood.setState(HoodState.FIXED);
-      flywheel.setState(FlywheelState.FIXED);
+    else if(robot.isFixedShot()){ //add boolean check later
+      setFixedStates();
     }
     else if(ShooterUtils.inNeutralZone(robotPose)){
-      hood.setState(HoodState.FERRYING);
-      flywheel.setState(FlywheelState.FERRYING);
+      setFerryingStates();
     }
     else{
-      hood.setState(HoodState.SHOOTING);
-      flywheel.setState(FlywheelState.SHOOTING);
+      setShootingStates();
     }
 
     controlShooting(distance);
@@ -88,8 +83,7 @@ public class Shoot extends Command {
     }
 
     if(flywheel.goodToShoot() && hood.goodToShoot()){
-      feeder.setState(FeederState.FORWARD);
-      spindexer.setState(SpindexerState.FORWARD);
+      setFeedingStates();
       controlFeeding();
     }
   }
@@ -110,6 +104,36 @@ public class Shoot extends Command {
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+  public void setPIDTuningStates(){
+    hood.setState(HoodState.PID_TUNING);
+    flywheel.setState(FlywheelState.PID_TUNING);
+  }
+
+  public void setDistanceTuningStates(){
+    hood.setState(HoodState.DISTANCE_TUNING);
+    flywheel.setState(FlywheelState.DISTANCE_TUNING);
+  }
+
+  public void setFixedStates(){
+    hood.setState(HoodState.FIXED);
+    flywheel.setState(FlywheelState.FIXED);
+  }
+
+  public void setFerryingStates(){
+    hood.setState(HoodState.FERRYING);
+    flywheel.setState(FlywheelState.FERRYING);
+  }
+
+  public void setShootingStates(){
+    hood.setState(HoodState.SHOOTING);
+    flywheel.setState(FlywheelState.SHOOTING);
+  }
+
+  public void setFeedingStates(){
+    feeder.setState(FeederState.FORWARD);
+    spindexer.setState(SpindexerState.FORWARD);
   }
 
   public void controlShooting(double distance){

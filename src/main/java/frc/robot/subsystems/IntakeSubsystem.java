@@ -96,6 +96,7 @@ public class IntakeSubsystem extends SubsystemBase {
     DEPLOYED,
     RETRACTED,
     FORCED_DOWN,
+    OFF,
     PID_TUNING
   }
   
@@ -135,12 +136,11 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void forceDownControl(){
-    if(pivotMotor.getStatorCurrent().getValueAsDouble() > PivotConstants.FORCED_DOWN_THRESHOLD){
-      pivotMotor.stopMotor();
-    }
-    else{
-      pivotMotor.setVoltage(PivotConstants.FORCE_DOWN_SPEED);
-    }
+    pivotMotor.setVoltage(PivotConstants.FORCE_DOWN_SPEED);
+  }
+
+  public void stopMotor(){
+    pivotMotor.stopMotor();
   }
 
   public void PIDTuningPivotControl(){
@@ -168,10 +168,17 @@ public class IntakeSubsystem extends SubsystemBase {
 
       case FORCED_DOWN:
         forceDownControl();
+        if(hittingBumper()){
+          pivotState = PivotState.OFF;
+        }
+        break;
+
+      case OFF:
+        stopMotor();
         break;
 
       default:
-        retractPivotControl();
+        stopMotor();
         break;
     }
   }
@@ -192,7 +199,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void stopRollers(){
-    rollerMotor.stopMotor();
+    rollerMotor.stopMotor();;
   }
 
   public void controlRoller(){
@@ -257,6 +264,12 @@ public class IntakeSubsystem extends SubsystemBase {
     controlRoller();
   }
 
+  public void forcedDownControl(){
+    setPivotState(PivotState.FORCED_DOWN);
+    setRollerState(RollerState.NORMAL);
+    controlPivot();
+    controlRoller();
+  }
 
   public void PIDTuningControl(){
     setPivotState(PivotState.PID_TUNING);
@@ -281,6 +294,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
       case REVERSE:
         reverseControl();
+        break;
+
+      case FORCED_DOWN:
+        forceDownControl();
         break;
     
       default:
@@ -316,6 +333,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public boolean isJammed(){
     return rollerMotor.getStatorCurrent().getValueAsDouble() > RollerConstants.JAMMED_THRESHOLD;
+  }
+
+  public boolean hittingBumper(){
+    return pivotMotor.getStatorCurrent().getValueAsDouble() > PivotConstants.FORCED_DOWN_THRESHOLD;
   }
 
   public TalonFX getPivotMotor(){

@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.IntakeState;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -32,13 +33,13 @@ public class ForceIntakeDown extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    
+    intake.setState(IntakeState.FORCED_DOWN);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
+    intake.controlIntake(); //in execute to check for hitting bumper
   }
 
   // Called once the command ends or is interrupted.

@@ -90,6 +90,8 @@ public class RobotContainer {
     
     public boolean safeToMove = false;
     private SendableChooser<Command> autoChooser;
+
+    private boolean fixedShot = false;
     
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
@@ -222,6 +224,14 @@ public class RobotContainer {
 
     public boolean isLowGear(){
         return lowGear;
+    }
+
+    public void toggleFixedShot(){
+        fixedShot = !fixedShot;
+    }
+
+    public boolean isFixedShot(){
+        return fixedShot;
     }
 
     // Returns 0 if reading the alliance color fails
