@@ -31,7 +31,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.LimelightHelpers;
 import frc.robot.utilities.RobotLogger;
 
-public class LimelightSubsystem extends SubsystemBase {
+public class LimelightSubsystemStrategy extends SubsystemBase {
   /** Creates a new LimelightSubsystem. */
   RobotContainer robot;
   Pose2d leftFieldVisionPose;
@@ -44,11 +44,16 @@ public class LimelightSubsystem extends SubsystemBase {
   public static String RIGHT_LIMELIGHT_NAME = "limelight-right";
   private AprilTagFieldLayout tagLayout;
 
+  private IVisionOdometryUpdater odometryUpdateStrategy;
 
-  public LimelightSubsystem(RobotContainer robot) {
+
+
+  public LimelightSubsystemStrategy(RobotContainer robot, IVisionOdometryUpdater odometryUpdateStrategy) {
     // Switch to pipeline 0
 
     this.robot = robot;
+    this.odometryUpdateStrategy = odometryUpdateStrategy;
+
     //Left
     LimelightHelpers.setPipelineIndex(LEFT_LIMELIGHT_NAME, 0);
     LimelightHelpers.SetIMUMode(LEFT_LIMELIGHT_NAME, 0);
@@ -106,44 +111,8 @@ public class LimelightSubsystem extends SubsystemBase {
     }
 
     updateFieldVisualization(leftFieldVisionPose,  leftFieldVisionDetections,  LEFT_LIMELIGHT_NAME);
-  
-    if(isValidUpdate(rightLL)){
-      LimelightHelpers.PoseEstimate mt2 = rightLL;
 
-      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
-      robot.drivetrain.addVisionMeasurement(
-        mt2.pose,
-        mt2.timestampSeconds
-      ); 
-    }
-
-   if(isValidUpdate(leftLL)){
-      LimelightHelpers.PoseEstimate mt2 = leftLL;
-
-      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
-      robot.drivetrain.addVisionMeasurement(
-        mt2.pose,
-        mt2.timestampSeconds
-      ); 
-    } 
-
-/*     LimelightHelpers.PoseEstimate mt2 = getBestPose(leftLL, rightLL);
-    if(mt2 != null){
-      robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
-      robot.drivetrain.addVisionMeasurement(
-        mt2.pose,
-        mt2.timestampSeconds
-      ); 
-
-       finalFieldVisionDetections = robot.field.getObject("Limelight/Final/visionDetections");
-      finalFieldVisionPose = robot.field.getObject("Limelight/Final/fieldVisionPose"); 
-
-      List<Pose2d> tagPoses = getTagPoses(mt2);     
-
-      finalFieldVisionDetections.setPoses(tagPoses);
-      finalFieldVisionPose.setPose(mt2.pose); 
-    }
- */
+    odometryUpdateStrategy.updateRobotPoseFromVision(robot.drivetrain, rightLL, leftLL);
   }
 
   private void updateFieldVisualization(
