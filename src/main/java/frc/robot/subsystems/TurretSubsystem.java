@@ -150,8 +150,8 @@ public class TurretSubsystem extends SubsystemBase {
       turretMotor.setControl(positionVoltage.withPosition(wantedEncoderPos));
     }
 
-    SmartDashboard.putBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());
-    SmartDashboard.putBoolean("UserButtonPressed", RobotController.getUserButton());
+    RobotLogger.logBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());
+    RobotLogger.logBoolean("UserButtonPressed", RobotController.getUserButton());
 
     logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        
     logNumber("Turret/CurrentPose", currentEncoderPos);        
@@ -227,7 +227,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public void logNumber(String key, double value){
-    SmartDashboard.putNumber(key, value);
+    RobotLogger.logDouble(key, value);
   }
 
   public void logNumber2(String key, double value){

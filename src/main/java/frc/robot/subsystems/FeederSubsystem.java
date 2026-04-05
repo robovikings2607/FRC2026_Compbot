@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.SysIdBuilder;
 import frc.robot.Constants.FeederConstants;
 
@@ -146,21 +147,21 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void updateLoggingData(){
-    SmartDashboard.putNumber("Feeder/CurrentRPS", motor.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Feeder/Goal(rps)", goal);
-    SmartDashboard.putNumber("Feeder/Voltage", motor.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putNumber("Feeder/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Feeder/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
-    SmartDashboard.putString("Feeder/State", state.name());
+    RobotLogger.logDouble("Feeder/CurrentRPS", motor.getVelocity().getValueAsDouble());
+    RobotLogger.logDouble("Feeder/Goal(rps)", goal);
+    RobotLogger.logDouble("Feeder/Voltage", motor.getMotorVoltage().getValueAsDouble());
+    RobotLogger.logDouble("Feeder/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Feeder/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
+    RobotLogger.logString("Feeder/State", state.name());
   }
 
   public void createTuningData(){
-    SmartDashboard.putNumber("Feeder/Tuning/PID/S", 0);
-    SmartDashboard.putNumber("Feeder/Tuning/PID/V", 0);
-    SmartDashboard.putNumber("Feeder/Tuning/PID/P", 0);
-    SmartDashboard.putNumber("Feeder/Tuning/PID/I", 0);
-    SmartDashboard.putNumber("Feeder/Tuning/PID/D", 0);
-    SmartDashboard.putNumber("Feeder/Tuning/Goal(rps)", 0);
+    RobotLogger.logDouble("Feeder/Tuning/PID/S", 0);
+    RobotLogger.logDouble("Feeder/Tuning/PID/V", 0);
+    RobotLogger.logDouble("Feeder/Tuning/PID/P", 0);
+    RobotLogger.logDouble("Feeder/Tuning/PID/I", 0);
+    RobotLogger.logDouble("Feeder/Tuning/PID/D", 0);
+    RobotLogger.logDouble("Feeder/Tuning/Goal(rps)", 0);
   }
 
   private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(

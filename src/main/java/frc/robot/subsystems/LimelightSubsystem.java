@@ -28,6 +28,7 @@ import frc.robot.RobotContainer;
 // import frc.robot.Constants.VisionConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.LimelightHelpers;
+import frc.robot.utilities.RobotLogger;
 
 public class LimelightSubsystem extends SubsystemBase {
   /** Creates a new LimelightSubsystem. */
@@ -107,7 +108,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
  
 
-   SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets", leftLL != null ? leftLL.tagCount > 0 : false);
+   RobotLogger.logBoolean("Limelight/" + LEFT_LIMELIGHT_NAME + "/hasTargets", leftLL != null ? leftLL.tagCount > 0 : false);
 
     if(isValidUpdate(rightLL) && rightLL.avgTagArea > 0.1){
       LimelightHelpers.PoseEstimate mt2 = rightLL;
@@ -118,9 +119,9 @@ public class LimelightSubsystem extends SubsystemBase {
         mt2.timestampSeconds
       ); 
 
-      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
-      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
-      SmartDashboard.putNumber("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
+      RobotLogger.logDouble("Limelight/" + RIGHT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
+      RobotLogger.logDouble("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
+      RobotLogger.logDouble("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
 
       // System.out.println("has pose");
       List<Pose2d> tagPoses = getTagPoses(mt2);     
@@ -138,9 +139,9 @@ public class LimelightSubsystem extends SubsystemBase {
         mt2.timestampSeconds
       ); 
 
-      SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
-      SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
-      SmartDashboard.putNumber("Limelight/" + LEFT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
+      RobotLogger.logDouble("Limelight/" + LEFT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
+      RobotLogger.logDouble("Limelight/" + LEFT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
+      RobotLogger.logDouble("Limelight/" + LEFT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
 
       // System.out.println("has pose");
       List<Pose2d> tagPoses = getTagPoses(mt2);     
@@ -166,7 +167,7 @@ public class LimelightSubsystem extends SubsystemBase {
       finalFieldVisionPose.setPose(mt2.pose); 
     }
  */
-       SmartDashboard.putBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightLL != null ? rightLL.tagCount > 0 : false);
+       RobotLogger.logBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightLL != null ? rightLL.tagCount > 0 : false);
   }
 
   public boolean isValidUpdate(LimelightHelpers.PoseEstimate mt2){

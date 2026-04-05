@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.SysIdBuilder;
 import frc.robot.Constants.SpindexerConstants;
 
@@ -102,10 +103,10 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void updateLoggingData(){
-    SmartDashboard.putNumber("Spindexer/Voltage", motor.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putNumber("Spindexer/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Spindexer/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
-    SmartDashboard.putString("Spindexer/State", state.name());
+    RobotLogger.logDouble("Spindexer/Voltage", motor.getMotorVoltage().getValueAsDouble());
+    RobotLogger.logDouble("Spindexer/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Spindexer/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
+    RobotLogger.logString("Spindexer/State", state.name());
   }
 
   private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(

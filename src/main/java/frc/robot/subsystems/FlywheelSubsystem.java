@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.SysIdBuilder;
 
 import static edu.wpi.first.units.Units.*;
@@ -198,22 +199,22 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void updateLoggingData(){
-    SmartDashboard.putNumber("Flywheel/Goal(RPS)", goal);
-    SmartDashboard.putNumber("Flywheel/CurrentRPS", motor.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Flywheel/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Flywheel/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Flywheel/Voltage", motor.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putBoolean("Flywheel/GoodToShoot", goodToShoot());
-    SmartDashboard.putString("Flywheel/State", state.name());
+    RobotLogger.logDouble("Flywheel/Goal(RPS)", goal);
+    RobotLogger.logDouble("Flywheel/CurrentRPS", motor.getVelocity().getValueAsDouble());
+    RobotLogger.logDouble("Flywheel/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Flywheel/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Flywheel/Voltage", motor.getMotorVoltage().getValueAsDouble());
+    RobotLogger.logBoolean("Flywheel/GoodToShoot", goodToShoot());
+    RobotLogger.logString("Flywheel/State", state.name());
   }
 
   public void createTuningData(){
-    SmartDashboard.putNumber("Flywheel/Tuning/PID/S", 0);
-    SmartDashboard.putNumber("Flywheel/Tuning/PID/V", 0);
-    SmartDashboard.putNumber("Flywheel/Tuning/PID/P", 0);
-    SmartDashboard.putNumber("Flywheel/Tuning/PID/I", 0);
-    SmartDashboard.putNumber("Flywheel/Tuning/PID/D", 0);
-    SmartDashboard.putNumber("Flywheel/Tuning/Goal(RPS)", 0);
+    RobotLogger.logDouble("Flywheel/Tuning/PID/S", 0);
+    RobotLogger.logDouble("Flywheel/Tuning/PID/V", 0);
+    RobotLogger.logDouble("Flywheel/Tuning/PID/P", 0);
+    RobotLogger.logDouble("Flywheel/Tuning/PID/I", 0);
+    RobotLogger.logDouble("Flywheel/Tuning/PID/D", 0);
+    RobotLogger.logDouble("Flywheel/Tuning/Goal(RPS)", 0);
   }  
 
   public boolean goodToShoot(){

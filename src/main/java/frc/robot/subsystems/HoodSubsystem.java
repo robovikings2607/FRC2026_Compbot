@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.RobotContainer;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.Constants.HoodConstants;
 
 public class HoodSubsystem extends SubsystemBase {
@@ -199,22 +200,22 @@ public class HoodSubsystem extends SubsystemBase {
   }
 
   public void updateLoggingData(){
-    SmartDashboard.putNumber("Hood/Output", output);
-    SmartDashboard.putNumber("Hood/Goal(Degrees)", goal);
-    SmartDashboard.putNumber("Hood/CurrentDegrees", encoderTicksToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
-    SmartDashboard.putNumber("Hood/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
-    SmartDashboard.putNumber("Hood/StatorCurrent", motor.getStatorCurrent());
-    SmartDashboard.putNumber("Hood/SupplyCurrent", motor.getSupplyCurrent());
-    SmartDashboard.putNumber("Hood/Voltage", motor.getMotorOutputVoltage());
-    SmartDashboard.putBoolean("Hood/GoodToShoot", goodToShoot());
-    SmartDashboard.putString("Hood/State", state.name());
+    RobotLogger.logDouble("Hood/Output", output);
+    RobotLogger.logDouble("Hood/Goal(Degrees)", goal);
+    RobotLogger.logDouble("Hood/CurrentDegrees", encoderTicksToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
+    RobotLogger.logDouble("Hood/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
+    RobotLogger.logDouble("Hood/StatorCurrent", motor.getStatorCurrent());
+    RobotLogger.logDouble("Hood/SupplyCurrent", motor.getSupplyCurrent());
+    RobotLogger.logDouble("Hood/Voltage", motor.getMotorOutputVoltage());
+    RobotLogger.logBoolean("Hood/GoodToShoot", goodToShoot());
+    RobotLogger.logString("Hood/State", state.name());
   }
 
   public void createTuningData(){
-    SmartDashboard.putNumber("Hood/Tuning/PID/P", 0);
-    SmartDashboard.putNumber("Hood/Tuning/PID/I", 0);
-    SmartDashboard.putNumber("Hood/Tuning/PID/D", 0);
-    SmartDashboard.putNumber("Hood/Tuning/Goal(Degrees)", 0);
+    RobotLogger.logDouble("Hood/Tuning/PID/P", 0);
+    RobotLogger.logDouble("Hood/Tuning/PID/I", 0);
+    RobotLogger.logDouble("Hood/Tuning/PID/D", 0);
+    RobotLogger.logDouble("Hood/Tuning/Goal(Degrees)", 0);
   }
 
   public boolean goodToShoot(){

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.Constants.PivotConstants;
 import frc.robot.Constants.RollerConstants;
 
@@ -307,28 +308,28 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void updateLoggingData(){
-    SmartDashboard.putString("Intake/State", state.name());
+    RobotLogger.logString("Intake/State", state.name());
     //Pivot
-    SmartDashboard.putNumber("Intake/Pivot/Output", output);
-    SmartDashboard.putNumber("Intake/Pivot/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
-    SmartDashboard.putNumber("Intake/Pivot/Goal", pid.getSetpoint());
-    SmartDashboard.putBoolean("Intake/Pivot/AtGoal", pid.atSetpoint());
-    SmartDashboard.putNumber("Intake/Pivot/StatorCurrent", pivotMotor.getStatorCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Intake/Pivot/SupplyCurrent", pivotMotor.getSupplyCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Intake/Pivot/Voltage", pivotMotor.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putString("Intake/Pivot/State", pivotState.name());
+    RobotLogger.logDouble("Intake/Pivot/Output", output);
+    RobotLogger.logDouble("Intake/Pivot/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
+    RobotLogger.logDouble("Intake/Pivot/Goal", pid.getSetpoint());
+    RobotLogger.logBoolean("Intake/Pivot/AtGoal", pid.atSetpoint());
+    RobotLogger.logDouble("Intake/Pivot/StatorCurrent", pivotMotor.getStatorCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Intake/Pivot/SupplyCurrent", pivotMotor.getSupplyCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Intake/Pivot/Voltage", pivotMotor.getMotorVoltage().getValueAsDouble());
+    RobotLogger.logString("Intake/Pivot/State", pivotState.name());
     //Roller
-    SmartDashboard.putNumber("Intake/Roller/StatorCurrent", rollerMotor.getStatorCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Intake/Roller/SupplyCurrent", rollerMotor.getSupplyCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Intake/Roller/Voltage", rollerMotor.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putString("Intake/Roller/State", rollerState.name());
+    RobotLogger.logDouble("Intake/Roller/StatorCurrent", rollerMotor.getStatorCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Intake/Roller/SupplyCurrent", rollerMotor.getSupplyCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Intake/Roller/Voltage", rollerMotor.getMotorVoltage().getValueAsDouble());
+    RobotLogger.logString("Intake/Roller/State", rollerState.name());
   }
 
   public void createTuningData(){
-    SmartDashboard.putNumber("Intake/Pivot/Tuning/PID/P", 0);
-    SmartDashboard.putNumber("Intake/Pivot/Tuning/PID/I", 0);
-    SmartDashboard.putNumber("Intake/Pivot/Tuning/PID/D", 0);
-    SmartDashboard.putBoolean("Intake/Pivot/Tuning/Deploy?", false);
+    RobotLogger.logDouble("Intake/Pivot/Tuning/PID/P", 0);
+    RobotLogger.logDouble("Intake/Pivot/Tuning/PID/I", 0);
+    RobotLogger.logDouble("Intake/Pivot/Tuning/PID/D", 0);
+    RobotLogger.logBoolean("Intake/Pivot/Tuning/Deploy?", false);
   }
 
   public boolean isJammed(){

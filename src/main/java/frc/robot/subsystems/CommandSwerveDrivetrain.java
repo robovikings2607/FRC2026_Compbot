@@ -299,8 +299,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        SmartDashboard.putNumber("DriveTrain/vX", getState().Speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("DriveTrain/vY", getState().Speeds.vyMetersPerSecond);
+        RobotLogger.logDouble("DriveTrain/vX", getState().Speeds.vxMetersPerSecond);
+        RobotLogger.logDouble("DriveTrain/vY", getState().Speeds.vyMetersPerSecond);
     }
 
     private void startSimThread() {
