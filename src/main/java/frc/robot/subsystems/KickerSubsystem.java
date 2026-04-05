@@ -16,10 +16,9 @@ import static edu.wpi.first.units.Units.*;
 
 public class KickerSubsystem extends SubsystemBase {
   /** Creates a new KickerSubsystem. */
-
   private RobotContainer robot;
-
-  private TalonFX kickerMotor;
+  private final TalonFX motor = new TalonFX(KickerConstants.MOTOR_ID);
+  private KickerState state = KickerState.OFF;
 
   public KickerSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -33,29 +32,65 @@ public class KickerSubsystem extends SubsystemBase {
   }
 
   public void configureMotor(){
-    kickerMotor = new TalonFX(KickerConstants.KICKER_ID);
-
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
     configs.withCurrentLimits(
         new CurrentLimitsConfigs()
             // Swerve azimuth does not require much torque output, so we can set a relatively low
             // stator current limit to help avoid brownouts without impacting performance.
-            .withStatorCurrentLimit(Amps.of(20))
+            .withStatorCurrentLimit(Amps.of(KickerConstants.STATOR_LIMIT))
             .withStatorCurrentLimitEnable(true)
-            .withSupplyCurrentLimit(Amps.of(40))
-            .withSupplyCurrentLowerLimit(Amps.of(10))
+            .withSupplyCurrentLimit(Amps.of(KickerConstants.SUPPLY_LIMIT))
+            .withSupplyCurrentLowerLimit(Amps.of(KickerConstants.SUPPLY_LOWER_LIMIT))
             .withSupplyCurrentLimitEnable(true)
     );
 
-    kickerMotor.getConfigurator().apply(configs);
+    motor.getConfigurator().apply(configs);
   }
 
-  public void runMotor(){
-    kickerMotor.setVoltage(KickerConstants.KICKER_SPEED);
+  public enum KickerState{
+    FORWARD,
+    REVERSE,
+    OFF
+  }
+
+  public void setState(KickerState state){
+    this.state = state;
+  }
+
+  public KickerState getState(){
+    return state;
+  }
+
+  public void forwardControl(){
+    motor.setVoltage(KickerConstants.SPEED);
+  }
+  
+  public void reverseControl(){
+    motor.setVoltage(-KickerConstants.SPEED);
   }
 
   public void stopMotor(){
-    kickerMotor.stopMotor();
+    motor.stopMotor();
+  }
+
+  public void controlMotor(){
+    switch (state) {
+      case FORWARD:
+        forwardControl();
+        break;      
+      
+      case REVERSE:
+        reverseControl();
+        break;
+
+      case OFF:
+        stopMotor();
+        break;
+    
+      default:
+        stopMotor();
+        break;
+    }
   }
 }

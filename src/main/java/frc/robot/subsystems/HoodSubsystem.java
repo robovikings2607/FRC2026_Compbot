@@ -193,7 +193,7 @@ public class HoodSubsystem extends SubsystemBase {
         break;
     
       default:
-        shootingControl(distance);
+        stopMotor();
         break;
     }
   }

@@ -23,10 +23,13 @@ import static edu.wpi.first.units.Units.*;
 
 public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   /** Creates a new SpinDexerSubSystem. */
+  private RobotContainer robot;
   private final TalonFX motor = new TalonFX(SpindexerConstants.MOTOR_ID);
   private SpindexerState state = SpindexerState.OFF;
 
   public SpindexerSubsystem(RobotContainer robot) {
+    this.robot = robot;
+
     configureMotor();
   }
 

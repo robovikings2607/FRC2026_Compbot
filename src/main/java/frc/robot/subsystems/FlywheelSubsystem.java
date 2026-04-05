@@ -192,7 +192,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
         break;
     
       default:
-        shootingControl(distance);
+        coastOut();
         break;
     }
   }

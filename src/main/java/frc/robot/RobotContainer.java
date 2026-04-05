@@ -43,12 +43,12 @@ import frc.robot.commands.shooter.FixShooter;
 import frc.robot.commands.shooter.ReverseSpindexer;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.KickerSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
@@ -99,8 +99,8 @@ public class RobotContainer {
     public final FeederSubsystem feeder = new FeederSubsystem(this);
     public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
     public final IntakeSubsystem intake = new IntakeSubsystem(this);
+    public final KickerSubsystem kicker = new KickerSubsystem(this);
     //public final LEDSubsystem leds = new LEDSubsystem(this);
-    //public final ClimberSubsystem climber = new ClimberSubsystem(this);
 
     public RobotContainer() {
 

@@ -167,14 +167,15 @@ public final class Constants {
 
   public static final class KickerConstants {
     //CAN ID
-    public static final int KICKER_ID = 22;
+    public static final int MOTOR_ID = 22;
 
     //Speed (in volts)
-    public static final double KICKER_SPEED = 6.0;
-  }
+    public static final double SPEED = 6.0;
 
-  public static final class ClimberConstants {
-    public static final int CLIMBER_ID = 19;
+    //Current Limits
+    public static final double STATOR_LIMIT = 20.0;
+    public static final double SUPPLY_LIMIT = 40.0;
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
   }
 
   public static final class LimelightConstants {

@@ -192,7 +192,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void stopRollers(){
-    rollerMotor.stopMotor();;
+    rollerMotor.stopMotor();
   }
 
   public void controlRoller(){
