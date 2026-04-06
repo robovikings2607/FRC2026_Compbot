@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.KickerConstants;
+import frc.robot.utilities.RobotLogger;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -29,6 +30,7 @@ public class KickerSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    updateLoggingData();
   }
 
   public void configureMotor(){
@@ -92,5 +94,12 @@ public class KickerSubsystem extends SubsystemBase {
         stopMotor();
         break;
     }
+  }
+
+  public void updateLoggingData(){
+    RobotLogger.logDouble("Kicker/Voltage", motor.getMotorVoltage().getValueAsDouble());
+    RobotLogger.logDouble("Kicker/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Kicker/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
+    RobotLogger.logString("Kicker/State", state.name());
   }
 }
