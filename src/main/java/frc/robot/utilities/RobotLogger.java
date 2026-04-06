@@ -182,4 +182,15 @@ public class RobotLogger {
         SmartDashboard.putData(key, data);
     }
 
+
+    /*
+    * retrieves the value from a key on SmartDashboard prefixed with
+    * the root key where all log data gets written. That way you'll look 
+    * in the same location for both logged data and data you're trying to
+    * retrieve
+    */
+    public static double getDouble(String key, double defaultValue) {
+        return SmartDashboard.getNumber(getDecoratedKey(key), defaultValue);
+    }
+
 }
