@@ -54,7 +54,7 @@ public final class Constants {
     //PID Values
     public static final double S = 0.55;
     public static final double V = 0.12167;
-    public static final double P = 6.0;
+    public static final double P = 0.6;
     public static final double I = 0.0;
     public static final double D = 0.0;
 

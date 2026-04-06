@@ -33,7 +33,7 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
   private final TalonFXConfiguration configs = new TalonFXConfiguration();
   private final VelocityVoltage pid = new VelocityVoltage(0.0);
   private final CoastOut coastOut = new CoastOut();
-  private FeederState state = FeederState.OFF;
+  private FeederState state = FeederState.FORWARD;
   private double goal;
 
   public FeederSubsystem(RobotContainer robot) {
@@ -90,12 +90,12 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void forwardControl() {
-    goal = (FeederConstants.SPEED);
-    motor.setControl(pid.withVelocity(goal));
+    goal = FeederConstants.SPEED;
+    motor.setControl(pid.withVelocity(75.0));
   }
 
   public void reverseControl(){
-    goal = (-FeederConstants.SPEED);
+    goal = -FeederConstants.SPEED;
     motor.setControl(pid.withVelocity(goal));
   }
 
