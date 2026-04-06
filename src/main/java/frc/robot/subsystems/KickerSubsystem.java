@@ -102,4 +102,8 @@ public class KickerSubsystem extends SubsystemBase {
     RobotLogger.logDouble("Kicker/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
     RobotLogger.logString("Kicker/State", state.name());
   }
+
+  public TalonFX getMotor(){
+    return motor;
+  }
 }
