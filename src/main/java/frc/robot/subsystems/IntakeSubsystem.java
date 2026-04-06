@@ -21,7 +21,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private RobotContainer robot;
   private final TalonFX rollerMotor = new TalonFX(RollerConstants.MOTOR_ID);
   private final TalonFX pivotMotor = new TalonFX(PivotConstants.MOTOR_ID);
-  private final CANcoder encoder = new CANcoder(PivotConstants.MOTOR_ID);
+  private final CANcoder encoder = new CANcoder(PivotConstants.ENCODER_ID);
   private final PhoenixPIDController pid = new PhoenixPIDController(PivotConstants.P, PivotConstants.I, PivotConstants.D);
   private final Timer timer = new Timer();
   private double output;
@@ -36,11 +36,13 @@ public class IntakeSubsystem extends SubsystemBase {
     configureRollerMotor();
     //configureEncoder();
     //configurePID();
+    createTuningData();
   }
 
   @Override
   public void periodic() {
     updateLoggingData();
+    RobotLogger.logDouble("Time", Timer.getFPGATimestamp());
   }
 
   public void configurePivotMotor(){
@@ -85,10 +87,6 @@ public class IntakeSubsystem extends SubsystemBase {
     PID_TUNING
   }
 
-  public void setState(IntakeState state){
-    this.state = state;
-  }
-
   public IntakeState getState(){
     return state;
   }
@@ -99,10 +97,6 @@ public class IntakeSubsystem extends SubsystemBase {
     FORCED_DOWN,
     OFF,
     PID_TUNING
-  }
-  
-  public void setPivotState(PivotState state){
-    pivotState = state;
   }
 
   public PivotState getPivotState(){
@@ -115,10 +109,6 @@ public class IntakeSubsystem extends SubsystemBase {
     REVERSE,
     UNJAM,
     OFF
-  }
-
-  public void setRollerState(RollerState state){
-    rollerState = state;
   }
 
   public RollerState getRollerState(){
@@ -157,7 +147,9 @@ public class IntakeSubsystem extends SubsystemBase {
     pivotMotor.set(output);    
   }
 
-  public void controlPivot(){
+  public void controlPivot(PivotState state){
+    pivotState = state;
+    
     switch (pivotState) {
       case RETRACTED:
         retractPivotControl();
@@ -176,6 +168,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
       case OFF:
         stopMotor();
+        break;
+
+      case PID_TUNING:
+        PIDTuningPivotControl();
         break;
 
       default:
@@ -203,7 +199,9 @@ public class IntakeSubsystem extends SubsystemBase {
     rollerMotor.stopMotor();;
   }
 
-  public void controlRoller(){
+  public void controlRoller(RollerState state){
+    rollerState = state;
+
     switch (rollerState) {
       case OFF:
         stopRollers();
@@ -245,41 +243,33 @@ public class IntakeSubsystem extends SubsystemBase {
 
   //Whole Intake Controls
   public void retractControl(){
-    setPivotState(PivotState.RETRACTED);
-    setRollerState(RollerState.OFF);
-    controlPivot();
-    controlRoller();
+    controlPivot(PivotState.RETRACTED);
+    controlRoller(RollerState.OFF);
   }
 
   public void deployControl(){
-    setPivotState(PivotState.DEPLOYED);
-    setRollerState(RollerState.NORMAL);
-    controlPivot();
-    controlRoller();
+    controlPivot(PivotState.DEPLOYED);
+    controlRoller(RollerState.NORMAL);
   }
 
   public void reverseControl(){
-    setPivotState(PivotState.DEPLOYED);
-    setRollerState(RollerState.REVERSE);
-    controlPivot();
-    controlRoller();
+    controlPivot(PivotState.DEPLOYED);
+    controlRoller(RollerState.REVERSE);
   }
 
   public void forcedDownControl(){
-    setPivotState(PivotState.FORCED_DOWN);
-    setRollerState(RollerState.NORMAL);
-    controlPivot();
-    controlRoller();
+    controlPivot(PivotState.FORCED_DOWN);
+    controlRoller(RollerState.NORMAL);
   }
 
   public void PIDTuningControl(){
-    setPivotState(PivotState.PID_TUNING);
-    setRollerState(RollerState.OFF);
-    controlPivot();
-    controlRoller();
+    controlPivot(PivotState.PID_TUNING);
+    controlRoller(RollerState.OFF);
   }
 
-  public void controlIntake(){
+  public void controlIntake(IntakeState state){
+    this.state = state;
+    
     switch (state) {
       case RETRACTED:
         retractControl();

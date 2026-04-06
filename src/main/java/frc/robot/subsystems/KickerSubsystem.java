@@ -76,7 +76,9 @@ public class KickerSubsystem extends SubsystemBase {
     motor.stopMotor();
   }
 
-  public void controlMotor(){
+  public void controlMotor(KickerState state){
+    this.state = state;
+
     switch (state) {
       case FORWARD:
         forwardControl();

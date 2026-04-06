@@ -98,7 +98,7 @@ public class RobotLogger {
         entry.append(value);
 
         if (inPublishMode()) {
-            RobotLogger.logDouble(getDecoratedKey(key), value);
+            SmartDashboard.putNumber(getDecoratedKey(key), value);
         }
     }
 
@@ -109,7 +109,7 @@ public class RobotLogger {
         entry.append(value);
 
         if (inPublishMode()) {
-            RobotLogger.logBoolean(getDecoratedKey(key), value);
+            SmartDashboard.putBoolean(getDecoratedKey(key), value);
         }
     }
 
@@ -120,7 +120,7 @@ public class RobotLogger {
         entry.append(value);
 
         if(inPublishMode()){
-            RobotLogger.logString(getDecoratedKey(key), value);
+            SmartDashboard.putString(getDecoratedKey(key), value);
         }
     }
 

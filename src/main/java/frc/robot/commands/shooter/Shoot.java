@@ -13,10 +13,12 @@ import frc.robot.Constants.HoodConstants;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.KickerSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
 import frc.robot.subsystems.FeederSubsystem.FeederState;
 import frc.robot.subsystems.FlywheelSubsystem.FlywheelState;
 import frc.robot.subsystems.HoodSubsystem.HoodState;
+import frc.robot.subsystems.KickerSubsystem.KickerState;
 import frc.robot.subsystems.SpindexerSubsystem.SpindexerState;
 import frc.robot.utilities.ShooterUtils;
 
@@ -29,6 +31,7 @@ public class Shoot extends Command {
   SpindexerSubsystem spindexer;
   HoodSubsystem hood;
   FlywheelSubsystem flywheel;
+  KickerSubsystem kicker;
 
   public Shoot(RobotContainer robot) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -37,8 +40,9 @@ public class Shoot extends Command {
     spindexer = robot.spindexer;
     hood = robot.hood;
     flywheel = robot.flywheel;
+    kicker = robot.kicker;
 
-    addRequirements(feeder, spindexer, hood, flywheel);
+    addRequirements(feeder, spindexer, hood, flywheel, kicker);
   }
 
   // Called when the command is initially scheduled.
@@ -58,7 +62,7 @@ public class Shoot extends Command {
     double distance = shooterPose.getDistance(goalPose);
 
     boolean pidTuningEnabled = SmartDashboard.getBoolean("Tuning/EnablePIDTuning", false);
-    boolean distanceTuningEnabled = SmartDashboard.getBoolean("Tuning/EnableDistanceTuning", false);
+    boolean distanceTuningEnabled = SmartDashboard.getBoolean("Tuning/EnableDistanceTuning", true);
 
     if(pidTuningEnabled){
       setPIDTuningStates();
@@ -78,26 +82,22 @@ public class Shoot extends Command {
 
     controlShooting(distance);
 
-    if(pidTuningEnabled){
-      return;
-    }
-
     if(flywheel.goodToShoot() && hood.goodToShoot()){
       setFeedingStates();
-      controlFeeding();
+      controlFeeding(KickerState.FORWARD);
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    feeder.setState(FeederState.OFF);
-    spindexer.setState(SpindexerState.OFF);
     hood.setState(HoodState.OFF);
     flywheel.setState(FlywheelState.OFF);
+    spindexer.setState(SpindexerState.OFF);
+    feeder.setState(FeederState.OFF);
     
     controlShooting(0);
-    controlFeeding();
+    controlFeeding(KickerState.OFF);
   }
 
   // Returns true when the command should end.
@@ -141,8 +141,9 @@ public class Shoot extends Command {
     flywheel.controlMotor(distance);
   }
 
-  public void controlFeeding(){
+  public void controlFeeding(KickerState kickerState){
     feeder.configureMotor();
     spindexer.controlMotor();
+    kicker.controlMotor(kickerState);
   }
 }

@@ -32,23 +32,22 @@ public class JostlePieces extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.setState(IntakeState.DEPLOYED);
-    intake.controlIntake();
+    intake.controlIntake(IntakeState.DEPLOYED);
     timer.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(timer.get() > 0.25 && intake.getState().equals(IntakeState.DEPLOYED)){
-      intake.setState(IntakeState.RETRACTED);
+    if((timer.get() > 0.25 && intake.getState().equals(IntakeState.DEPLOYED)) || 
+        timer.get() < 0.25 && intake.getState().equals(IntakeState.RETRACTED)){
+      intake.controlIntake(IntakeState.RETRACTED);
     }
 
-    if(timer.get() > 0.25 && intake.getState().equals(IntakeState.RETRACTED)){
-      intake.setState(IntakeState.DEPLOYED);
+    if((timer.get() > 0.25 && intake.getState().equals(IntakeState.RETRACTED)) || 
+        timer.get() < 0.25 && intake.getState().equals(IntakeState.DEPLOYED)){
+      intake.controlIntake(IntakeState.DEPLOYED);
     }
-
-    intake.controlIntake();
   }
 
   // Called once the command ends or is interrupted.

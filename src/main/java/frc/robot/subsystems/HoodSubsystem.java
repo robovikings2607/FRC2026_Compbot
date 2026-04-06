@@ -30,7 +30,7 @@ public class HoodSubsystem extends SubsystemBase {
   private final PhoenixPIDController pid = new PhoenixPIDController(HoodConstants.P, HoodConstants.I, HoodConstants.D);
   private final InterpolatingDoubleTreeMap shootingInterp = new InterpolatingDoubleTreeMap();
   private final InterpolatingDoubleTreeMap ferryingInterp = new InterpolatingDoubleTreeMap();
-  private HoodState state = HoodState.SHOOTING;
+  private HoodState state = HoodState.OFF;
   private double goal, output;
 
   public HoodSubsystem(RobotContainer robot) {

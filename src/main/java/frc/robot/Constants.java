@@ -39,7 +39,7 @@ public final class Constants {
   }
 
   public static final class TurretConstants {
-    public static final int TURRET_ID = 30;
+    public static final int TURRET_ID = 30; //30
 
     public static final double OFFSET = 0.0;  
 
@@ -71,15 +71,15 @@ public final class Constants {
 
     //Encoder 
     public static final double DISCONTINUITY_POINT = 0.0;
-    public static final double MAGNET_OFFSET = 0.716064;
-    public static final double ENCODER_MIN = 0.0;
+    public static final double MAGNET_OFFSET = 0.71;
+    public static final double ENCODER_MIN = 0.005;
     public static final double ENCODER_MAX = -0.831299;
 
     //PID Values
     public static final double P = 7.0;
     public static final double I = 0.0;
     public static final double D = 0.0;
-    public static final double TOLERANCE = 0.002; //equates to +/- 0.05 degrees of error, may need to change
+    public static final double TOLERANCE = 0.01; //equates to +/- 0.05 degrees of error, may need to change
 
     public static final double GEAR_RATIO = 350.0/25.0; //Hood Gear:Shaft Gear
 
@@ -106,7 +106,7 @@ public final class Constants {
     public static final double FORCE_DOWN_SPEED = 2.0;
 
     //PID Values
-    public static final double P = 0.0;
+    public static final double P = -4.0;
     public static final double I = 0.0;
     public static final double D = 0.0;    
 
@@ -167,7 +167,7 @@ public final class Constants {
 
   public static final class KickerConstants {
     //CAN ID
-    public static final int MOTOR_ID = 22;
+    public static final int MOTOR_ID = 21;
 
     //Speed (in volts)
     public static final double SPEED = 6.0;

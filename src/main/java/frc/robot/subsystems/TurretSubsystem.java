@@ -30,6 +30,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
@@ -52,16 +53,18 @@ public class TurretSubsystem extends SubsystemBase {
   private static final double rotationsPerDegree = 10.0/360.0;
   private final TalonFX turretMotor;
   private final RobotContainer robot;
+  private final DigitalInput magnet = new DigitalInput(6);
   private MotionMagicVoltage magicMotionRequest;
   private PositionVoltage positionVoltage;
   private double currentEncoderPos;
   private boolean fixedShot = false;
   private boolean isDeactivated = false;
+  private boolean isZeroed = false;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
 
-    turretMotor = new TalonFX(99);
+    turretMotor = new TalonFX(TurretConstants.TURRET_ID);
 
     //turretMotor.setPosition(0);
     //previousSetPoint = turretMotor.getPosition().getValueAsDouble();
@@ -120,9 +123,18 @@ public class TurretSubsystem extends SubsystemBase {
   public void periodic() {
 
     // This method will be called once per scheduler run
+        RobotLogger.logBoolean("Turret/Magnet", !magnet.get());
 
     if(turretMotor.hasResetOccurred()){
       turretMotor.setPosition(currentEncoderPos);
+    }
+
+    if(!magnet.get() && !isZeroed){
+      turretMotor.setPosition(92.74 * rotationsPerDegree);
+      isZeroed = true;
+    }
+    else if(!isZeroed){
+      return;
     }
 
     Pose2d robotPose = robot.drivetrain.getState().Pose;
@@ -130,6 +142,8 @@ public class TurretSubsystem extends SubsystemBase {
     double robotRotation = robotPose.getRotation().getDegrees();
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
     Translation2d goalPose = ShooterUtils.determineShootingGoal(robotPose);
+
+    RobotLogger.logDouble("Distance", shooterPose.getDistance(goalPose));
 
     //checks alliance and aims at corresponding hub
     currentEncoderPos = turretMotor.getPosition().getValueAsDouble();
