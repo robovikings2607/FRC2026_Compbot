@@ -26,13 +26,13 @@ public class RetractIntake extends Command {
     intake = robot.intake;
     kicker = robot.kicker;
 
-    addRequirements(intake, kicker);
+    addRequirements(intake);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    kicker.controlMotor(KickerState.OFF);
+    //kicker.controlMotor(KickerState.OFF);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

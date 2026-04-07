@@ -94,7 +94,16 @@ public class HoodSubsystem extends SubsystemBase {
     //key = distance from goal
     //value = position of hood in encoder values
     shootingInterp.put(0.0, 0.0);
-    shootingInterp.put(6.0, 0.0);
+    shootingInterp.put(1.5, 0.0);
+    shootingInterp.put(2.0, -1.0);
+    shootingInterp.put(2.5, -2.0);
+    shootingInterp.put(3.0, -4.0);
+    shootingInterp.put(3.5, -6.0);
+    shootingInterp.put(4.0, -9.0);
+    shootingInterp.put(4.5, -12.0);
+    shootingInterp.put(5.0, -14.0);
+    //shootingInterp.put(5.5, 0.0);
+    //shootingInterp.put(6.0, 0.0);
   }
 
   public void createFerryingInterpMap(){

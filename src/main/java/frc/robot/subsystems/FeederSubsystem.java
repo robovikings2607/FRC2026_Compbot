@@ -91,7 +91,7 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
 
   public void forwardControl() {
     goal = FeederConstants.SPEED;
-    motor.setControl(pid.withVelocity(75.0));
+    motor.setControl(pid.withVelocity(goal));
   }
 
   public void reverseControl(){

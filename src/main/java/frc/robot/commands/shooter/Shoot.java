@@ -61,7 +61,7 @@ public class Shoot extends Command {
 
     double distance = shooterPose.getDistance(goalPose);
 
-    boolean pidTuningEnabled = SmartDashboard.getBoolean("Tuning/EnablePIDTuning", false);
+   /*  boolean pidTuningEnabled = SmartDashboard.getBoolean("Tuning/EnablePIDTuning", false);
     boolean distanceTuningEnabled = SmartDashboard.getBoolean("Tuning/EnableDistanceTuning", true);
 
     if(pidTuningEnabled){
@@ -70,7 +70,7 @@ public class Shoot extends Command {
     else if(distanceTuningEnabled){
       setDistanceTuningStates();
     }
-    else if(robot.isFixedShot()){ //add boolean check later
+    else */ if(robot.isFixedShot()){ //add boolean check later
       setFixedStates();
     }
     else if(ShooterUtils.inNeutralZone(robotPose)){
@@ -142,7 +142,7 @@ public class Shoot extends Command {
   }
 
   public void controlFeeding(KickerState kickerState){
-    feeder.configureMotor();
+    feeder.controlMotor();
     spindexer.controlMotor();
     kicker.controlMotor(kickerState);
   }

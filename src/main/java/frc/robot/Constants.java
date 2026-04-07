@@ -137,7 +137,7 @@ public final class Constants {
     public static final int MOTOR_ID = 16;
 
     //Speed (in rps)
-    public static final double SPEED = 75.0;
+    public static final double SPEED = 80.0;
 
     //PID Values
     public static final double S = 0.0;
@@ -148,7 +148,7 @@ public final class Constants {
 
     //Current Limits
     public static final double STATOR_LIMIT = 85.0;
-    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
+    public static final double SUPPLY_LIMIT = 50.0; //equivalent to breaker
     public static final double SUPPLY_LOWER_LIMIT = 10.0;
   }
 
@@ -170,7 +170,7 @@ public final class Constants {
     public static final int MOTOR_ID = 21;
 
     //Speed (in volts)
-    public static final double SPEED = 6.0;
+    public static final double SPEED = 8.0;
 
     //Current Limits
     public static final double STATOR_LIMIT = 20.0;
