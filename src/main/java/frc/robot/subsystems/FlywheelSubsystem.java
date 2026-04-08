@@ -140,6 +140,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     ferryingInterp.put(6.5, -53.0);
     ferryingInterp.put(7.0, -56.0);
     ferryingInterp.put(8.0, -65.0);
+    //over bump
     ferryingInterp.put(10.5, -41.0);
     ferryingInterp.put(11.0, -44.0);
     ferryingInterp.put(11.5, -47.0);

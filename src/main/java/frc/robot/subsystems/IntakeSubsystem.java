@@ -84,7 +84,9 @@ public class IntakeSubsystem extends SubsystemBase {
     RETRACTED,
     REVERSE,
     FORCED_DOWN,
-    PID_TUNING
+    PID_TUNING,
+    JAMMED,
+    UNJAM
   }
 
   public IntakeState getState(){
@@ -209,19 +211,10 @@ public class IntakeSubsystem extends SubsystemBase {
     
       case NORMAL:
         normalRollerControl();
-        if(isJammed()){
-          rollerState = RollerState.JAMMED;
-        }
         break;
 
       case JAMMED:
         jammedRollerControl();
-        if(!isJammed()){
-          rollerState = RollerState.NORMAL;
-        }
-        else if(timer.get() > 1.0){
-          rollerState = RollerState.UNJAM;
-        }
         break;
 
       case UNJAM:
@@ -267,9 +260,21 @@ public class IntakeSubsystem extends SubsystemBase {
     controlRoller(RollerState.OFF);
   }
 
-  public void controlIntake(IntakeState state){
+  public void jammedControl(){
+    controlPivot(PivotState.DEPLOYED);
+    controlRoller(RollerState.JAMMED);
+  }  
+  
+  public void unjamControl(){
+    controlPivot(PivotState.DEPLOYED);
+    controlRoller(RollerState.UNJAM);
+  }
+
+  public void setState(IntakeState state){
     this.state = state;
-    
+  }
+
+  public void controlIntake(){
     switch (state) {
       case RETRACTED:
         retractControl();
@@ -277,6 +282,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
       case DEPLOYED:
         deployControl();
+        if(isJammed()){
+          setState(IntakeState.JAMMED);
+        }
         break;
 
       case PID_TUNING:
@@ -291,6 +299,22 @@ public class IntakeSubsystem extends SubsystemBase {
         forceDownControl();
         break;
     
+      case JAMMED:
+        jammedControl();
+        if(!isJammed()){
+          setState(IntakeState.DEPLOYED);
+        }
+        else if(timer.get() > 1.0){
+          setState(IntakeState.UNJAM);
+        }
+        break;
+
+      case UNJAM:
+        if(!isJammed()){
+          setState(IntakeState.DEPLOYED);
+        }
+        break;
+
       default:
         retractControl();
         break;
