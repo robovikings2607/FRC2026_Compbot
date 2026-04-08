@@ -31,13 +31,13 @@ public class ReverseRollers extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    intake.setState(IntakeState.REVERSE);
   }
 
    // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intake.controlIntake(IntakeState.REVERSE); //needs to be in execute to check for jam
+    intake.controlIntake(); //needs to be in execute to check for jam
   }
 
   // Called once the command ends or is interrupted.

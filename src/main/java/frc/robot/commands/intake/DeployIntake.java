@@ -37,12 +37,13 @@ public class DeployIntake extends Command {
   @Override
   public void initialize() {
     //kicker.controlMotor(KickerState.FORWARD);
+    intake.setState(IntakeState.DEPLOYED);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intake.controlIntake(IntakeState.DEPLOYED); //needs to be in execute to check for jam
+    intake.controlIntake(); //needs to be in execute to check for jam
   }
 
   // Called once the command ends or is interrupted.
