@@ -122,14 +122,31 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     shootingInterp.put(4.0, -52.5);
     shootingInterp.put(4.5, -54.0);
     shootingInterp.put(5.0, -56.5);
+    shootingInterp.put(5.5, -61.0);
+    shootingInterp.put(5.8, -61.0);
     //shootingInterp.put(6.0, 0.0);
   }
 
   public void createFerryingInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps
-    ferryingInterp.put(0.0, 0.0);
-    ferryingInterp.put(6.0, 0.0);
+    ferryingInterp.put(0.0, -35.0);
+    ferryingInterp.put(3.5, -35.0);
+    ferryingInterp.put(4.0, -38.0);
+    ferryingInterp.put(4.5, -41.0);
+    ferryingInterp.put(5.0, -44.0);
+    ferryingInterp.put(5.5, -47.0);
+    ferryingInterp.put(6.0, -50.0);
+    ferryingInterp.put(6.5, -53.0);
+    ferryingInterp.put(7.0, -56.0);
+    ferryingInterp.put(8.0, -65.0);
+    ferryingInterp.put(10.5, -41.0);
+    ferryingInterp.put(11.0, -44.0);
+    ferryingInterp.put(11.5, -47.0);
+    ferryingInterp.put(12.5, -53.0);
+    ferryingInterp.put(13.0, -56.0);
+
+    //ferryingInterp.put(6.0, 0.0);
   }
 
   public double getGoal(){

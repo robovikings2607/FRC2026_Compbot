@@ -225,7 +225,7 @@ public class IntakeSubsystem extends SubsystemBase {
         break;
 
       case UNJAM:
-        reverseControl();
+        reverseRollerControl();
         if(!isJammed()){
           rollerState = RollerState.NORMAL;
         }

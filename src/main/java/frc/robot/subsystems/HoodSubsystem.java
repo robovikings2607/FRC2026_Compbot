@@ -102,6 +102,8 @@ public class HoodSubsystem extends SubsystemBase {
     shootingInterp.put(4.0, -9.0);
     shootingInterp.put(4.5, -12.0);
     shootingInterp.put(5.0, -14.0);
+    shootingInterp.put(5.5, -19.0);
+    shootingInterp.put(5.8, -19.0);
     //shootingInterp.put(5.5, 0.0);
     //shootingInterp.put(6.0, 0.0);
   }
@@ -109,8 +111,8 @@ public class HoodSubsystem extends SubsystemBase {
   public void createFerryingInterpMap(){
     //key = distance from goal
     //value = position of hood in degrees
-    ferryingInterp.put(0.0, 0.0);
-    ferryingInterp.put(6.0, 0.0);
+    ferryingInterp.put(0.0, HoodConstants.MAX_ANGLE);
+    ferryingInterp.put(13.0, HoodConstants.MAX_ANGLE);
   }
 
   public double degreesToEncoderTick(double degrees){
@@ -210,7 +212,7 @@ public class HoodSubsystem extends SubsystemBase {
 
   public void updateLoggingData(){
     RobotLogger.logDouble("Hood/Output", output);
-    RobotLogger.logDouble("Hood/Goal(Degrees)", goal);
+    RobotLogger.logDouble("Hood/Goal(Degrees)", encoderTicksToDegrees(goal));
     RobotLogger.logDouble("Hood/CurrentDegrees", encoderTicksToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
     RobotLogger.logDouble("Hood/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
     RobotLogger.logDouble("Hood/StatorCurrent", motor.getStatorCurrent());

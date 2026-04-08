@@ -176,8 +176,8 @@ public class RobotContainer {
     }
 
     public void createTuningToggles(){
-        RobotLogger.logBoolean("Tuning/EnablePIDTuning", false);
-        RobotLogger.logBoolean("Tuning/EnableDistanceTuning", false);
+        SmartDashboard.putBoolean("Tuning/EnablePIDTuning", false);
+        SmartDashboard.putBoolean("Tuning/EnableDistanceTuning", true);
     }
      /**
      * VERY IMPORTANT: Put the robot up on blocks before running these!

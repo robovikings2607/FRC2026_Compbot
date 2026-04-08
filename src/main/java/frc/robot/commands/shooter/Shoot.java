@@ -61,15 +61,15 @@ public class Shoot extends Command {
 
     double distance = shooterPose.getDistance(goalPose);
 
-   /*  boolean pidTuningEnabled = SmartDashboard.getBoolean("Tuning/EnablePIDTuning", false);
+    boolean pidTuningEnabled = SmartDashboard.getBoolean("Tuning/EnablePIDTuning", false);
     boolean distanceTuningEnabled = SmartDashboard.getBoolean("Tuning/EnableDistanceTuning", true);
-
+    /* 
     if(pidTuningEnabled){
       setPIDTuningStates();
-    }
+    } 
     else if(distanceTuningEnabled){
       setDistanceTuningStates();
-    }
+    } 
     else */ if(robot.isFixedShot()){ //add boolean check later
       setFixedStates();
     }
