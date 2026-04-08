@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.SpindexerConstants;
 import frc.robot.subsystems.SpindexerSubsystem;
+import frc.robot.subsystems.SpindexerSubsystem.SpindexerState;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ReverseSpindexer extends Command {
@@ -28,7 +29,8 @@ public class ReverseSpindexer extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    spindexer.reverseMotor();
+    spindexer.setState(SpindexerState.REVERSE);
+    spindexer.controlMotor();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -38,7 +40,8 @@ public class ReverseSpindexer extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    spindexer.stopMotor();
+    spindexer.setState(SpindexerState.OFF);
+    spindexer.controlMotor();
   }
 
   // Returns true when the command should end.

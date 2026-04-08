@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.IntakeState;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -32,26 +33,24 @@ public class ForceIntakeDown extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.forcePivotDown();
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(intake.getPivotMotor().getStatorCurrent().getValueAsDouble() > 15.0){
-      done = true;
-    }
+    intake.controlIntake(IntakeState.FORCED_DOWN); //in execute to check for hitting bumper
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-          intake.getPivotMotor().setVoltage(0);
+
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return done;
+    return false;
   }
 }

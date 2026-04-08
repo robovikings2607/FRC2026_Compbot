@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.RobotContainer;
 // import frc.robot.Constants.VisionConstants;
 import frc.robot.generated.TunerConstants;
@@ -34,10 +33,10 @@ import frc.robot.utilities.RobotLogger;
 public class LimelightSubsystem extends SubsystemBase {
   /** Creates a new LimelightSubsystem. */
   RobotContainer robot;
-  Pose2d leftFieldVisionPose;
-  Pose2d[] leftFieldVisionDetections;
-  Pose2d rightFieldVisionPose;
-  Pose2d[] rightFieldVisionDetections;
+  FieldObject2d fieldVisionDetections, fieldVisionPose;
+  FieldObject2d leftFieldVisionDetections, leftFieldVisionPose;
+  FieldObject2d rightFieldVisionDetections, rightFieldVisionPose;  
+  FieldObject2d finalFieldVisionDetections, finalFieldVisionPose;  
   
   double yaw;
   public static String LEFT_LIMELIGHT_NAME = "limelight-left";
@@ -70,19 +69,36 @@ public class LimelightSubsystem extends SubsystemBase {
     } catch (IOException e) {
         e.printStackTrace();
     }
+
   }
 
+  void log_limelight(String name, Optional<LimelightHelpers.PoseEstimate> estimate) {
+    var fieldVisionDetections = robot.field.getObject("Limelight/"+name+"/visionDetections");
+    var fieldVisionPose = robot.field.getObject("Limelight/"+name+"/fieldVisionPose");
+
+    // Don't show stale data if this camera loses pose.
+    if (!estimate.isPresent())
+    {
+      fieldVisionDetections.setPoses(Collections.emptyList());
+      fieldVisionPose.setPoses(Collections.emptyList());
+    }
+
+
+/*     List<Pose2d> tagPoses = getTagPoses(estimate.get());     
+    fieldVisionDetections.setPoses(tagPoses);
+    fieldVisionPose.setPose(estimate.get().pose);  */
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     //yaw = LimelightHelpers.getBotPose2d(LEFT_LIMELIGHT_NAME).getRotation().getDegrees();
-    yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
+  yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
 
-    LimelightHelpers.SetRobotOrientation(RIGHT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
-    LimelightHelpers.SetRobotOrientation(LEFT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
-    LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
-    LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
+  LimelightHelpers.SetRobotOrientation(RIGHT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
+  LimelightHelpers.SetRobotOrientation(LEFT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
+  LimelightHelpers.PoseEstimate rightLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
+  LimelightHelpers.PoseEstimate leftLL = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
 
     RobotLogger.logBoolean("Limelight/" + LEFT_LIMELIGHT_NAME  + "/hasTargets", leftLL  != null && leftLL.tagCount  > 0);
     RobotLogger.logBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightLL != null && rightLL.tagCount > 0);    
@@ -115,9 +131,19 @@ public class LimelightSubsystem extends SubsystemBase {
         mt2.pose,
         mt2.timestampSeconds
       ); 
+
+      RobotLogger.logDouble("Limelight/" + RIGHT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
+      RobotLogger.logDouble("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
+      RobotLogger.logDouble("Limelight/" + RIGHT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
+
+      // System.out.println("has pose");
+      List<Pose2d> tagPoses = getTagPoses(mt2);     
+
+      rightFieldVisionDetections.setPoses(tagPoses);
+      rightFieldVisionPose.setPose(mt2.pose); 
     }
 
-   if(isValidUpdate(leftLL)){
+   if(isValidUpdate(leftLL) && leftLL.avgTagArea > 0.1){
       LimelightHelpers.PoseEstimate mt2 = leftLL;
 
       robot.drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.5,0.5, 999999999));
@@ -125,6 +151,16 @@ public class LimelightSubsystem extends SubsystemBase {
         mt2.pose,
         mt2.timestampSeconds
       ); 
+
+      RobotLogger.logDouble("Limelight/" + LEFT_LIMELIGHT_NAME + "/X", mt2.pose.getX());
+      RobotLogger.logDouble("Limelight/" + LEFT_LIMELIGHT_NAME + "/Y", mt2.pose.getY());
+      RobotLogger.logDouble("Limelight/" + LEFT_LIMELIGHT_NAME + "/Rotation", mt2.pose.getRotation().getDegrees()); 
+
+      // System.out.println("has pose");
+      List<Pose2d> tagPoses = getTagPoses(mt2);     
+
+      leftFieldVisionDetections.setPoses(tagPoses);
+      leftFieldVisionPose.setPose(mt2.pose); 
     } 
 
 /*     LimelightHelpers.PoseEstimate mt2 = getBestPose(leftLL, rightLL);
@@ -144,19 +180,11 @@ public class LimelightSubsystem extends SubsystemBase {
       finalFieldVisionPose.setPose(mt2.pose); 
     }
  */
-  }
-
-  private void updateFieldVisualization(
-      Pose2d robotPose,
-      Pose2d[] aprilTagPoses,
-      String name) {
-
-      RobotLogger.logStruct("Limelight/" + name + "/RobotPose", Pose2d.struct, robotPose);    
-      RobotLogger.logStructArray("Limelight/" + name + "/AprilTagPoses", Pose2d.struct, aprilTagPoses);
+       RobotLogger.logBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightLL != null ? rightLL.tagCount > 0 : false);
   }
 
   public boolean isValidUpdate(LimelightHelpers.PoseEstimate mt2){
-    return mt2 != null && mt2.tagCount > 0 && mt2.avgTagArea > 0.1;
+    return mt2 != null && mt2.tagCount > 0;
   }
 
   public void configureCameraOffset(){

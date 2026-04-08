@@ -30,6 +30,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
@@ -52,16 +53,18 @@ public class TurretSubsystem extends SubsystemBase {
   private static final double rotationsPerDegree = 10.0/360.0;
   private final TalonFX turretMotor;
   private final RobotContainer robot;
+  private final DigitalInput magnet = new DigitalInput(6);
   private MotionMagicVoltage magicMotionRequest;
   private PositionVoltage positionVoltage;
   private double currentEncoderPos;
   private boolean fixedShot = false;
   private boolean isDeactivated = false;
+  private boolean isZeroed = false;
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
 
-    turretMotor = new TalonFX(99);
+    turretMotor = new TalonFX(TurretConstants.TURRET_ID);
 
     //turretMotor.setPosition(0);
     //previousSetPoint = turretMotor.getPosition().getValueAsDouble();
@@ -72,9 +75,9 @@ public class TurretSubsystem extends SubsystemBase {
     magicMotionRequest = new MotionMagicVoltage(0.0);
     positionVoltage = new PositionVoltage(0.0);
 
-    RobotLogger.logDouble("Turret/BootUpPos", turretMotor.getPosition().getValueAsDouble());
-    RobotLogger.logDouble("SetOffset", 0.0);    
-    RobotLogger.logDouble("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());        
+    logNumber2("Turret/BootUpPose", turretMotor.getPosition().getValueAsDouble());
+    logNumber2("SetOffset", 0.0);    
+    //logNumber2("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());        
   }
 
   private void configureMotor() {
@@ -120,9 +123,18 @@ public class TurretSubsystem extends SubsystemBase {
   public void periodic() {
 
     // This method will be called once per scheduler run
+        RobotLogger.logBoolean("Turret/Magnet", !magnet.get());
 
     if(turretMotor.hasResetOccurred()){
       turretMotor.setPosition(currentEncoderPos);
+    }
+
+    if(!magnet.get() && !isZeroed){
+      turretMotor.setPosition(92.74 * rotationsPerDegree);
+      isZeroed = true;
+    }
+    else if(!isZeroed){
+      return;
     }
 
     Pose2d robotPose = robot.drivetrain.getState().Pose;
@@ -130,6 +142,8 @@ public class TurretSubsystem extends SubsystemBase {
     double robotRotation = robotPose.getRotation().getDegrees();
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
     Translation2d goalPose = ShooterUtils.determineShootingGoal(robotPose);
+
+    RobotLogger.logDouble("Distance", shooterPose.getDistance(goalPose));
 
     //checks alliance and aims at corresponding hub
     currentEncoderPos = turretMotor.getPosition().getValueAsDouble();
@@ -150,13 +164,13 @@ public class TurretSubsystem extends SubsystemBase {
       turretMotor.setControl(positionVoltage.withPosition(wantedEncoderPos));
     }
 
-    RobotLogger.logBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());            
-    RobotLogger.logBoolean("UserButtonPressed", RobotController.getUserButton());                    
+    RobotLogger.logBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());
+    RobotLogger.logBoolean("UserButtonPressed", RobotController.getUserButton());
 
-    RobotLogger.logDouble("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));    
-    RobotLogger.logDouble("Turret/CurrentPos", currentEncoderPos);    
-    RobotLogger.logDouble("Turret/TargetPos", targetEncoderPos);    
-    RobotLogger.logDouble("Turret/WantedPos", wantedEncoderPos);                
+    logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        
+    logNumber("Turret/CurrentPose", currentEncoderPos);        
+    logNumber2("Turret/TargetPose", targetEncoderPos);        
+    logNumber2("Turret/WantedPose", wantedEncoderPos);        
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
@@ -224,6 +238,14 @@ public class TurretSubsystem extends SubsystemBase {
 
   public boolean isFixed(){
     return fixedShot;
+  }
+
+  public void logNumber(String key, double value){
+    RobotLogger.logDouble(key, value);
+  }
+
+  public void logNumber2(String key, double value){
+    RobotLogger.logDouble(key, value);
   }
 
 }

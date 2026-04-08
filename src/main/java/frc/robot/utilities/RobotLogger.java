@@ -2,9 +2,11 @@ package frc.robot.utilities;
 
 import java.util.HashMap;
 import java.util.Map;
+//import java.lang.UnsupportedOperationException;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.util.datalog.StructArrayLogEntry;
 import edu.wpi.first.util.datalog.StructLogEntry;
 import edu.wpi.first.util.sendable.Sendable;
@@ -12,6 +14,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringEntry;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 
@@ -38,6 +41,7 @@ public class RobotLogger {
     // Caches to hold our log entries so we don't recreate them every 20ms
     private static final Map<String, DoubleLogEntry> doubleLogs = new HashMap<>();
     private static final Map<String, BooleanLogEntry> booleanLogs = new HashMap<>();   
+    private static final Map<String, StringLogEntry> stringLogs = new HashMap<>();
     private static final Map<String, StructLogEntry<?>> structLogs = new HashMap<>();
     private static final Map<String, StructPublisher<?>> structPublishers = new HashMap<>();
     private static final Map<String, StructArrayLogEntry<?>> structArrayLogs = new HashMap<>();
@@ -59,7 +63,8 @@ public class RobotLogger {
 
     private RobotLogger() {
         // from accidentally creating an instance of this class.
-        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated!");        
+        //throw new UnsupportedOperationException("This is a utility class and cannot be instantiated!"); 
+        //not working right now 
     }
 
     private static String getLoggingTableKey() {
@@ -105,6 +110,17 @@ public class RobotLogger {
 
         if (inPublishMode()) {
             SmartDashboard.putBoolean(getDecoratedKey(key), value);
+        }
+    }
+
+    
+    public static void logString(String key, String value){
+        StringLogEntry entry = stringLogs.computeIfAbsent(key, 
+            k -> new StringLogEntry(log, getDecoratedKey(k)));
+        entry.append(value);
+
+        if(inPublishMode()){
+            SmartDashboard.putString(getDecoratedKey(key), value);
         }
     }
 
@@ -166,7 +182,8 @@ public class RobotLogger {
         SmartDashboard.putData(key, data);
     }
 
-   /*
+
+    /*
     * retrieves the value from a key on SmartDashboard prefixed with
     * the root key where all log data gets written. That way you'll look 
     * in the same location for both logged data and data you're trying to

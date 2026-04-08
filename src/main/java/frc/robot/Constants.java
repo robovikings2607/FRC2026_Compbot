@@ -14,8 +14,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
 public final class Constants { 
-  public static final Pose2d EMPTY_POSE = new Pose2d();
-
   public static final class Simulation {
     public static final Pose2d LEFT_BOTTOM_CORNER = new Pose2d(new Translation2d(-8.2423, -4.0513), new Rotation2d());  // 2023 game LEFT_BOTTOM_CORNER was at -8.2423, -4.0513
     public static final int simAlliance = 1; // 1 for Red Alliance and -1 for Blue Alliance
@@ -41,7 +39,7 @@ public final class Constants {
   }
 
   public static final class TurretConstants {
-    public static final int TURRET_ID = 30;
+    public static final int TURRET_ID = 30; //30
 
     public static final double OFFSET = 0.0;  
 
@@ -50,59 +48,134 @@ public final class Constants {
   }
 
   public static final class FlywheelConstants {
-    public static final int FLYWHEEL_ID = 17;
+    //CAN ID
+    public static final int MOTOR_ID = 17;
+
+    //PID Values
+    public static final double S = 0.55;
+    public static final double V = 0.12167;
+    public static final double P = 0.6;
+    public static final double I = 0.0;
+    public static final double D = 0.0;
+
+    //Current Limits
+    public static final double STATOR_LIMIT = 120.0;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
   }
 
   public static final class HoodConstants {
-    public static final int HOOD_ID = 18;
+    //CAN IDs
+    public static final int MOTOR_ID = 18;
     public static final int ENCODER_ID = 20;
 
-    //new values with encoder
-    public static final double ENCODER_MAGNET_OFFSET = 0.716064;
-    public static final double ENCODER_ZERO = 0.0;
+    //Encoder 
+    public static final double DISCONTINUITY_POINT = 0.0;
+    public static final double MAGNET_OFFSET = 0.71;
+    public static final double ENCODER_MIN = 0.005;
     public static final double ENCODER_MAX = -0.831299;
 
-    //old values
-    public static final double MAX_HOOD_ANGLE = -24.7887; //check these later
-    public static final double MIN_HOOD_ANGLE = 0.0; //check these later
+    //PID Values
+    public static final double P = 7.0;
+    public static final double I = 0.0;
+    public static final double D = 0.0;
+    public static final double TOLERANCE = 0.01; //equates to +/- 0.05 degrees of error, may need to change
 
-    public static final double MAX_HOOD_POSITION = -1.04434;
-    public static final double MIN_HOOD_POSITION = 0.0;
-    
-    public static final double MAX_SHOT_ANGLE = 90.0 - 38.2; //check these later 
-    public static final double MIN_SHOT_ANGLE = 90.0 - 59.91; //check these later
+    public static final double GEAR_RATIO = 350.0/25.0; //Hood Gear:Shaft Gear
+
+    //Degree Calculations
+    public static final double MIN_ANGLE = ENCODER_MIN/GEAR_RATIO * 360;
+    public static final double MAX_ANGLE = ENCODER_MAX/GEAR_RATIO * 360;
+
+    //Current Limits
+    public static final int PEAK_LIMIT = 0; //0 to make the current limit single threshold
+    public static final int CONTINUOUS_LIMIT = 60;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
   }
 
-  public static final class IntakeConstants {
-    public static final int ROLLER_ID = 14;
-    public static final int PIVOT_ID = 13;
+  public static final class PivotConstants {
+    //CAN IDs
+    public static final int MOTOR_ID = 13;
     public static final int ENCODER_ID = 19;
 
-    //new values with encoder
-    public static final double INTAKE_RETRACTED = 0.419434; //check these later
-    public static final double INTAKE_DEPLOYED = 0.247314; //check these later
+    //Positions (in encoder ticks)
+    public static final double RETRACTED = 0.419434;
+    public static final double DEPLOYED = 0.247314;
+
+    //Speed (in volts)
+    public static final double FORCE_DOWN_SPEED = 2.0;
+
+    //PID Values
+    public static final double P = -4.0;
+    public static final double I = 0.0;
+    public static final double D = 0.0;    
+
+    //Current Limits
+    public static final double STATOR_LIMIT = 35.0;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
+    public static final double FORCED_DOWN_THRESHOLD = 20.0;
+  }
+
+  public static final class RollerConstants{
+    //CAN ID
+    public static final int MOTOR_ID = 14;
+
+    //Speeds (in volts)
+    public static final double NORMAL_SPEED = 10.5;
+    public static final double JAMMED_SPEED = 12.0;
+
+    //Current Limits
+    public static final double STATOR_LIMIT = 120.0;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
+    public static final double JAMMED_THRESHOLD = 100.0;
   }
 
   public static final class FeederConstants {
-    public static final int FEEDER_ID = 16;
+    //CAN ID
+    public static final int MOTOR_ID = 16;
 
-    public static final double FEEDER_SPEED = 10.0; //check this later
+    //Speed (in rps)
+    public static final double SPEED = 45.0;
+
+    //PID Values
+    public static final double S = 0.0;
+    public static final double V = 0.105;
+    public static final double P = 1.1;
+    public static final double I = 0.0;
+    public static final double D = 0.0;
+
+    //Current Limits
+    public static final double STATOR_LIMIT = 85.0;
+    public static final double SUPPLY_LIMIT = 50.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
   }
 
   public static final class SpindexerConstants {
-    public static final int SPINDEXER_ID = 15;
+    //CAN ID
+    public static final int MOTOR_ID = 15;
 
-    public static final double SPINDEXER_SPEED = 12.0; //check this later
+    //Speed (in volts)
+    public static final double SPEED = 12.0; 
+
+    //Current Limits
+    public static final double STATOR_LIMIT = 30.0;
+    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
   }
 
   public static final class KickerConstants {
-    public static final int KICKER_ID = 22;
+    //CAN ID
+    public static final int MOTOR_ID = 21;
 
-    public static final double KICKER_SPEED = 6.0;
-  }
+    //Speed (in volts)
+    public static final double SPEED = 2.0;
 
-  public static final class ClimberConstants {
-    public static final int CLIMBER_ID = 19;
+    //Current Limits
+    public static final double STATOR_LIMIT = 40.0;
+    public static final double SUPPLY_LIMIT = 40.0;
+    public static final double SUPPLY_LOWER_LIMIT = 10.0;
   }
 
   public static final class LimelightConstants {
