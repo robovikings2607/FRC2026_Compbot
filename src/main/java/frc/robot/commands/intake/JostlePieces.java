@@ -32,7 +32,7 @@ public class JostlePieces extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.controlIntake(IntakeState.DEPLOYED);
+    intake.setState(IntakeState.DEPLOYED);;
     timer.start();
   }
 
@@ -41,12 +41,14 @@ public class JostlePieces extends Command {
   public void execute() {
     if((timer.get() > 0.25 && intake.getState().equals(IntakeState.DEPLOYED)) || 
         timer.get() < 0.25 && intake.getState().equals(IntakeState.RETRACTED)){
-      intake.controlIntake(IntakeState.RETRACTED);
+      intake.setState(IntakeState.RETRACTED);
+      intake.controlIntake();
     }
 
     if((timer.get() > 0.25 && intake.getState().equals(IntakeState.RETRACTED)) || 
         timer.get() < 0.25 && intake.getState().equals(IntakeState.DEPLOYED)){
-      intake.controlIntake(IntakeState.DEPLOYED);
+      intake.setState(IntakeState.DEPLOYED);
+      intake.controlIntake();
     }
   }
 

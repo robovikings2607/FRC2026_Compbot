@@ -141,7 +141,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     double robotRotation = robotPose.getRotation().getDegrees();
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
-    Translation2d goalPose = ShooterUtils.determineShootingGoal(robotPose);
+    Translation2d goalPose = ShooterUtils.stuypulesShootOnMove(robot.drivetrain, robotPose);
 
     RobotLogger.logDouble("Distance", shooterPose.getDistance(goalPose));
 

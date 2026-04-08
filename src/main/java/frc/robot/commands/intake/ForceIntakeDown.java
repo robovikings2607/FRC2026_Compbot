@@ -33,13 +33,13 @@ public class ForceIntakeDown extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    intake.setState(IntakeState.FORCED_DOWN);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intake.controlIntake(IntakeState.FORCED_DOWN); //in execute to check for hitting bumper
+    intake.controlIntake(); //in execute to check for hitting bumper
   }
 
   // Called once the command ends or is interrupted.

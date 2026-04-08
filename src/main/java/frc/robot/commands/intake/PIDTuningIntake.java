@@ -29,14 +29,13 @@ public class PIDTuningIntake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-        intake.controlIntake(IntakeState.PID_TUNING);
-
+    intake.setState(IntakeState.PID_TUNING);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intake.controlIntake(IntakeState.PID_TUNING);
+    intake.controlIntake();
   }
 
   // Called once the command ends or is interrupted.

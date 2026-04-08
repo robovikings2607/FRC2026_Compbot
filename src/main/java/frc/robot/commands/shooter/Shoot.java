@@ -57,7 +57,7 @@ public class Shoot extends Command {
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
-    Translation2d goalPose = ShooterUtils.determineShootingGoal(robotPose);
+    Translation2d goalPose = ShooterUtils.stuypulesShootOnMove(robot.drivetrain, robotPose);
 
     double distance = shooterPose.getDistance(goalPose);
 

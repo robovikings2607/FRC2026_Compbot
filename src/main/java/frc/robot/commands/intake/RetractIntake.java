@@ -33,12 +33,13 @@ public class RetractIntake extends Command {
   @Override
   public void initialize() {
     //kicker.controlMotor(KickerState.OFF);
+    intake.setState(IntakeState.RETRACTED);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intake.controlIntake(IntakeState.RETRACTED); //needs to be in execute to calculate
+    intake.controlIntake(); //needs to be in execute to calculate
   }
 
   // Called once the command ends or is interrupted.
