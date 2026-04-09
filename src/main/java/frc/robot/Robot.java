@@ -7,6 +7,8 @@ package frc.robot;
 import com.ctre.phoenix6.HootAutoReplay;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utilities.RobotLogger;
@@ -95,6 +97,20 @@ public class Robot extends TimedRobot {
     @Override
     public void testExit() {}
 
-    @Override
-    public void simulationPeriodic() {}
-}
+// Inside Robot.java
+@Override
+public void simulationPeriodic() {
+    // 1. Gather the current draw from all your simulated mechanisms
+    double totalCurrentAmps = 0;
+    totalCurrentAmps += m_robotContainer.feeder.getSimulatedCurrentDraw();
+    // totalCurrentAmps += m_swerveDrive.getSimulatedCurrentDraw();
+    // totalCurrentAmps += m_climber.getSimulatedCurrentDraw();
+
+    // 2. Calculate what the battery voltage should drop to based on that load
+    // WPILib uses a standard internal resistance model for an FRC battery (0.018 ohms)
+    double loadedVoltage = BatterySim.calculateDefaultBatteryLoadedVoltage(totalCurrentAmps);
+
+    // 3. Update the global HAL battery voltage
+    // Now, every call to RobotController.getBatteryVoltage() will return this lower number!
+    RoboRioSim.setVInVoltage(loadedVoltage);
+}}

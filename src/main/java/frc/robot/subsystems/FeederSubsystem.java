@@ -11,7 +11,12 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -26,18 +31,38 @@ import static edu.wpi.first.units.Units.*;
 public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
   /** Creates a new FeederSubsystem. */
   //private int reverse;
-  private TalonFX feederMotor;
+  private TalonFX motor;
   private VelocityVoltage control = new VelocityVoltage(0.0);
   private double speed;
 
+  //Simulation code
+  private final double kGearRatio = 1.0;
+  private final double kMomentOfInertia = 0.001; // Estimated mass/inertia of the feeder wheel (kg*m^2)
+  private final TalonFXSimState motorSimState = motor.getSimState();
+  private final FlywheelSim feederPhysicsSim;
+
+
   public FeederSubsystem(RobotContainer robot) {
-    feederMotor = new TalonFX(FeederConstants.FEEDER_ID);
+    motor = new TalonFX(FeederConstants.FEEDER_ID);
     configureMotor();
-    SmartDashboard.putNumber("Feeder/Speed", 0.0);
+
+    var flywheelPlant = LinearSystemId.createFlywheelSystem(
+            DCMotor.getKrakenX44(1), // Motor
+            kMomentOfInertia,        // J (kg * m^2)
+            kGearRatio               // Gearing
+    );
+
+    // 2. Initialize the simulator with the plant
+    feederPhysicsSim = new FlywheelSim(
+        flywheelPlant,           // The physics model we just created
+        DCMotor.getKrakenX44(1), // The motor type (used by sim to calculate current draw)
+        kGearRatio               // The gearing
+    );    
+
   }
 
   private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
-        feederMotor, this, "feeder", 4.0
+        motor, this, "feeder", 4.0
   );    
 
   public SysIdRoutine getSysIdRoutine() {
@@ -70,19 +95,50 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
 
     configs.withSlot0(slot0Configs);
 
-    feederMotor.getConfigurator().apply(configs);
+    motor.getConfigurator().apply(configs);
   }
 
   public void runMotor() {
     //feederMotor.setVoltage(FeederConstants.FEEDER_SPEED);
-    feederMotor.setControl(control.withVelocity(75));
+    motor.setControl(control.withVelocity(75));
   }
 
   public void stopMotor() {
-    feederMotor.setControl(new CoastOut());
+    motor.setControl(new CoastOut());
   }
 
   public void reverseMotor() {
-    feederMotor.setVoltage(-FeederConstants.FEEDER_SPEED);;
+    motor.setVoltage(-FeederConstants.FEEDER_SPEED);;
   }
+
+  public double getSimulatedCurrentDraw() {
+    return feederPhysicsSim.getCurrentDrawAmps();
+  }
+  
+  @Override
+  public void simulationPeriodic() {
+      // 1. Give the simulated motor a virtual battery voltage
+      motorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
+      // 2. Find out what voltage your robot code is telling the motor to apply
+      double appliedVoltage = motorSimState.getMotorVoltage();
+
+      // 3. Feed that applied voltage into the WPILib physics model
+      feederPhysicsSim.setInputVoltage(appliedVoltage);
+
+      // 4. Advance the physics model by the standard 20ms robot loop
+      feederPhysicsSim.update(0.020);
+
+      // 5. Extract the resulting velocity from the physics model
+      // NOTE: WPILib physics returns radians per second at the *mechanism*
+      double mechanismVelocityRadPerSec = feederPhysicsSim.getAngularVelocityRadPerSec();
+
+      // 6. Convert to the units CTRE expects: Rotations Per Second (RPS) at the *rotor*
+      double mechanismVelocityRps = mechanismVelocityRadPerSec / (2 * Math.PI);
+      double rotorVelocityRps = mechanismVelocityRps * kGearRatio;
+
+      // 7. Update the virtual encoder
+      motorSimState.setRotorVelocity(rotorVelocityRps);
+  }
+
 }
