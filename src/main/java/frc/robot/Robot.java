@@ -40,11 +40,13 @@ public class Robot extends TimedRobot {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
         
+        /*
         if(RobotController.getUserButton()){
             m_robotContainer.hood.getMotor().setPosition(0.0);
             m_robotContainer.turret.getMotor().setPosition(0.0);
             m_robotContainer.intake.getPivotMotor().setPosition(0.0);
         } 
+        */
     }
 
     @Override
@@ -108,9 +110,9 @@ public void simulationPeriodic() {
 
     // 2. Calculate what the battery voltage should drop to based on that load
     // WPILib uses a standard internal resistance model for an FRC battery (0.018 ohms)
-    double loadedVoltage = BatterySim.calculateDefaultBatteryLoadedVoltage(totalCurrentAmps);
+    //double loadedVoltage = BatterySim.calculateDefaultBatteryLoadedVoltage(totalCurrentAmps);
 
     // 3. Update the global HAL battery voltage
     // Now, every call to RobotController.getBatteryVoltage() will return this lower number!
-    RoboRioSim.setVInVoltage(loadedVoltage);
+    //RoboRioSim.setVInVoltage(loadedVoltage);
 }}

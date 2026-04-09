@@ -54,8 +54,10 @@ public class LimelightSubsystemExp extends SubsystemBase {
 
   public void drawTargetsOnField(LimelightHelpers.PoseEstimate mt2)
   {
-      fieldVisionDetections.setPoses(mt2.pose);
-      fieldVisionPose.setPose(mt2.pose); 
+      if (mt2 != null) {
+        fieldVisionDetections.setPoses(mt2.pose);
+        fieldVisionPose.setPose(mt2.pose); 
+      }
   }
 
   public void configureLLRightOffsets() {

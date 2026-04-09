@@ -12,12 +12,17 @@ import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -26,14 +31,14 @@ import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.ShooterUtils;
 import frc.robot.utilities.SysIdBuilder;
 
 import static edu.wpi.first.units.Units.*;
 
 public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
-  /** Creates a new ShooterHoodSubsystem. */
-  public final TalonFX flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
+  public final TalonFX motor = new TalonFX(FlywheelConstants.FLYWHEEL_ID);
   private final RobotContainer robot;
   private VelocityVoltage velocityControl = new VelocityVoltage(0);
   private CoastOut coastOut = new CoastOut();
@@ -41,17 +46,39 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   private InterpolatingDoubleTreeMap flywheelInterp = new InterpolatingDoubleTreeMap();
   private boolean readyToShoot = false;
   private boolean fixedShot = false;
+  private double targetVelocityRps = 0.0;    
+
+  //Simulation code
+  private final double kGearRatio = 1.0;
+  private final double kMomentOfInertia = 0.006; // Estimated mass/inertia of the feeder wheel (kg*m^2)
+  private final TalonFXSimState motorSimState = motor.getSimState();
+  private final FlywheelSim feederPhysicsSim;
+
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
-    //configureMotor();
-    configureMotorForSysId();
+    configureMotor();
+    //configureMotorForSysId();
     createInterpMap();
+
+    var flywheelPlant = LinearSystemId.createFlywheelSystem(
+            DCMotor.getKrakenX60(1), // Motor
+            kMomentOfInertia,        // J (kg * m^2)
+            kGearRatio               // Gearing
+    );
+
+    // 2. Initialize the simulator with the plant
+    feederPhysicsSim = new FlywheelSim(
+        flywheelPlant,           // The physics model we just created
+        DCMotor.getKrakenX60(1), // The motor type (used by sim to calculate current draw)
+        kGearRatio               // The gearing
+    );    
+
 
   }
 
   private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
-    flywheelMotor, this, "flywheel", 7.0
+    motor, this, "flywheel", 7.0
   );    
  
   public SysIdRoutine getSysIdRoutine() {
@@ -60,6 +87,12 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
 
   @Override
   public void periodic() {
+      RobotLogger.logDouble("Feeder/ActualVelocity", motor.getVelocity().getValueAsDouble());
+
+      RobotLogger.logDouble("Flywheel/TargetVelocity", targetVelocityRps);
+
+      RobotLogger.logDouble("Feeder/MotorVoltage", motor.getMotorVoltage().getValueAsDouble());
+
     // This method will be called once per scheduler run
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
@@ -67,28 +100,15 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
 
     double distance = shooterPose.getDistance(goalPose);
-    SmartDashboard.putNumber("Distance", distance);
 
-    SmartDashboard.putNumber("Flywheel/Speed", flywheelMotor.getRotorVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Flywheel/WantedSpeed", getGoal(distance));
+    // Log the Inputs/Math
+    SmartDashboard.putNumber("Flywheel/Distance", distance);
+    SmartDashboard.putNumber("Flywheel/TargetVelocity", getGoal(distance));
 
-    
-/*     // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
-    if(!readyToShoot){
-      flywheelMotor.setControl(coastOut);
-    }
-    else{
-/*        if(fixedShot){
-        flywheelMotor.setControl(velocityControl.withVelocity(50));
-      } 
-      if(ShooterUtils.inNeutralZone(robotPose)){
-        flywheelMotor.setControl(velocityControl.withVelocity(-80.0));
-      }
-      else{
-        setGoal(distance);
-        flywheelMotor.setControl(velocityControl.withVelocity(rps));
-      }
-    }  */
+    // Log the Hardware Reality
+    SmartDashboard.putNumber("Flywheel/ActualVelocity", motor.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Flywheel/MotorVoltage", motor.getMotorVoltage().getValueAsDouble());    
+
   }
 
   public void configureMotor(){ 
@@ -108,16 +128,16 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
                 .withStatorCurrentLimitEnable(true)
         );
 
-    flywheelMotor.setNeutralMode(NeutralModeValue.Coast);
-    flywheelMotor.getConfigurator().apply(configs);
+    motor.setNeutralMode(NeutralModeValue.Coast);
+    motor.getConfigurator().apply(configs);
   }
 
     private void configureMotorForSysId() {
     // --- THE SYSID FIX: FORCE HIGH-SPEED DATA LOGGING ---
     // We tell the motor to send Voltage, Position, and Velocity at 250 Hz (every 4 milliseconds)
-    flywheelMotor.getMotorVoltage().setUpdateFrequency(250.0);
-    flywheelMotor.getPosition().setUpdateFrequency(250.0);
-    flywheelMotor.getVelocity().setUpdateFrequency(250.0);
+    motor.getMotorVoltage().setUpdateFrequency(250.0);
+    motor.getPosition().setUpdateFrequency(250.0);
+    motor.getVelocity().setUpdateFrequency(250.0);
         
     // (Optional but recommended) Wait for the CAN bus to apply the changes
     try { Thread.sleep(250); } catch (InterruptedException e) {}
@@ -143,11 +163,11 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void coastOut(){
-    flywheelMotor.setControl(new CoastOut());
+    motor.setControl(new CoastOut());
   }
 
   public void velocityControl(double rps){
-    flywheelMotor.setControl(velocityControl.withVelocity(rps));
+    motor.setControl(velocityControl.withVelocity(rps));
   }
 
   public double getGoal(double distance){
@@ -156,7 +176,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public double getSpeed(){
-    return flywheelMotor.getVelocity().getValueAsDouble();
+    return motor.getVelocity().getValueAsDouble();
   }
 
   public boolean goodToShoot(){
@@ -176,6 +196,33 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void tune(){
-    flywheelMotor.setControl(velocityControl.withVelocity(-70));
+    motor.setControl(velocityControl.withVelocity(-70));
   }
+
+  @Override
+  public void simulationPeriodic() {
+      // 1. Give the simulated motor a virtual battery voltage
+      motorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
+      // 2. Find out what voltage your robot code is telling the motor to apply
+      double appliedVoltage = motorSimState.getMotorVoltage();
+
+      // 3. Feed that applied voltage into the WPILib physics model
+      feederPhysicsSim.setInputVoltage(appliedVoltage);
+
+      // 4. Advance the physics model by the standard 20ms robot loop
+      feederPhysicsSim.update(0.020);
+
+      // 5. Extract the resulting velocity from the physics model
+      // NOTE: WPILib physics returns radians per second at the *mechanism*
+      double mechanismVelocityRadPerSec = feederPhysicsSim.getAngularVelocityRadPerSec();
+
+      // 6. Convert to the units CTRE expects: Rotations Per Second (RPS) at the *rotor*
+      double mechanismVelocityRps = mechanismVelocityRadPerSec / (2 * Math.PI);
+      double rotorVelocityRps = mechanismVelocityRps * kGearRatio;
+
+      // 7. Update the virtual encoder
+      motorSimState.setRotorVelocity(rotorVelocityRps);
+  }
+
 }

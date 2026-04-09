@@ -49,6 +49,7 @@ import frc.robot.commands.shooter.StopShooter;
 import frc.robot.commands.shooter.ActivateTurret;
 import frc.robot.commands.shooter.DeactivateTurret;
 import frc.robot.commands.shooter.ReverseSpindexer;
+import frc.robot.commands.shooter.RunFeederCommand;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.commands.shooter.AutoAimAndShootCommandExp;
 import frc.robot.commands.shooter.TrackHubTargetExp;
@@ -200,7 +201,8 @@ public class RobotContainer {
 
         //Operator/Emergency
         operatorController.buttonY.onTrue(new RetractIntake(this));
-        operatorController.buttonA.onTrue(new DeployIntake(this));
+        //operatorController.buttonA.onTrue(new DeployIntake(this));
+        operatorController.buttonA.whileTrue(new RunFeederCommand(this.feeder,75));        
         operatorController.buttonB.onTrue(new DeactivateTurret(this));
         operatorController.buttonX.onTrue(new ActivateTurret(this));
         operatorController.leftBumper.onTrue(new JostlePieces(this));
