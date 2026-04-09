@@ -225,7 +225,7 @@ public class IntakeSubsystem extends SubsystemBase {
         break;
     
       case REVERSE:
-        reverseControl();
+        reverseRollerControl();
         break;
 
       default:

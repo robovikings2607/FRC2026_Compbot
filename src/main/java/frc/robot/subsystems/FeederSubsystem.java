@@ -154,6 +154,7 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
     RobotLogger.logDouble("Feeder/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
     RobotLogger.logDouble("Feeder/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
     RobotLogger.logString("Feeder/State", state.name());
+    RobotLogger.logBoolean("Feeder/MotorReset", motor.hasResetOccurred());
   }
 
   public void createTuningData(){

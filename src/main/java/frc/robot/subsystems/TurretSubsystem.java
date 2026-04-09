@@ -27,6 +27,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -114,7 +115,7 @@ public class TurretSubsystem extends SubsystemBase {
                 .withSupplyCurrentLowerLimit(Amps.of(10))
                 .withSupplyCurrentLimitEnable(true)
         );
-  
+      
     turretMotor.getConfigurator().apply(configs);
     turretMotor.setNeutralMode(NeutralModeValue.Brake);    
   }
@@ -143,7 +144,8 @@ public class TurretSubsystem extends SubsystemBase {
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
     Translation2d goalPose = ShooterUtils.stuypulesShootOnMove(robot.drivetrain, robotPose);
 
-    RobotLogger.logDouble("Distance", shooterPose.getDistance(goalPose));
+    RobotLogger.logDouble("NoSOTMDistance", shooterPose.getDistance(ShooterUtils.determineShootingGoal(robotPose)));
+    RobotLogger.logDouble("SOTMDistance", shooterPose.getDistance(goalPose));
 
     //checks alliance and aims at corresponding hub
     currentEncoderPos = turretMotor.getPosition().getValueAsDouble();

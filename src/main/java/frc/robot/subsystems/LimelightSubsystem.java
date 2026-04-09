@@ -6,30 +6,20 @@ package frc.robot.subsystems;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.hardware.Pigeon2;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.LimelightHelpers;
+import frc.robot.utilities.RobotLogger;
 
 public class LimelightSubsystem extends SubsystemBase {
 
@@ -46,6 +36,8 @@ public class LimelightSubsystem extends SubsystemBase {
    */
   private static final double kMinTagAreaSingle = 0.2;
   private static final double kMinTagAreaMulti  = 0.05;
+
+  private static final double kMaxTagArea = 4.9;
 
   /**
    * Reject any pose whose translation norm is below this value.
@@ -76,8 +68,12 @@ public class LimelightSubsystem extends SubsystemBase {
   // State
   // -------------------------------------------------------------------------
   RobotContainer robot;
-  FieldObject2d leftFieldVisionDetections,  leftFieldVisionPose;
-  FieldObject2d rightFieldVisionDetections, rightFieldVisionPose;
+
+  Pose2d leftFieldVisionPose;
+  Pose2d[] leftFieldVisionDetections;
+  Pose2d rightFieldVisionPose;
+  Pose2d[] rightFieldVisionDetections;
+
 
   double yaw;
   private AprilTagFieldLayout tagLayout;
@@ -137,20 +133,31 @@ public class LimelightSubsystem extends SubsystemBase {
     LimelightHelpers.PoseEstimate leftRaw  = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
     LimelightHelpers.PoseEstimate rightRaw = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
 
-    leftFieldVisionDetections  = robot.field.getObject("Limelight/" + LEFT_LIMELIGHT_NAME  + "/visionDetections");
-    leftFieldVisionPose        = robot.field.getObject("Limelight/" + LEFT_LIMELIGHT_NAME  + "/fieldVisionPose");
-    rightFieldVisionDetections = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/visionDetections");
-    rightFieldVisionPose       = robot.field.getObject("Limelight/" + RIGHT_LIMELIGHT_NAME + "/fieldVisionPose");
-
-    SmartDashboard.putBoolean("Limelight/" + LEFT_LIMELIGHT_NAME  + "/hasTargets", leftRaw  != null && leftRaw.tagCount  > 0);
-    SmartDashboard.putBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightRaw != null && rightRaw.tagCount > 0);
+    RobotLogger.logBoolean("Limelight/" + LEFT_LIMELIGHT_NAME  + "/hasTargets", leftRaw  != null && leftRaw.tagCount  > 0);
+    RobotLogger.logBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightRaw != null && rightRaw.tagCount > 0);    
 
     Optional<CameraEstimate> leftEst  = processCamera(leftRaw,  LEFT_LIMELIGHT_NAME);
     Optional<CameraEstimate> rightEst = processCamera(rightRaw, RIGHT_LIMELIGHT_NAME);
 
-    // Field2d visualization
-    updateFieldVisualization(leftEst,  leftRaw,  leftFieldVisionDetections,  leftFieldVisionPose,  LEFT_LIMELIGHT_NAME);
-    updateFieldVisualization(rightEst, rightRaw, rightFieldVisionDetections, rightFieldVisionPose, RIGHT_LIMELIGHT_NAME);
+    if (leftEst.isPresent()) {
+      leftFieldVisionPose = leftRaw.pose;
+      leftFieldVisionDetections = getTagPoses(leftRaw).toArray(Pose2d[]::new);
+    } else {
+      leftFieldVisionPose = Constants.EMPTY_POSE;
+      leftFieldVisionDetections =  new Pose2d[]{};
+    }
+    
+    updateFieldVisualization(leftFieldVisionPose,  leftFieldVisionDetections,  LEFT_LIMELIGHT_NAME);
+
+    if (rightEst.isPresent()) {
+      rightFieldVisionPose = rightRaw.pose;
+      rightFieldVisionDetections = getTagPoses(rightRaw).toArray(Pose2d[]::new);
+    } else {
+      rightFieldVisionPose = Constants.EMPTY_POSE;
+      rightFieldVisionDetections =  new Pose2d[]{};
+    }
+
+    updateFieldVisualization(rightFieldVisionPose,  rightFieldVisionDetections,  RIGHT_LIMELIGHT_NAME);
 
     // Fuse both cameras before submitting a single update to the pose estimator.
     // This avoids two correlated updates hitting the Kalman filter independently.
@@ -164,9 +171,11 @@ public class LimelightSubsystem extends SubsystemBase {
     }
 
     toSubmit.ifPresent(est -> {
-      if (est.timestampSeconds > lastSubmittedTimestamp - 0.02) {
+      if (est.timestampSeconds > lastSubmittedTimestamp) {
         robot.drivetrain.addVisionMeasurement(est.pose, est.timestampSeconds, est.stdDevs);
         lastSubmittedTimestamp = est.timestampSeconds;
+        RobotLogger.logDouble("Limelight/" + "Robot/fusedtimestamped", est.timestampSeconds);                   
+        RobotLogger.logStruct("Limelight/" + "Robot/robotPose", Pose2d.struct, est.pose);           
       }
     });
   }
@@ -194,35 +203,49 @@ public class LimelightSubsystem extends SubsystemBase {
    */
   private Optional<CameraEstimate> processCamera(LimelightHelpers.PoseEstimate mt, String name) {
     if (mt == null || mt.tagCount == 0) {
+      RobotLogger.logBoolean("Limelight/" + name + "/no Tags", true);                         
       return Optional.empty();
     }
+    RobotLogger.logBoolean("Limelight/" + name + "/no Tags", false);                             
 
     if (mt.timestampSeconds <= lastSubmittedTimestamp) {
+      RobotLogger.logBoolean("Limelight/" + name + "/bad Timestamp", true);                                   
       return Optional.empty();
     }
+    RobotLogger.logBoolean("Limelight/" + name + "/bad Timestamp", false);                                       
 
     if (mt.tagCount < 2) {
       // Single-tag extra checks
       if (mt.rawFiducials != null) {
         for (LimelightHelpers.RawFiducial f : mt.rawFiducials) {
           if (f.ambiguity > kAmbiguityThreshold) {
+            RobotLogger.logBoolean("Limelight/" + name + "/bad Ambuguity", true);                                                   
             return Optional.empty();
           }
         }
       }
-      if (mt.avgTagArea < kMinTagAreaSingle) {
+      RobotLogger.logBoolean("Limelight/" + name + "/bad Ambuguity", false);                                                         
+
+      if (mt.avgTagArea < kMinTagAreaSingle || mt.avgTagArea > kMaxTagArea) {
+        RobotLogger.logBoolean("Limelight/" + name + "/bad Area", true);                                                                 
         return Optional.empty();
       }
-    } else {
+      RobotLogger.logBoolean("Limelight/" + name + "/bad Area", false);                                                                       
+    } 
+    else {
       if (mt.avgTagArea < kMinTagAreaMulti) {
+        RobotLogger.logBoolean("Limelight/" + name + "/bad MinTagAreaMulti", true);                                                                               
         return Optional.empty();
       }
+      RobotLogger.logBoolean("Limelight/" + name + "/bad MinTagAreaMulti", false);                                                                                     
     }
 
     // Reject poses suspiciously close to the field origin (likely a bad solve)
     if (mt.pose.getTranslation().getNorm() < kMinPoseNorm) {
+      RobotLogger.logBoolean("Limelight/" + name + "/bad PoseNorm", true);                                                                                           
       return Optional.empty();
     }
+    RobotLogger.logBoolean("Limelight/" + name + "/bad PoseNorm", false);                                                                                               
 
     // Quality-scaled standard deviations.
     // quality = 1.0 for multi-tag; 1.0 - ambiguity for single-tag (per 254's metric).
@@ -285,26 +308,12 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
 
   private void updateFieldVisualization(
-      Optional<CameraEstimate> est,
-      LimelightHelpers.PoseEstimate raw,
-      FieldObject2d detections,
-      FieldObject2d poseObj,
+      Pose2d robotPose,
+      Pose2d[] aprilTagPoses,
       String name) {
 
-    if (!est.isPresent()) {
-      detections.setPoses(Collections.emptyList());
-      poseObj.setPoses(Collections.emptyList());
-      return;
-    }
-
-    poseObj.setPose(est.get().pose);
-    if (raw != null) {
-      detections.setPoses(getTagPoses(raw));
-    }
-
-    SmartDashboard.putNumber("Limelight/" + name + "/X",        est.get().pose.getX());
-    SmartDashboard.putNumber("Limelight/" + name + "/Y",        est.get().pose.getY());
-    SmartDashboard.putNumber("Limelight/" + name + "/Rotation", est.get().pose.getRotation().getDegrees());
+      RobotLogger.logStruct("Limelight/" + name + "/RobotPose", Pose2d.struct, robotPose);    
+      RobotLogger.logStructArray("Limelight/" + name + "/AprilTagPoses", Pose2d.struct, aprilTagPoses);
   }
 
   public boolean isValidUpdate(LimelightHelpers.PoseEstimate mt2) {
