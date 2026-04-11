@@ -9,6 +9,8 @@ import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.FlywheelSubsystem.FlywheelState;
+import frc.robot.subsystems.HoodSubsystem.HoodState;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -31,7 +33,9 @@ public class StopShooter extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    hood.coastOut();
-    flywheel.coastOut();
+    hood.setState(HoodState.OFF);
+    flywheel.setState(FlywheelState.OFF);
+    hood.controlMotor(0);
+    flywheel.controlMotor(0);
   }
 }

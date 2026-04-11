@@ -4,178 +4,240 @@
 
 package frc.robot.subsystems;
 
-import java.util.Dictionary;
-
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.RobotContainer;
 import frc.robot.utilities.RobotLogger;
-import frc.robot.utilities.ShooterUtils;
-import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.HoodConstants;
-
-import static edu.wpi.first.units.Units.*;
-
 
 public class HoodSubsystem extends SubsystemBase {
   /** Creates a new HoodSubsystem. */
-  private TalonFX hoodMotor;
   private RobotContainer robot;
-
-  private final PositionVoltage control = new PositionVoltage(0);
-  private final CoastOut coastOut = new CoastOut();
-  private static final double gearRatio = ((350.0/50.0)*(26.0/12.0));
-  private static final double rotationsPerDegree = gearRatio/360.0;
-  private double setPoint, goal;
-  private InterpolatingDoubleTreeMap hoodInterp = new InterpolatingDoubleTreeMap();
-  private boolean readyToShoot = false;
-  private boolean fixedShot = false;
-
+  private final TalonSRX motor = new TalonSRX(HoodConstants.MOTOR_ID);
+  private final CANcoder encoder = new CANcoder(HoodConstants.ENCODER_ID);
+  private final PhoenixPIDController pid = new PhoenixPIDController(HoodConstants.P, HoodConstants.I, HoodConstants.D);
+  private final InterpolatingDoubleTreeMap shootingInterp = new InterpolatingDoubleTreeMap();
+  private final InterpolatingDoubleTreeMap ferryingInterp = new InterpolatingDoubleTreeMap();
+  private HoodState state = HoodState.OFF;
+  private double goal, output;
 
   public HoodSubsystem(RobotContainer robot) {
     this.robot = robot;
 
     configureMotor();
-    createInterpMap();
-    // zeroMotor();
-    SmartDashboard.putNumber("Hood/SetPoint", 0);
-    hoodMotor.setControl(control.withPosition(HoodConstants.MAX_HOOD_POSITION/2));
+    configureEncoder();
+    configurePID();
+    createShootingInterpMap();
+    createFerryingInterpMap();
+    createTuningData();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    
-/*     if(!readyToShoot){
-      hoodMotor.setControl(coastOut);
-    }
-    else{
- /*      if(fixedShot){
-        hoodMotor.setControl(magicMotionRequest.withPosition(0));
-      }
-      if(ShooterUtils.inNeutralZone(robotPose)){
-        hoodMotor.setControl(magicMotionRequest.withPosition(HoodConstants.MAX_HOOD_POSITION));
-      }
-      else{
-        setGoal(distance);
-        hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
-      }
-    } */
-
-    //setPoint = SmartDashboard.getNumber("Hood/SetPoint", 0) * rotationsPerDegree;
-    // hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
-
-   /*  if(RobotController.getUserButton()){
-      hoodMotor.setPosition(0.0);
-    } */
-
-    SmartDashboard.putNumber("Hood/Positioj", hoodMotor.getPosition().getValueAsDouble());
+    updateLoggingData();
   }
-
 
   public void configureMotor(){
-    hoodMotor = new TalonFX(HoodConstants.HOOD_ID);
+    SupplyCurrentLimitConfiguration supply = new SupplyCurrentLimitConfiguration();
+    supply.currentLimit = HoodConstants.SUPPLY_LIMIT;
 
-    TalonFXConfiguration configs = new TalonFXConfiguration();
-
-    var slot0Configs = configs.Slot0;
-  /*       slot0Configs.kS = 1.0; // Voltage output to overcome static friction
-        slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
-        slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output */
-        slot0Configs.kP = 7.2; // A position error of 2.5 rotations requires this voltage outputp
-        slot0Configs.kI = 0.0; // no output for integrated error
-        slot0Configs.kD = 0.0; // A velocity error of 1 rps requires this voltage output
-
-  /*   var motionMagicConfigs = configs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 80; // Target cruise velocity of 80 rps
-        motionMagicConfigs.MotionMagicAcceleration = 160; // Target acceleration of 160 rps/s (0.5 seconds)
-        motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds) */
-
-     //enable software limits
-    configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-
-    //limits (in rotations)
-    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = HoodConstants.MIN_HOOD_ANGLE * rotationsPerDegree;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = HoodConstants.MAX_HOOD_ANGLE * rotationsPerDegree; 
-  
-    configs.withCurrentLimits(
-            new CurrentLimitsConfigs()
-                .withStatorCurrentLimit(Amps.of(60))
-                .withStatorCurrentLimitEnable(true)
-        );
-
-    hoodMotor.getConfigurator().apply(configs);
-    hoodMotor.setNeutralMode(NeutralModeValue.Brake);
-
-    //hoodMotor.setPosition(0);
+    motor.configPeakCurrentLimit(HoodConstants.PEAK_LIMIT);
+    motor.configContinuousCurrentLimit(HoodConstants.CONTINUOUS_LIMIT);
+    motor.configSupplyCurrentLimit(supply);
   }
 
-  public void createInterpMap(){
+  public void configureEncoder(){
+    CANcoderConfiguration configs = new CANcoderConfiguration();
+
+    //ensures no jump discontinuity occurs
+    configs.MagnetSensor.AbsoluteSensorDiscontinuityPoint = HoodConstants.DISCONTINUITY_POINT;
+    configs.MagnetSensor.MagnetOffset = HoodConstants.MAGNET_OFFSET;
+
+    encoder.getConfigurator().apply(configs);
+  }
+
+  public void configurePID(){
+    pid.setTolerance(HoodConstants.TOLERANCE);
+  }
+
+  public enum HoodState{
+    SHOOTING,
+    FERRYING,
+    FIXED,
+    PID_TUNING,
+    DISTANCE_TUNING,
+    OFF
+  }
+
+  public void setState(HoodState state){
+    this.state = state;
+  }
+
+  public HoodState getState(){
+    return state;
+  }
+
+  public void createShootingInterpMap(){
     //key = distance from goal
-    //value = position of hood in desired shot angle
-    hoodInterp.put(0.0, 0.0);
-    hoodInterp.put(6.0, 0.0);
-    //hoodInterp.put(4.5, 0.0);
-    //hoodInterp.put(5.0, -2.0);
-    //hoodInterp.put(5.6, -4.0);
-    //hoodInterp.put(6.0, -6.0);
+    //value = position of hood in encoder values
+    shootingInterp.put(0.0, 0.0);
+    shootingInterp.put(1.5, 0.0);
+    shootingInterp.put(2.0, -1.0);
+    shootingInterp.put(2.5, -2.0);
+    shootingInterp.put(3.0, -4.0);
+    shootingInterp.put(3.5, -6.0);
+    shootingInterp.put(4.0, -9.0);
+    shootingInterp.put(4.5, -12.0);
+    shootingInterp.put(5.0, -14.0);
+    shootingInterp.put(5.5, -19.0);
+    shootingInterp.put(5.8, -19.0);
+    //shootingInterp.put(5.5, 0.0);
+    //shootingInterp.put(6.0, 0.0);
   }
 
-  public void setGoal(double distance){ 
-    setPoint = hoodInterp.get(distance) * rotationsPerDegree;
+  public void createFerryingInterpMap(){
+    //key = distance from goal
+    //value = position of hood in degrees
+    ferryingInterp.put(0.0, HoodConstants.MAX_ANGLE);
+    ferryingInterp.put(13.0, HoodConstants.MAX_ANGLE);
   }
 
-  public void positionControl(double angle){
-    RobotLogger.logDouble("hood", angle);
-    hoodMotor.setControl(control.withPosition(angle));
+  public double degreesToEncoderTick(double degrees){
+    return degrees/360 * HoodConstants.GEAR_RATIO;
   }
 
-  public void coastOut(){
-    hoodMotor.setControl(new CoastOut());
+  public double encoderTicksToDegrees(double ticks){
+    return ticks/HoodConstants.GEAR_RATIO * 360;
   }
 
-  public void zeroMotor(){
-    hoodMotor.set(0.2);
+  public void setGoalFromInterp(InterpolatingDoubleTreeMap interp, double distance){ 
+    goal = interp.get(distance);
+    MathUtil.clamp(goal, HoodConstants.MAX_ANGLE, HoodConstants.MIN_ANGLE);
+    goal = degreesToEncoderTick(goal);
+  }
 
-    if(hoodMotor.getStatorCurrent().getValueAsDouble() > 25){
-      hoodMotor.set(0);
-      hoodMotor.setPosition(HoodConstants.MIN_HOOD_ANGLE * rotationsPerDegree);
+  public void setGoalInDegrees(double degrees){
+    goal = degreesToEncoderTick(degrees);
+  }
+
+  public void setGoalInTicks(double ticks){
+    goal = ticks;
+  }
+
+  public double getGoal(){
+    return goal;
+  }
+
+  public void shootingControl(double distance){
+    setGoalFromInterp(shootingInterp, distance);
+    output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
+    motor.set(TalonSRXControlMode.PercentOutput, output);
+  }  
+  
+  public void ferryingControl(double distance){
+    setGoalFromInterp(ferryingInterp, distance);
+    output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
+    motor.set(TalonSRXControlMode.PercentOutput, output);
+  }  
+  
+  public void fixedControl(){
+    setGoalFromInterp(shootingInterp, 3.0);
+    output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
+    motor.set(TalonSRXControlMode.PercentOutput, output);
+  }
+
+  public void PIDTuningControl(){
+    pid.setP(SmartDashboard.getNumber("Hood/Tuning/PID/P", 0));
+    pid.setI(SmartDashboard.getNumber("Hood/Tuning/PID/I", 0));
+    pid.setD(SmartDashboard.getNumber("Hood/Tuning/PID/D", 0));
+    setGoalInDegrees(SmartDashboard.getNumber("Hood/Tuning/Goal(Degrees)", 0));
+    output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
+    motor.set(TalonSRXControlMode.PercentOutput, output);
+  }
+
+  public void disatnceTuningControl(){
+    setGoalInDegrees(SmartDashboard.getNumber("Hood/Tuning/Goal(Degrees)", 0));
+    output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
+    motor.set(TalonSRXControlMode.PercentOutput, output);
+  }
+
+  public void stopMotor(){
+    motor.set(TalonSRXControlMode.PercentOutput, 0.0);;
+  }
+
+  public void controlMotor(double distance){
+    switch (state) {
+      case SHOOTING:
+        shootingControl(distance);
+        break;
+
+      case FERRYING:
+        ferryingControl(distance);
+        break;
+      
+      case FIXED:
+        fixedControl();
+        break;
+
+      case PID_TUNING:
+        PIDTuningControl();
+        break;
+
+      case DISTANCE_TUNING:
+        disatnceTuningControl();
+        break;
+
+      case OFF:
+        stopMotor();
+        break;
+    
+      default:
+        stopMotor();
+        break;
     }
   }
 
-  public double getGoal(double distance){
-    return hoodInterp.get(distance) * rotationsPerDegree;
-    //return setPoint * rotationsPerDegree;
+  public void updateLoggingData(){
+    RobotLogger.logDouble("Hood/Output", output);
+    RobotLogger.logDouble("Hood/Goal(Degrees)", encoderTicksToDegrees(goal));
+    RobotLogger.logDouble("Hood/CurrentDegrees", encoderTicksToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
+    RobotLogger.logDouble("Hood/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
+    RobotLogger.logDouble("Hood/StatorCurrent", motor.getStatorCurrent());
+    RobotLogger.logDouble("Hood/SupplyCurrent", motor.getSupplyCurrent());
+    RobotLogger.logDouble("Hood/Voltage", motor.getMotorOutputVoltage());
+    RobotLogger.logBoolean("Hood/GoodToShoot", goodToShoot());
+    RobotLogger.logString("Hood/State", state.name());
   }
 
-  public double getSetPoint(){
-    return setPoint;
+  public void createTuningData(){
+    RobotLogger.logDouble("Hood/Tuning/PID/P", 0);
+    RobotLogger.logDouble("Hood/Tuning/PID/I", 0);
+    RobotLogger.logDouble("Hood/Tuning/PID/D", 0);
+    RobotLogger.logDouble("Hood/Tuning/Goal(Degrees)", 0);
   }
 
-  public void readyShot(boolean ready){
-    readyToShoot = ready;
+  public boolean goodToShoot(){
+    return pid.atSetpoint();
   }
 
-  public void fixedShot(boolean fixed){
-    fixedShot = fixed;
+  public TalonSRX getMotor(){
+    return motor;
   }
 
-  public TalonFX getMotor(){
-    return hoodMotor;
+  public CANcoder getEncoder(){
+    return encoder;
   }
 }

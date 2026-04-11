@@ -10,35 +10,35 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.SysIdBuilder;
 import frc.robot.Constants.SpindexerConstants;
 
 import static edu.wpi.first.units.Units.*;
 
 public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
-  private int reverse;
   /** Creates a new SpinDexerSubSystem. */
- private TalonFX spindexerMotor;
+  private RobotContainer robot;
+  private final TalonFX motor = new TalonFX(SpindexerConstants.MOTOR_ID);
+  private SpindexerState state = SpindexerState.OFF;
+
   public SpindexerSubsystem(RobotContainer robot) {
-    spindexerMotor = new TalonFX(SpindexerConstants.SPINDEXER_ID);
+    this.robot = robot;
+
+    configureMotor();
   }
-
-  private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
-      spindexerMotor, this, "spindexer", 4.5
-  );    
-
-   public SysIdRoutine getSysIdRoutine() {
-    return sysIdRoutine;
-  }    
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    updateLoggingData();
   }
 
   public void configureMotor(){
@@ -48,31 +48,78 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
         new CurrentLimitsConfigs()
             // Swerve azimuth does not require much torque output, so we can set a relatively low
             // stator current limit to help avoid brownouts without impacting performance.
-            .withStatorCurrentLimit(Amps.of(120))
+            .withStatorCurrentLimit(Amps.of(SpindexerConstants.STATOR_LIMIT))
             .withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(Amps.of(SpindexerConstants.SUPPLY_LIMIT))
+            .withSupplyCurrentLowerLimit(Amps.of(SpindexerConstants.SUPPLY_LOWER_LIMIT))
+            .withSupplyCurrentLimitEnable(true)
     );
 
-    //TODO JJF: Get the real numbers for these values through tuning
-    var slot0Configs = configs.Slot0;
-        slot0Configs.kS = 0.0; // Voltage output to overcome static friction
-        slot0Configs.kV = 0.0; // A velocity target of 1 rps requires this voltage output.
-        slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires this voltage output
-        slot0Configs.kP = 0; // A position error of x rotations requires this voltage output
-        slot0Configs.kI = 0; // no output for integrated error
-        slot0Configs.kD = 0.0; // A velocity error of 1 rps requires this voltage output
-
-    spindexerMotor.getConfigurator().apply(configs);
+    motor.getConfigurator().apply(configs);
   }
 
-  public void runMotor() {
-    spindexerMotor.setVoltage(SpindexerConstants.SPINDEXER_SPEED);
+  public enum SpindexerState{
+    FORWARD,
+    REVERSE,
+    OFF
   }
 
+  public void setState(SpindexerState state){
+    this.state = state;
+  }
+
+  public SpindexerState getState(){
+    return state;
+  }
+
+  public void forwardControl() {
+    motor.setVoltage(SpindexerConstants.SPEED);
+  }
+  
+  public void reverseControl() {
+    motor.setVoltage(-SpindexerConstants.SPEED);
+  }
+  
   public void stopMotor() {
-    spindexerMotor.setVoltage(0);
+    motor.stopMotor();
   }
 
-  public void reverseMotor() {
-    spindexerMotor.setVoltage(-SpindexerConstants.SPINDEXER_SPEED);
+  public void controlMotor(){
+    switch (state) {
+      case FORWARD:
+        forwardControl();
+        break;
+
+      case REVERSE:
+        reverseControl();
+        break;
+
+      case OFF:
+        stopMotor();
+        break;
+    
+      default:
+        stopMotor();
+        break;
+    }
+  }
+
+  public void updateLoggingData(){
+    RobotLogger.logDouble("Spindexer/Voltage", motor.getMotorVoltage().getValueAsDouble());
+    RobotLogger.logDouble("Spindexer/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Spindexer/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
+    RobotLogger.logString("Spindexer/State", state.name());
+  }
+
+  private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
+      motor, this, "spindexer", 4.5
+  );    
+
+   public SysIdRoutine getSysIdRoutine() {
+    return sysIdRoutine;
+  }    
+
+  public TalonFX getMotor(){
+    return motor;
   }
 }

@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,6 +36,7 @@ import frc.robot.commands.intake.ReverseRollers;
 import frc.robot.commands.intake.DeployIntake;
 import frc.robot.commands.intake.ForceIntakeDown;
 import frc.robot.commands.intake.JostlePieces;
+import frc.robot.commands.intake.PIDTuningIntake;
 import frc.robot.commands.intake.RetractIntake;
 import frc.robot.commands.shooter.StopShooter;
 import frc.robot.commands.shooter.ActivateTurret;
@@ -43,12 +45,12 @@ import frc.robot.commands.shooter.FixShooter;
 import frc.robot.commands.shooter.ReverseSpindexer;
 import frc.robot.commands.shooter.Shoot;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.KickerSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
@@ -60,6 +62,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.utilities.AxisButton;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.RobotLogger;
 
 public class RobotContainer {
     public Field2d field = new Field2d();
@@ -90,6 +93,8 @@ public class RobotContainer {
     
     public boolean safeToMove = false;
     private SendableChooser<Command> autoChooser;
+
+    private boolean fixedShot = false;
     
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
@@ -99,13 +104,14 @@ public class RobotContainer {
     public final FeederSubsystem feeder = new FeederSubsystem(this);
     public final SpindexerSubsystem spindexer = new SpindexerSubsystem(this);
     public final IntakeSubsystem intake = new IntakeSubsystem(this);
+    public final KickerSubsystem kicker = new KickerSubsystem(this);
     //public final LEDSubsystem leds = new LEDSubsystem(this);
-    //public final ClimberSubsystem climber = new ClimberSubsystem(this);
 
     public RobotContainer() {
 
         configureBindings();
         configureNamedCommands();
+        createTuningToggles();
 
         autoChooser = AutoBuilder.buildAutoChooser();
         
@@ -115,8 +121,8 @@ public class RobotContainer {
 
     private void configureBindings() {
  
-        SmartDashboard.putBoolean("FieldCentricMode", fieldCentricDrive);
-        SmartDashboard.putBoolean("HighGear", !lowGear);
+        RobotLogger.logBoolean("FieldCentricMode", fieldCentricDrive);
+        RobotLogger.logBoolean("HighGear", !lowGear);
 
         // Initialize the swerve drive to be controlled by the driver's controller
         setDrivetrainMode();
@@ -136,7 +142,7 @@ public class RobotContainer {
 
         //Shooter
         driverController.rightTriggerButton.whileTrue(new Shoot(this));
-        //driverController.buttonA.onTrue(new StopShooter(this));
+        driverController.buttonA.onTrue(new PIDTuningIntake(this));
         //driverController.buttonB.onTrue(new DeactivateTurret(this));
         //driverController.buttonX.onTrue(new ActivateTurret(this));
         //driverController.buttonY.onTrue(new FixShooter(this));
@@ -169,6 +175,10 @@ public class RobotContainer {
         NamedCommands.registerCommand("Shoot", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(6.0)));
     }
 
+    public void createTuningToggles(){
+        SmartDashboard.putBoolean("Tuning/EnablePIDTuning", false);
+        SmartDashboard.putBoolean("Tuning/EnableDistanceTuning", true);
+    }
      /**
      * VERY IMPORTANT: Put the robot up on blocks before running these!
      * VERY IMPORTANT: Change the button bindings to those you want to trigger the 4 tests
@@ -212,11 +222,19 @@ public class RobotContainer {
     public void toggleHiLoGear() {
         lowGear = !lowGear;
         driveSpeedScale = (lowGear ? slowGear : highGear);
-        SmartDashboard.putBoolean("HighGear", !lowGear);
+        RobotLogger.logBoolean("HighGear", !lowGear);
     }
 
     public boolean isLowGear(){
         return lowGear;
+    }
+
+    public void toggleFixedShot(){
+        fixedShot = !fixedShot;
+    }
+
+    public boolean isFixedShot(){
+        return fixedShot;
     }
 
     // Returns 0 if reading the alliance color fails
@@ -240,7 +258,7 @@ public class RobotContainer {
             allianceSign = Constants.Simulation.simAlliance;
         }
 
-        SmartDashboard.putNumber("AllianceSign", allianceSign);
+        RobotLogger.logDouble("AllianceSign", allianceSign);
 
         return allianceSign;
     }
@@ -250,14 +268,14 @@ public class RobotContainer {
     // If it is robot centric, change it to field centric
     public void toggleDriveMode() {
         setFieldCentric(!fieldCentricDrive);
-        SmartDashboard.putBoolean("FieldCentricMode", fieldCentricDrive);
+        RobotLogger.logBoolean("FieldCentricMode", fieldCentricDrive);
         // setDrivetrainMode();
     }
 
      // Set the swerve mode drive to field centric (true) or robot centric (false)
     public void setFieldCentric(boolean state) {
         fieldCentricDrive = state;
-        SmartDashboard.putBoolean("FieldCentricMode", fieldCentricDrive);
+        RobotLogger.logBoolean("FieldCentricMode", fieldCentricDrive);
         setDrivetrainMode();
     }
 

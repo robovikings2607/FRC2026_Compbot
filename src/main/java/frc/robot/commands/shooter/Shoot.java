@@ -7,15 +7,19 @@ package frc.robot.commands.shooter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.KickerSubsystem;
 import frc.robot.subsystems.SpindexerSubsystem;
+import frc.robot.subsystems.FeederSubsystem.FeederState;
+import frc.robot.subsystems.FlywheelSubsystem.FlywheelState;
+import frc.robot.subsystems.HoodSubsystem.HoodState;
+import frc.robot.subsystems.KickerSubsystem.KickerState;
+import frc.robot.subsystems.SpindexerSubsystem.SpindexerState;
 import frc.robot.utilities.ShooterUtils;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -27,6 +31,7 @@ public class Shoot extends Command {
   SpindexerSubsystem spindexer;
   HoodSubsystem hood;
   FlywheelSubsystem flywheel;
+  KickerSubsystem kicker;
 
   public Shoot(RobotContainer robot) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -35,15 +40,15 @@ public class Shoot extends Command {
     spindexer = robot.spindexer;
     hood = robot.hood;
     flywheel = robot.flywheel;
+    kicker = robot.kicker;
 
-    addRequirements(feeder, spindexer, hood, flywheel);
+    addRequirements(feeder, spindexer, hood, flywheel, kicker);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    hood.readyShot(true);
-    flywheel.readyShot(true);
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -56,43 +61,89 @@ public class Shoot extends Command {
 
     double distance = shooterPose.getDistance(goalPose);
 
-    double rps = flywheel.getGoal(distance);
-    double angle = hood.getGoal(distance);
-
-    // rps = SmartDashboard.getNumber("Flywheel/Speed", 0);
-/*        if(fixedShot){
-        flywheelMotor.setControl(velocityControl.withVelocity(50));
-      } */
-    if(flywheel.isFixed()){
-      flywheel.velocityControl(-50.0); //guessing
+    boolean pidTuningEnabled = SmartDashboard.getBoolean("Tuning/EnablePIDTuning", false);
+    boolean distanceTuningEnabled = SmartDashboard.getBoolean("Tuning/EnableDistanceTuning", true);
+    /* 
+    if(pidTuningEnabled){
+      setPIDTuningStates();
+    } 
+    else if(distanceTuningEnabled){
+      setDistanceTuningStates();
+    } 
+    else */ if(robot.isFixedShot()){ //add boolean check later
+      setFixedStates();
     }
     else if(ShooterUtils.inNeutralZone(robotPose)){
-      flywheel.velocityControl(-80.0);
-      hood.positionControl(HoodConstants.MAX_HOOD_POSITION);
+      setFerryingStates();
     }
     else{
-      flywheel.velocityControl(rps);
-      hood.positionControl(angle);
+      setShootingStates();
     }
 
-    if(flywheel.goodToShoot()){
-      feeder.runMotor();
-      spindexer.runMotor();
+    controlShooting(distance);
+
+    if(flywheel.goodToShoot() && hood.goodToShoot()){
+      setFeedingStates();
+      controlFeeding(KickerState.FORWARD);
     }
-    }
+  }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    feeder.stopMotor();
-    spindexer.stopMotor();
-    hood.positionControl(HoodConstants.MAX_HOOD_POSITION/2);
-    flywheel.coastOut();
+    hood.setState(HoodState.OFF);
+    flywheel.setState(FlywheelState.OFF);
+    spindexer.setState(SpindexerState.OFF);
+    feeder.setState(FeederState.OFF);
+    
+    controlShooting(0);
+    controlFeeding(KickerState.OFF);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+  public void setPIDTuningStates(){
+    hood.setState(HoodState.PID_TUNING);
+    flywheel.setState(FlywheelState.PID_TUNING);
+  }
+
+  public void setDistanceTuningStates(){
+    hood.setState(HoodState.DISTANCE_TUNING);
+    flywheel.setState(FlywheelState.DISTANCE_TUNING);
+  }
+
+  public void setFixedStates(){
+    hood.setState(HoodState.FIXED);
+    flywheel.setState(FlywheelState.FIXED);
+  }
+
+  public void setFerryingStates(){
+    hood.setState(HoodState.FERRYING);
+    flywheel.setState(FlywheelState.FERRYING);
+  }
+
+  public void setShootingStates(){
+    hood.setState(HoodState.SHOOTING);
+    flywheel.setState(FlywheelState.SHOOTING);
+  }
+
+  public void setFeedingStates(){
+    feeder.setState(FeederState.FORWARD);
+    spindexer.setState(SpindexerState.FORWARD);
+  }
+
+  public void controlShooting(double distance){
+    hood.controlMotor(distance);
+    flywheel.controlMotor(distance);
+  }
+
+  public void controlFeeding(KickerState kickerState){
+    feeder.controlMotor();
+    spindexer.controlMotor();
+    kicker.controlMotor(kickerState);
   }
 }

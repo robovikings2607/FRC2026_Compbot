@@ -2,47 +2,45 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.shooter;
+package frc.robot.commands.intake;
 
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
-import com.pathplanner.lib.config.RobotConfig;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
-import frc.robot.Constants.SpindexerConstants;
-import frc.robot.subsystems.SpindexerSubsystem;
-import frc.robot.subsystems.SpindexerSubsystem.SpindexerState;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.IntakeState;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class ReverseSpindexer extends Command {
-  /** Creates a new ReverseSpindexer. */
+public class PIDTuningIntake extends Command {
+  /** Creates a new PIDTuningIntake. */
 
   RobotContainer robot;
-  SpindexerSubsystem spindexer;
+  IntakeSubsystem intake;
 
-  public ReverseSpindexer(RobotContainer robot) {
+  public PIDTuningIntake(RobotContainer robot) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.robot = robot;
-    spindexer = robot.spindexer;
+    intake = robot.intake;
+
+    addRequirements(intake);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    spindexer.setState(SpindexerState.REVERSE);
-    spindexer.controlMotor();
+    intake.setState(IntakeState.PID_TUNING);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    intake.controlIntake();
+  }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    spindexer.setState(SpindexerState.OFF);
-    spindexer.controlMotor();
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override

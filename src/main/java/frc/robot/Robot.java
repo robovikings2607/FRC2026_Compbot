@@ -40,11 +40,12 @@ public class Robot extends TimedRobot {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
         
-        if(RobotController.getUserButton()){
-            m_robotContainer.hood.getMotor().setPosition(0.0);
+/*         if(RobotController.getUserButton()){
+            //m_robotContainer.hood.getMotor().setPosition(0.0);
             m_robotContainer.turret.getMotor().setPosition(0.0);
             m_robotContainer.intake.getPivotMotor().setPosition(0.0);
-        } 
+        }  */
+          
     }
 
     @Override

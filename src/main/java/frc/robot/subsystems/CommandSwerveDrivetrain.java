@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.utilities.RobotLogger;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -299,8 +300,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        SmartDashboard.putNumber("DriveTrain/vX", getState().Speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("DriveTrain/vY", getState().Speeds.vyMetersPerSecond);
+        RobotLogger.logDouble("DriveTrain/vX", getState().Speeds.vxMetersPerSecond);
+        RobotLogger.logDouble("DriveTrain/vY", getState().Speeds.vyMetersPerSecond);
     }
 
     private void startSimThread() {
