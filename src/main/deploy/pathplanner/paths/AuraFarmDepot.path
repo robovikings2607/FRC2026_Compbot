@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.8036649659863944,
+        "y": 5.310229591836734
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.1846938775510205,
+        "y": 5.392261904761904
+      },
+      "isLocked": false,
+      "linkedName": "AuraFarmShootEnd"
+    },
+    {
+      "anchor": {
+        "x": 0.6409948979591837,
+        "y": 5.959030612244897
+      },
+      "prevControl": {
+        "x": 0.809562238964517,
+        "y": 5.774409238762865
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "AuraFarmDepotEnd"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 5.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 179.30130561701648
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -179.6075692906592
+  },
+  "useDefaultConstraints": true
+}

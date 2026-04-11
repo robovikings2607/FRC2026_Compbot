@@ -21,19 +21,39 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral1 (LeftBump)"
+                        "pathName": "AuraFarmStart"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Copy of CollectFuel (LeftBump)"
+                        "pathName": "AuraFarmCollect"
                       }
-                    },
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.5
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "NeutralToAlliance1 (LeftBump)"
+                        "pathName": "AuraFarmShoot"
                       }
                     }
                   ]
@@ -65,25 +85,19 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral2 (LeftBump)"
+                        "pathName": "AuraFarmDepot"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "NeutralToAlliance2 (LeftBump)"
+                        "pathName": "AuraFarmShootTwo"
                       }
                     }
                   ]
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
           }
         }
       ]

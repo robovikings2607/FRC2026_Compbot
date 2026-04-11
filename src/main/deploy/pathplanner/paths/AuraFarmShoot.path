@@ -3,42 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.797738944365191,
-        "y": 3.5498002853067057
+        "x": 7.800178571428573,
+        "y": 3.4309438775510204
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.688316326530613,
-        "y": 5.7502210884353735
+        "x": 8.635416666666666,
+        "y": 6.742066326530612
       },
       "isLocked": false,
-      "linkedName": "CopyLeftPostCollect"
+      "linkedName": "AuraFarmCollectEnd"
     },
     {
       "anchor": {
-        "x": 2.2794008559201138,
-        "y": 5.6070470756062765
+        "x": 2.8036649659863944,
+        "y": 5.310229591836734
       },
       "prevControl": {
-        "x": 2.8163552068467754,
-        "y": 5.995206847357638
+        "x": 3.1019642857142857,
+        "y": 5.332602040816325
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "AuraFarmShootEnd"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5756929637526655,
-      "rotationDegrees": -45.0
+      "waypointRelativePos": 0.6392009987515617,
+      "rotationDegrees": -138.77761148969498
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.46995273463875864,
-      "maxWaypointRelativePos": 0.6995273463875757,
+      "minWaypointRelativePos": 0.4190476190476203,
+      "maxWaypointRelativePos": 0.7062271062271119,
       "constraints": {
         "maxVelocity": 2.0,
         "maxAcceleration": 3.0,
@@ -61,13 +61,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": -179.6075692906592
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0.0,
-    "rotation": -90.0
+    "velocity": 0,
+    "rotation": -91.9920935729665
   },
   "useDefaultConstraints": true
 }
