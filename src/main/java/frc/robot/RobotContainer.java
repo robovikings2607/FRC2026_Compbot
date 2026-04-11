@@ -115,6 +115,7 @@ public class RobotContainer {
         configureBindings();
         configureNamedCommands();
         createTuningToggles();
+        configureSysIdBindings(null);
         
         kicker.setDefaultCommand(new PulseKicker(this));
 
@@ -148,7 +149,7 @@ public class RobotContainer {
 
         //Shooter
         driverController.rightTriggerButton.whileTrue(new Shoot(this));
-        driverController.buttonA.onTrue(new PIDTuningIntake(this));
+        //driverController.buttonA.onTrue(new PIDTuningIntake(this));
         //driverController.buttonB.onTrue(new DeactivateTurret(this));
         //driverController.buttonX.onTrue(new ActivateTurret(this));
         //driverController.buttonY.onTrue(new FixShooter(this));
@@ -179,7 +180,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("DoNothing", new DoNothing());
         NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
         NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
-        NamedCommands.registerCommand("Shoot", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(6.0)));
+        NamedCommands.registerCommand("ShootStationary", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(6.0)));
+        NamedCommands.registerCommand("ShootOnTheMove", new Shoot(this));
     }
 
     public void createTuningToggles(){
