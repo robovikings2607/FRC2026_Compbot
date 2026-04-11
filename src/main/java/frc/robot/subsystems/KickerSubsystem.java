@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.KickerConstants;
+import frc.robot.commands.intake.PulseKicker;
 import frc.robot.utilities.RobotLogger;
 
 import static edu.wpi.first.units.Units.*;

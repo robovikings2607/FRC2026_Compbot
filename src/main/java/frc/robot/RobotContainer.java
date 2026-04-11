@@ -37,8 +37,10 @@ import frc.robot.commands.intake.DeployIntake;
 import frc.robot.commands.intake.ForceIntakeDown;
 import frc.robot.commands.intake.JostlePieces;
 import frc.robot.commands.intake.PIDTuningIntake;
+import frc.robot.commands.intake.PulseKicker;
 import frc.robot.commands.intake.RetractIntake;
 import frc.robot.commands.shooter.StopShooter;
+import frc.robot.commands.shooter.ToggleOperatorControls;
 import frc.robot.commands.shooter.ActivateTurret;
 import frc.robot.commands.shooter.DeactivateTurret;
 import frc.robot.commands.shooter.FixShooter;
@@ -95,6 +97,7 @@ public class RobotContainer {
     private SendableChooser<Command> autoChooser;
 
     private boolean fixedShot = false;
+    private boolean operatorEnabled = false;
     
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
@@ -112,6 +115,8 @@ public class RobotContainer {
         configureBindings();
         configureNamedCommands();
         createTuningToggles();
+        
+        kicker.setDefaultCommand(new PulseKicker(this));
 
         autoChooser = AutoBuilder.buildAutoChooser();
         
@@ -123,6 +128,7 @@ public class RobotContainer {
  
         RobotLogger.logBoolean("FieldCentricMode", fieldCentricDrive);
         RobotLogger.logBoolean("HighGear", !lowGear);
+        RobotLogger.logBoolean("OperatorEnabled", operatorEnabled);
 
         // Initialize the swerve drive to be controlled by the driver's controller
         setDrivetrainMode();
@@ -148,6 +154,7 @@ public class RobotContainer {
         //driverController.buttonY.onTrue(new FixShooter(this));
 
         //Operator/Emergency
+        operatorController.backButton.and(operatorController.startButton).onTrue(new ToggleOperatorControls(this));
         operatorController.buttonY.onTrue(new RetractIntake(this));
         operatorController.buttonA.onTrue(new DeployIntake(this));
         operatorController.buttonB.onTrue(new DeactivateTurret(this));
@@ -235,6 +242,14 @@ public class RobotContainer {
 
     public boolean isFixedShot(){
         return fixedShot;
+    }
+
+    public void toggleOperatorControls(){
+        operatorEnabled = !operatorEnabled;
+    }
+
+    public boolean operatorEnabled(){
+        return operatorEnabled;
     }
 
     // Returns 0 if reading the alliance color fails

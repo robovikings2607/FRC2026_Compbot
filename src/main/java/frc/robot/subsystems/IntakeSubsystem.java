@@ -13,6 +13,7 @@ import frc.robot.RobotContainer;
 import frc.robot.utilities.RobotLogger;
 import frc.robot.Constants.PivotConstants;
 import frc.robot.Constants.RollerConstants;
+import frc.robot.subsystems.KickerSubsystem.KickerState;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -303,6 +304,7 @@ public class IntakeSubsystem extends SubsystemBase {
         jammedControl();
         if(!isJammed()){
           setState(IntakeState.DEPLOYED);
+          robot.kicker.controlMotor(KickerState.FORWARD);
         }
         else if(timer.get() > 1.0){
           setState(IntakeState.UNJAM);

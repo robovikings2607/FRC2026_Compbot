@@ -27,6 +27,8 @@ public class ActivateTurret extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    turret.deactivateTurret(false);
+    if(robot.operatorEnabled()){
+      turret.deactivateTurret(false);
+    }
   }
 }
