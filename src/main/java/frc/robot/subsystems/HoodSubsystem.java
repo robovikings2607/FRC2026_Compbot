@@ -14,10 +14,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -43,6 +47,20 @@ public class HoodSubsystem extends SubsystemBase {
   private InterpolatingDoubleTreeMap hoodInterp = new InterpolatingDoubleTreeMap();
   private boolean readyToShoot = false;
   private boolean fixedShot = false;
+  // The WPILib Physics Model
+// Needs: Gearbox, Gearing Ratio, Moment of Inertia (guess small, like 0.01), 
+// Length, Min Angle, Max Angle, Simulate Gravity (usually false for a tight hood)
+private final SingleJointedArmSim hoodSim = new SingleJointedArmSim(
+    DCMotor.getKrakenX44(1), 
+    gearRatio, // Example 100:1 gear ratio
+    0.01,  // Moment of Inertia (kg*m^2)
+    0.2,   // Length of the hood mechanism (meters)
+    Math.toRadians(10), // Minimum angle (Bottomed out)
+    Math.toRadians(50), // Maximum angle (Fully extended)
+    true,  // Simulate gravity? (usually yes, unless it's a lead screw)
+    0.0    // Starting angle
+);
+
 
 
   public HoodSubsystem(RobotContainer robot) {
@@ -81,7 +99,7 @@ public class HoodSubsystem extends SubsystemBase {
       hoodMotor.setPosition(0.0);
     } */
 
-    SmartDashboard.putNumber("Hood/Positioj", hoodMotor.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Hood/Position", hoodMotor.getPosition().getValueAsDouble());
   }
 
 
@@ -189,4 +207,34 @@ public class HoodSubsystem extends SubsystemBase {
   public TalonFX getMotor(){
     return hoodMotor;
   }
+
+  public void simulationPeriodic() {
+    // 1. Give the WPILib physics model the current voltage from our virtual motor
+    hoodSim.setInputVoltage(hoodMotor.getSimState().getMotorVoltage());
+    
+    // 2. Advance the physics simulation by 20ms
+    hoodSim.update(0.020);
+    
+    // 1. Convert WPILib's radians into friendly degrees
+    double hoodDegrees = Units.radiansToDegrees(hoodSim.getAngleRads());
+
+    // 2. Convert degrees to rotations (divide by 360), then multiply by the gear ratio
+    hoodMotor.getSimState().setRawRotorPosition(
+        (hoodDegrees / 360.0) * gearRatio 
+    );
+
+    // 2. Create a fake Pose2d off the bottom of the field.
+    // X: 0.0, Y: -1.0 (Off the carpet), Rotation: Your hood angle!
+    Pose2d hoodDial = new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(hoodDegrees));
+    // 2. Create a static base line that stays permanently locked at 0 degrees (horizontal)
+    Pose2d staticBase = new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(0));
+
+
+    RobotLogger.logDouble("Hood/" + "targetAngleDegrees",hoodDegrees);   
+    RobotLogger.logStruct("Hood/" + "targetAnglePose", Pose2d.struct, hoodDial);     
+    RobotLogger.logStruct("Hood/" + "targetAngleBaseZeroPose", Pose2d.struct, staticBase);     
+
+  }
+
+
 }

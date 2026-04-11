@@ -87,25 +87,18 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
 
   @Override
   public void periodic() {
-      RobotLogger.logDouble("Feeder/ActualVelocity", motor.getVelocity().getValueAsDouble());
-
-      RobotLogger.logDouble("Flywheel/TargetVelocity", targetVelocityRps);
-
-      RobotLogger.logDouble("Feeder/MotorVoltage", motor.getMotorVoltage().getValueAsDouble());
-
     // This method will be called once per scheduler run
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
-    Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
+    //Translation2d goalPose = ShooterUtils.virtualTarget(robot.drivetrain, robotPose);
+    Translation2d goalPose = FieldLocations.BLUE_HUB;
 
-    double distance = shooterPose.getDistance(goalPose);
+    double distance = robotPose.getTranslation().getDistance(goalPose);
 
     // Log the Inputs/Math
     SmartDashboard.putNumber("Flywheel/Distance", distance);
     SmartDashboard.putNumber("Flywheel/TargetVelocity", getGoal(distance));
-
-    // Log the Hardware Reality
     SmartDashboard.putNumber("Flywheel/ActualVelocity", motor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Flywheel/MotorVoltage", motor.getMotorVoltage().getValueAsDouble());    
 
@@ -144,18 +137,21 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
 
   }
 
-  public void createInterpMap(){
+public void createInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    flywheelInterp.put(0.0, -49.5);
-    flywheelInterp.put(2.53, -49.5);
-    flywheelInterp.put(3.1, -52.0);
-    flywheelInterp.put(3.5, -56.5);
-    flywheelInterp.put(4.0, -59.0);
-    flywheelInterp.put(4.5, -62.0);
-    flywheelInterp.put(5.0, -65.0);
-    flywheelInterp.put(5.5, -68.0);
-    flywheelInterp.put(6.0, -69.0);
+    flywheelInterp.put(0.0, -40.0);
+    flywheelInterp.put(1.5, -40.0);
+    flywheelInterp.put(2.0, -42.5);
+    flywheelInterp.put(2.5, -45.0);
+    flywheelInterp.put(3.0, -47.5);
+    flywheelInterp.put(3.5, -50.0);
+    flywheelInterp.put(4.0, -52.5);
+    flywheelInterp.put(4.5, -54.0);
+    flywheelInterp.put(5.0, -56.5);
+    flywheelInterp.put(5.5, -61.0);
+    flywheelInterp.put(5.8, -61.0);
+    //shootingInterp.put(6.0, 0.0);
   }
 
   public void setGoal(double distance){

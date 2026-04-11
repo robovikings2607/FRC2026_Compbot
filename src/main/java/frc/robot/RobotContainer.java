@@ -412,6 +412,20 @@ public class RobotContainer {
         return fieldCentricDrive;
     }
 
+
+    /**
+     * A smart wrapper to handle the GLFW Sim GUI axis bug.
+     */
+    public double getSmartRightX() {
+        if (RobotBase.isSimulation()) {
+            // In the simulator, use the GLFW quirky mapping
+            return driverController.controller.getRawAxis(2); 
+        } else {
+            // On the real robot, trust the official WPILib method
+            return driverController.controller.getRightX(); 
+        }
+    }
+
     private void setDrivetrainMode() {
         // A standard deadband is 10% (0.1). 
         // If your controllers are really old and beat up, you might need 0.15.
@@ -422,7 +436,7 @@ public class RobotContainer {
                 drivetrain.applyRequest(() -> driveFieldCentric
                     .withVelocityX(-MathUtil.applyDeadband(driverController.controller.getLeftY(), deadband) * MaxSpeed * driveSpeedScale) 
                     .withVelocityY(-MathUtil.applyDeadband(driverController.controller.getLeftX(), deadband) * MaxSpeed * driveSpeedScale) 
-                    .withRotationalRate(-MathUtil.applyDeadband(driverController.controller.getRawAxis(2), deadband) * MaxAngularRate * driveSpeedScale)
+                    .withRotationalRate(-MathUtil.applyDeadband(getSmartRightX(), deadband) * MaxAngularRate * driveSpeedScale) 
                 )
             );
         } else {
@@ -430,7 +444,7 @@ public class RobotContainer {
                 drivetrain.applyRequest(() -> driveRobotCentric
                     .withVelocityX(-MathUtil.applyDeadband(driverController.controller.getLeftY(), deadband) * MaxSpeed * driveSpeedScale) 
                     .withVelocityY(-MathUtil.applyDeadband(driverController.controller.getLeftX(), deadband) * MaxSpeed * driveSpeedScale) 
-                    .withRotationalRate(-MathUtil.applyDeadband(driverController.controller.getRawAxis(2), deadband) * MaxAngularRate * driveSpeedScale)
+                    .withRotationalRate(-MathUtil.applyDeadband(getSmartRightX(), deadband) * MaxAngularRate * driveSpeedScale) 
                 )
             );
         }
