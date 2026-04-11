@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utilities.RobotLogger;
@@ -32,6 +33,9 @@ public class Robot extends TimedRobot {
         // Wakes up the Logger class and triggers its static setup block
         // this will also call DataLogManager.start to initiate .wpilog logging 
         RobotLogger.init(); 
+
+        // Force the Command Scheduler to broadcast its status to NetworkTables
+        SmartDashboard.putData("Scheduler", CommandScheduler.getInstance());        
     }
 
 

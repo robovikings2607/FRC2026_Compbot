@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -106,8 +108,8 @@ public class RobotContainer {
     private double highGear = 1.0; // 0.6 or 60% (max speed) for competition
     private double slowGear = 0.3; // 0.2 or 20% of max speed for competition
     public double driveSpeedScale = (lowGear ? slowGear : highGear);
-    public OI driverController = new OI(OI.kDriverControllerPort);
-    public OI operatorController = new OI(OI.kOperatorControllerPort);
+    public OI driverController = new OI(OI.kOperatorControllerPort);
+    public OI operatorController = new OI(OI.kDriverControllerPort);
     
     public boolean safeToMove = false;
     private SendableChooser<Command> autoChooser;
@@ -410,25 +412,29 @@ public class RobotContainer {
         return fieldCentricDrive;
     }
 
-     // This method is called to modify the drivetrain mode
     private void setDrivetrainMode() {
+        // A standard deadband is 10% (0.1). 
+        // If your controllers are really old and beat up, you might need 0.15.
+        double deadband = 0.1; 
+
         if (getFieldCentric()) {
-            drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() -> driveFieldCentric
-                .withVelocityX(-driverController.controller.getLeftY() * MaxSpeed * driveSpeedScale) // Drive forward with negative Y (forward)
-                .withVelocityY(-driverController.controller.getLeftX() * MaxSpeed * driveSpeedScale) // Drive left with negative X (left)
-                .withRotationalRate(-driverController.controller.getRightX() * MaxAngularRate * driveSpeedScale) // Drive counterclockwise with negative X (left)
-            ));
+            drivetrain.setDefaultCommand(
+                drivetrain.applyRequest(() -> driveFieldCentric
+                    .withVelocityX(-MathUtil.applyDeadband(driverController.controller.getLeftY(), deadband) * MaxSpeed * driveSpeedScale) 
+                    .withVelocityY(-MathUtil.applyDeadband(driverController.controller.getLeftX(), deadband) * MaxSpeed * driveSpeedScale) 
+                    .withRotationalRate(-MathUtil.applyDeadband(driverController.controller.getRawAxis(2), deadband) * MaxAngularRate * driveSpeedScale)
+                )
+            );
         } else {
-            drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-                    drivetrain.applyRequest(() -> driveRobotCentric
-                    .withVelocityX(-driverController.controller.getLeftY() * MaxSpeed * driveSpeedScale) // Drive forward with negative Y (forward)
-                    .withVelocityY(-driverController.controller.getLeftX() * MaxSpeed * driveSpeedScale) // Drive left with negative X (left)
-                    .withRotationalRate(-driverController.controller.getRightX() * MaxAngularRate * driveSpeedScale) // Drive counterclockwise with negative X (left)
-                    ));
+            drivetrain.setDefaultCommand(
+                drivetrain.applyRequest(() -> driveRobotCentric
+                    .withVelocityX(-MathUtil.applyDeadband(driverController.controller.getLeftY(), deadband) * MaxSpeed * driveSpeedScale) 
+                    .withVelocityY(-MathUtil.applyDeadband(driverController.controller.getLeftX(), deadband) * MaxSpeed * driveSpeedScale) 
+                    .withRotationalRate(-MathUtil.applyDeadband(driverController.controller.getRawAxis(2), deadband) * MaxAngularRate * driveSpeedScale)
+                )
+            );
         }
     }
-
     
     public Command getAutonomousCommand() {
        return autoChooser.getSelected();
