@@ -115,7 +115,7 @@ public class RobotContainer {
         configureBindings();
         configureNamedCommands();
         createTuningToggles();
-        configureSysIdBindings(null);
+        //configureSysIdBindings(drivetrain);
         
         kicker.setDefaultCommand(new PulseKicker(this));
 

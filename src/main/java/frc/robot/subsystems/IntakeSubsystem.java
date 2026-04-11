@@ -323,6 +323,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
   }
 
+  
   public void updateLoggingData(){
     RobotLogger.logString("Intake/State", state.name());
     //Pivot

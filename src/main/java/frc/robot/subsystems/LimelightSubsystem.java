@@ -1,4 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
+// Copyback (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
@@ -61,18 +61,18 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
   // Camera names
   // -------------------------------------------------------------------------
-  private final String LEFT_LIMELIGHT_NAME  = "limelight-left";
-  private final String RIGHT_LIMELIGHT_NAME = "limelight-right";
+  private final String FRONT_LIMELIGHT_NAME  = "limelight-front";
+  private final String BACK_LIMELIGHT_NAME = "limelight-back";
 
   // -------------------------------------------------------------------------
   // State
   // -------------------------------------------------------------------------
   RobotContainer robot;
 
-  Pose2d leftFieldVisionPose;
-  Pose2d[] leftFieldVisionDetections;
-  Pose2d rightFieldVisionPose;
-  Pose2d[] rightFieldVisionDetections;
+  Pose2d frontFieldVisionPose;
+  Pose2d[] frontFieldVisionDetections;
+  Pose2d backFieldVisionPose;
+  Pose2d[] backFieldVisionDetections;
 
 
   double yaw;
@@ -104,12 +104,12 @@ public class LimelightSubsystem extends SubsystemBase {
   public LimelightSubsystem(RobotContainer robot) {
     this.robot = robot;
 
-    LimelightHelpers.setPipelineIndex(LEFT_LIMELIGHT_NAME, 0);
-    LimelightHelpers.SetIMUMode(LEFT_LIMELIGHT_NAME, 0);
+    LimelightHelpers.setPipelineIndex(FRONT_LIMELIGHT_NAME, 0);
+    LimelightHelpers.SetIMUMode(FRONT_LIMELIGHT_NAME, 0);
 
-    LimelightHelpers.setPipelineIndex(RIGHT_LIMELIGHT_NAME, 0);
-    LimelightHelpers.SetIMUMode(RIGHT_LIMELIGHT_NAME, 0);
-    //LimelightHelpers.SetIMUAssistAlpha(RIGHT_LIMELIGHT_NAME, 0.01);
+    LimelightHelpers.setPipelineIndex(BACK_LIMELIGHT_NAME, 0);
+    LimelightHelpers.SetIMUMode(BACK_LIMELIGHT_NAME, 0);
+    //LimelightHelpers.SetIMUAssistAlpha(BACK_LIMELIGHT_NAME, 0.01);
 
     try {
       java.io.File deployDir = edu.wpi.first.wpilibj.Filesystem.getDeployDirectory();
@@ -127,47 +127,47 @@ public class LimelightSubsystem extends SubsystemBase {
   public void periodic() {
     yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
 
-    LimelightHelpers.SetRobotOrientation(LEFT_LIMELIGHT_NAME,  yaw, 0, 0, 0, 0, 0);
-    LimelightHelpers.SetRobotOrientation(RIGHT_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation(FRONT_LIMELIGHT_NAME,  yaw, 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation(BACK_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
 
-    LimelightHelpers.PoseEstimate leftRaw  = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LEFT_LIMELIGHT_NAME);
-    LimelightHelpers.PoseEstimate rightRaw = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RIGHT_LIMELIGHT_NAME);
+    LimelightHelpers.PoseEstimate frontRaw  = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(FRONT_LIMELIGHT_NAME);
+    LimelightHelpers.PoseEstimate backRaw = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(BACK_LIMELIGHT_NAME);
 
-    RobotLogger.logBoolean("Limelight/" + LEFT_LIMELIGHT_NAME  + "/hasTargets", leftRaw  != null && leftRaw.tagCount  > 0);
-    RobotLogger.logBoolean("Limelight/" + RIGHT_LIMELIGHT_NAME + "/hasTargets", rightRaw != null && rightRaw.tagCount > 0);    
+    RobotLogger.logBoolean("Limelight/" + FRONT_LIMELIGHT_NAME  + "/hasTargets", frontRaw  != null && frontRaw.tagCount  > 0);
+    RobotLogger.logBoolean("Limelight/" + BACK_LIMELIGHT_NAME + "/hasTargets", backRaw != null && backRaw.tagCount > 0);    
 
-    Optional<CameraEstimate> leftEst  = processCamera(leftRaw,  LEFT_LIMELIGHT_NAME);
-    Optional<CameraEstimate> rightEst = processCamera(rightRaw, RIGHT_LIMELIGHT_NAME);
+    Optional<CameraEstimate> frontEst  = processCamera(frontRaw,  FRONT_LIMELIGHT_NAME);
+    Optional<CameraEstimate> backEst = processCamera(backRaw, BACK_LIMELIGHT_NAME);
 
-    if (leftEst.isPresent()) {
-      leftFieldVisionPose = leftRaw.pose;
-      leftFieldVisionDetections = getTagPoses(leftRaw).toArray(Pose2d[]::new);
+    if (frontEst.isPresent()) {
+      frontFieldVisionPose = frontRaw.pose;
+      frontFieldVisionDetections = getTagPoses(frontRaw).toArray(Pose2d[]::new);
     } else {
-      leftFieldVisionPose = Constants.EMPTY_POSE;
-      leftFieldVisionDetections =  new Pose2d[]{};
+      frontFieldVisionPose = Constants.EMPTY_POSE;
+      frontFieldVisionDetections =  new Pose2d[]{};
     }
     
-    updateFieldVisualization(leftFieldVisionPose,  leftFieldVisionDetections,  LEFT_LIMELIGHT_NAME);
+    updateFieldVisualization(frontFieldVisionPose,  frontFieldVisionDetections,  FRONT_LIMELIGHT_NAME);
 
-    if (rightEst.isPresent()) {
-      rightFieldVisionPose = rightRaw.pose;
-      rightFieldVisionDetections = getTagPoses(rightRaw).toArray(Pose2d[]::new);
+    if (backEst.isPresent()) {
+      backFieldVisionPose = backRaw.pose;
+      backFieldVisionDetections = getTagPoses(backRaw).toArray(Pose2d[]::new);
     } else {
-      rightFieldVisionPose = Constants.EMPTY_POSE;
-      rightFieldVisionDetections =  new Pose2d[]{};
+      backFieldVisionPose = Constants.EMPTY_POSE;
+      backFieldVisionDetections =  new Pose2d[]{};
     }
 
-    updateFieldVisualization(rightFieldVisionPose,  rightFieldVisionDetections,  RIGHT_LIMELIGHT_NAME);
+    updateFieldVisualization(backFieldVisionPose,  backFieldVisionDetections,  BACK_LIMELIGHT_NAME);
 
     // Fuse both cameras before submitting a single update to the pose estimator.
     // This avoids two correlated updates hitting the Kalman filter independently.
     Optional<CameraEstimate> toSubmit;
-    if (leftEst.isPresent() && rightEst.isPresent()) {
-      toSubmit = Optional.of(fuseEstimates(leftEst.get(), rightEst.get()));
-    } else if (leftEst.isPresent()) {
-      toSubmit = leftEst;
+    if (frontEst.isPresent() && backEst.isPresent()) {
+      toSubmit = Optional.of(fuseEstimates(frontEst.get(), backEst.get()));
+    } else if (frontEst.isPresent()) {
+      toSubmit = frontEst;
     } else {
-      toSubmit = rightEst;
+      toSubmit = backEst;
     }
 
     toSubmit.ifPresent(est -> {
@@ -321,7 +321,7 @@ public class LimelightSubsystem extends SubsystemBase {
   }
 
   public void configureCameraOffset() {
-    LimelightHelpers.SetFidcuial3DOffset(LEFT_LIMELIGHT_NAME, yaw, yaw, yaw);
+    LimelightHelpers.SetFidcuial3DOffset(FRONT_LIMELIGHT_NAME, yaw, yaw, yaw);
   }
 
   public List<Pose2d> getTagPoses(LimelightHelpers.PoseEstimate mt2) {
@@ -338,27 +338,27 @@ public class LimelightSubsystem extends SubsystemBase {
   }
 
   private LimelightHelpers.PoseEstimate getBestPose(
-      LimelightHelpers.PoseEstimate leftCamera, LimelightHelpers.PoseEstimate rightCamera) {
+      LimelightHelpers.PoseEstimate frontCamera, LimelightHelpers.PoseEstimate backCamera) {
 
-    boolean lefteliminated  = false;
-    boolean righteliminated = false;
+    boolean fronteliminated  = false;
+    boolean backeliminated = false;
 
     double minTagSize = 0.1;
 
-    if (isValidUpdate(leftCamera))  { lefteliminated  = true; }
-    if (isValidUpdate(rightCamera)) { righteliminated = true; }
-    if (lefteliminated && righteliminated) { return null; }
+    if (isValidUpdate(frontCamera))  { fronteliminated  = true; }
+    if (isValidUpdate(backCamera)) { backeliminated = true; }
+    if (fronteliminated && backeliminated) { return null; }
 
-    if (leftCamera.avgTagArea  < minTagSize) { lefteliminated  = true; }
-    if (rightCamera.avgTagArea < minTagSize) { righteliminated = true; }
-    if (lefteliminated && righteliminated) { return null; }
+    if (frontCamera.avgTagArea  < minTagSize) { fronteliminated  = true; }
+    if (backCamera.avgTagArea < minTagSize) { backeliminated = true; }
+    if (fronteliminated && backeliminated) { return null; }
 
-    if (leftCamera.tagCount > rightCamera.tagCount) {
-      return leftCamera;
-    } else if (rightCamera.tagCount > leftCamera.tagCount) {
-      return rightCamera;
+    if (frontCamera.tagCount > backCamera.tagCount) {
+      return frontCamera;
+    } else if (backCamera.tagCount > frontCamera.tagCount) {
+      return backCamera;
     } else {
-      return (rightCamera.avgTagArea > leftCamera.avgTagArea) ? rightCamera : leftCamera;
+      return (backCamera.avgTagArea > frontCamera.avgTagArea) ? backCamera : frontCamera;
     }
   }
 

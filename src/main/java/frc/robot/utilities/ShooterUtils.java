@@ -25,7 +25,7 @@ import frc.robot.RobotContainer;
 /** Add your docs here. */
 public final class ShooterUtils {
 
-  static double updateDelay = 0.005; //tune
+  static double updateDelay = 0.02; //tune
   
    public static Translation2d getShooterPose(Pose2d robotPose){    
       double robotRotation = MathUtil.inputModulus(robotPose.getRotation().getDegrees(), -180, 180);

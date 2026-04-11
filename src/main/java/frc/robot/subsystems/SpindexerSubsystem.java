@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.Tracer;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -39,6 +40,8 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   public void periodic() {
     // This method will be called once per scheduler run
     updateLoggingData();
+
+  
   }
 
   public void configureMotor(){
