@@ -18,6 +18,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import static edu.wpi.first.units.Units.Amps;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -105,7 +107,11 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
 
     RobotLogger.logDouble(getNTKey() + "TargetVelocity", targetMetric);
     RobotLogger.logDouble(getNTKey() + "ActualVelocity", motor.getVelocity().getValueAsDouble());
-    RobotLogger.logDouble(getNTKey() + "MotorVoltage", motor.getMotorVoltage().getValueAsDouble());    
+    RobotLogger.logDouble(getNTKey() + "MotorVoltage", motor.getMotorVoltage().getValueAsDouble());   
+    RobotLogger.logDouble(getNTKey() + "Motor Temp (C)", motor.getDeviceTemp().getValueAsDouble());
+
+    RobotLogger.logDouble(getNTKey() + "Target " + getMetricUnitName(), getTargetMetric());
+    RobotLogger.logDouble(getNTKey() + "Actual " + getMetricUnitName(), getActualMetric());
 
   }
 
@@ -114,5 +120,14 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
   public String getNTKey() {
     return getNTSubsystemKey() + "/";
   }
+
+  /** Returns the label for the dashboard (e.g. "Degrees" or "RPM") */
+  protected abstract String getMetricUnitName();
+  
+  /** Returns the current target as a raw double for graphing */
+  protected abstract double getTargetMetric();
+  
+  /** Returns the current actual sensor reading as a raw double for graphing */
+  protected abstract double getActualMetric();
 
 }
