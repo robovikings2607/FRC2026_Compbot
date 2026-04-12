@@ -3,44 +3,39 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.636811224489796,
-        "y": 3.5577210884353727
+        "x": 0.64807272728024,
+        "y": 6.083990909080623
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.837532097004279,
-        "y": 6.603323823109844
+        "x": 1.64807272728024,
+        "y": 6.083990909080623
       },
       "isLocked": false,
-      "linkedName": "LeftReCollect"
+      "linkedName": "2522DepotAndShoot1End"
     },
     {
       "anchor": {
-        "x": 2.2794008559201138,
-        "y": 5.6070470756062765
+        "x": 0.64807272728024,
+        "y": 5.442552337906891
       },
       "prevControl": {
-        "x": 3.1721683309557767,
-        "y": 5.555292439372327
+        "x": 1.8064407575542027,
+        "y": 5.59656948026847
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LeftShoot"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.46691635455680147,
-      "rotationDegrees": -45.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [
     {
-      "name": "Over Bump",
-      "minWaypointRelativePos": 0.2124542124542102,
-      "maxWaypointRelativePos": 0.9730363423212205,
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 1.5,
+        "maxVelocity": 3.0,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -61,13 +56,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 179.3929817359896
   },
   "useDefaultConstraints": true
 }
