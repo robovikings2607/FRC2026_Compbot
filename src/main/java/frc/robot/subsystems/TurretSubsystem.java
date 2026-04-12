@@ -243,7 +243,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public boolean goodToShoot(){
-    return Math.abs(turretMotor.getClosedLoopError().getValueAsDouble()) < 90.0 * rotationsPerDegree;
+    return Math.abs(turretMotor.getClosedLoopError().getValueAsDouble()) < 10.0 * rotationsPerDegree;
   }
 
   public void logNumber(String key, double value){
