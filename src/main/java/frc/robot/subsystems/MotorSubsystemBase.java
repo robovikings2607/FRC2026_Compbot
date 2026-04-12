@@ -13,15 +13,11 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-import static edu.wpi.first.units.Units.Amps;
-import edu.wpi.first.units.measure.Current;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utilities.RobotLogger;
 
@@ -120,6 +116,22 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
   public String getNTKey() {
     return getNTSubsystemKey() + "/";
   }
+
+  /**
+ * Retrieves the current actual position of the mechanism in Degrees.
+ */
+  public double getActualPositionDegrees() {
+    return motor.getPosition().getValue().in(Degrees);
+  }
+
+/**
+ * Retrieves the current actual velocity of the mechanism in RPM.
+ */
+  public double getActualVelocityRpm() {
+    return motor.getVelocity().getValue().in(RPM);
+  }
+
+  //Abstract methods that the inheritor must define
 
   /** Returns the label for the dashboard (e.g. "Degrees" or "RPM") */
   protected abstract String getMetricUnitName();
