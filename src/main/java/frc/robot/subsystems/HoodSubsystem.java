@@ -30,6 +30,7 @@ import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.ShooterUtils;
 import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.HoodConstants;
+import frc.robot.utilities.GeometryUtil;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -47,6 +48,8 @@ public class HoodSubsystem extends SubsystemBase {
   private InterpolatingDoubleTreeMap hoodInterp = new InterpolatingDoubleTreeMap();
   private boolean readyToShoot = false;
   private boolean fixedShot = false;
+  private double targetAngleDegrees = 0.0;    
+
   // The WPILib Physics Model
 // Needs: Gearbox, Gearing Ratio, Moment of Inertia (guess small, like 0.01), 
 // Length, Min Angle, Max Angle, Simulate Gravity (usually false for a tight hood)
@@ -74,34 +77,15 @@ private final SingleJointedArmSim hoodSim = new SingleJointedArmSim(
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    
-/*     if(!readyToShoot){
-      hoodMotor.setControl(coastOut);
-    }
-    else{
- /*      if(fixedShot){
-        hoodMotor.setControl(magicMotionRequest.withPosition(0));
-      }
-      if(ShooterUtils.inNeutralZone(robotPose)){
-        hoodMotor.setControl(magicMotionRequest.withPosition(HoodConstants.MAX_HOOD_POSITION));
-      }
-      else{
-        setGoal(distance);
-        hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
-      }
-    } */
-
-    // setPoint = SmartDashboard.getNumber("Hood/SetPoint", 0) * rotationsPerDegree;
-    // hoodMotor.setControl(magicMotionRequest.withPosition(setPoint));
-
-   /*  if(RobotController.getUserButton()){
-      hoodMotor.setPosition(0.0);
-    } */
-
-    SmartDashboard.putNumber("Hood/Position", hoodMotor.getPosition().getValueAsDouble());
+    RobotLogger.logDouble("Hood/" + "actualAngleDegrees",getActualHoodAngleDegrees());   
+    RobotLogger.logDouble("Hood/" + "targetAngleDegrees",targetAngleDegrees);   
   }
 
+  private double getActualHoodAngleDegrees() {
+    return GeometryUtil.getMotorRotationsAsDegrees(
+      hoodMotor.getPosition().getValueAsDouble(), 
+      gearRatio);
+  }
 
   public void configureMotor(){
     hoodMotor = new TalonFX(HoodConstants.HOOD_ID);
@@ -167,7 +151,8 @@ private final SingleJointedArmSim hoodSim = new SingleJointedArmSim(
   }
 
   public void setGoal(double distance){ 
-    setPoint = hoodInterp.get(distance) * rotationsPerDegree;
+    targetAngleDegrees  = hoodInterp.get(distance);
+    setPoint = targetAngleDegrees * rotationsPerDegree;
   }
 
   public void positionControl(double angle){
@@ -230,7 +215,6 @@ private final SingleJointedArmSim hoodSim = new SingleJointedArmSim(
     Pose2d staticBase = new Pose2d(0.5, 0.5, Rotation2d.fromDegrees(0));
 
 
-    RobotLogger.logDouble("Hood/" + "targetAngleDegrees",hoodDegrees);   
     RobotLogger.logStruct("Hood/" + "targetAnglePose", Pose2d.struct, hoodDial);     
     RobotLogger.logStruct("Hood/" + "targetAngleBaseZeroPose", Pose2d.struct, staticBase);     
 
