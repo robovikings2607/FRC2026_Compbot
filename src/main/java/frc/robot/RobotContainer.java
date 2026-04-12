@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.CameraCalibrationCommand;
 import frc.robot.commands.DoNothing;
 //import frc.robot.commands.drivetrain.ToggleFieldCentric;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
@@ -157,6 +158,9 @@ public class RobotContainer {
         driverController.leftBumper.onTrue(new RetratctIntakeAndStopKicker(this)); //will be retract later
         driverController.rightBumper.onTrue(new ReverseRollers(this));
 
+        driverController.buttonA
+            .onTrue(new CameraCalibrationCommand(this, LimelightSubsystem.BACK_LIMELIGHT_NAME));
+
         //Shooter
         //driverController.buttonA.onTrue(new PIDTuningIntake(this));
         shootCommand = new Shoot(this);
@@ -175,6 +179,7 @@ public class RobotContainer {
         operatorController.leftTriggerButton.onTrue(new FixShooter(this));
         operatorController.rightBumper.whileTrue(new ReverseSpindexer(this));
         operatorController.rightTriggerButton.onTrue(new ForceIntakeDown(this));
+
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.

@@ -61,8 +61,8 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
   // Camera names
   // -------------------------------------------------------------------------
-  private final String FRONT_LIMELIGHT_NAME  = "limelight-front";
-  private final String BACK_LIMELIGHT_NAME = "limelight-back";
+  public static final String FRONT_LIMELIGHT_NAME = "limelight-front";
+  public static final String BACK_LIMELIGHT_NAME  = "limelight-back";
 
   // -------------------------------------------------------------------------
   // State
@@ -77,6 +77,17 @@ public class LimelightSubsystem extends SubsystemBase {
 
   double yaw;
   private AprilTagFieldLayout tagLayout;
+
+  public AprilTagFieldLayout getTagLayout() { return tagLayout; }
+
+  private boolean frontVisionEnabled = true;
+  private boolean backVisionEnabled  = false;
+
+  /** Enable or disable a camera's contribution to the drivetrain pose estimator. */
+  public void setVisionEnabled(String cameraName, boolean enabled) {
+    if (cameraName.equals(FRONT_LIMELIGHT_NAME))      frontVisionEnabled = enabled;
+    else if (cameraName.equals(BACK_LIMELIGHT_NAME))  backVisionEnabled  = enabled;
+  }
 
   /** Timestamp of the last measurement submitted to the pose estimator. */
   private double lastSubmittedTimestamp = 0.0;
@@ -136,8 +147,8 @@ public class LimelightSubsystem extends SubsystemBase {
     RobotLogger.logBoolean("Limelight/" + FRONT_LIMELIGHT_NAME  + "/hasTargets", frontRaw  != null && frontRaw.tagCount  > 0);
     RobotLogger.logBoolean("Limelight/" + BACK_LIMELIGHT_NAME + "/hasTargets", backRaw != null && backRaw.tagCount > 0);    
 
-    Optional<CameraEstimate> frontEst  = processCamera(frontRaw,  FRONT_LIMELIGHT_NAME);
-    Optional<CameraEstimate> backEst = processCamera(backRaw, BACK_LIMELIGHT_NAME);
+    Optional<CameraEstimate> frontEst  = frontVisionEnabled ? processCamera(frontRaw,  FRONT_LIMELIGHT_NAME) : Optional.empty();
+    Optional<CameraEstimate> backEst = backVisionEnabled  ? processCamera(backRaw, BACK_LIMELIGHT_NAME)  : Optional.empty();
 
     if (frontEst.isPresent()) {
       frontFieldVisionPose = frontRaw.pose;
