@@ -25,7 +25,7 @@ import frc.robot.RobotContainer;
 /** Add your docs here. */
 public final class ShooterUtils {
 
-  static double updateDelay = 0.005; //tune
+  static double updateDelay = 0.02; //tune
   
    public static Translation2d getShooterPose(Pose2d robotPose){    
       double robotRotation = MathUtil.inputModulus(robotPose.getRotation().getDegrees(), -180, 180);
@@ -86,20 +86,18 @@ public final class ShooterUtils {
       return goalPose;
     }
   
-    public static InterpolatingDoubleTreeMap timeOfFlightInterp(){
-      InterpolatingDoubleTreeMap interp = new InterpolatingDoubleTreeMap();
-      
-      interp.put(0.0, 0.7);
-      interp.put(2.5, 0.7);
-      interp.put(3.0, 0.8);
-      interp.put(3.5, 0.9);
-      interp.put(4.0, 1.0);
-      interp.put(4.5, 1.1);
-      interp.put(5.0, 1.2);
-      interp.put(5.5, 1.3);
-      interp.put(6.0, 1.4);
-  
-      return interp;
+    public static final InterpolatingDoubleTreeMap timeOfFlightInterp = new InterpolatingDoubleTreeMap();
+
+    static {
+      timeOfFlightInterp.put(0.0, 0.7);
+      timeOfFlightInterp.put(2.5, 0.7);
+      timeOfFlightInterp.put(3.0, 0.8);
+      timeOfFlightInterp.put(3.5, 0.9);
+      timeOfFlightInterp.put(4.0, 1.0);
+      timeOfFlightInterp.put(4.5, 1.1);
+      timeOfFlightInterp.put(5.0, 1.2);
+      timeOfFlightInterp.put(5.5, 1.3);
+      timeOfFlightInterp.put(6.0, 1.4);
     }
   
     public static Translation2d virtualTarget(CommandSwerveDrivetrain drivetrain, Pose2d robotPose){
@@ -107,8 +105,8 @@ public final class ShooterUtils {
       Translation2d shooterPose = getShooterPose(robotPose);
   
       double distance = GeometryUtil.getTargetDistance(shooterPose, goalPose);
-      double timeOfFlight = timeOfFlightInterp().get(distance);
-  
+      double timeOfFlight = timeOfFlightInterp.get(distance);
+
       double virtualTargetX = goalPose.getX() - (drivetrain.getState().Speeds.vyMetersPerSecond * timeOfFlight);
       double virtualTargetY = goalPose.getY() - (drivetrain.getState().Speeds.vxMetersPerSecond * timeOfFlight);
       Translation2d virtualTarget = new Translation2d(virtualTargetX, virtualTargetY);
@@ -123,7 +121,7 @@ public final class ShooterUtils {
       Translation2d vituralPose = goalPose;
   
       double distance = shooterPose.getDistance(goalPose);
-      double timeOfFlight = timeOfFlightInterp().get(distance);
+      double timeOfFlight = timeOfFlightInterp.get(distance);
   
       // double vx = drivetrain.getState().Speeds.vxMetersPerSecond;
       // double vy = drivetrain.getState().Speeds.vyMetersPerSecond;
@@ -139,11 +137,11 @@ public final class ShooterUtils {
         vituralPose = new Translation2d(goalPose.getX() - dx, goalPose.getY() - dy);
         distance = shooterPose.getDistance(vituralPose);
   
-        if(Math.abs(timeOfFlightInterp().get(distance) - timeOfFlight) < 0.01){
+        if(Math.abs(timeOfFlightInterp.get(distance) - timeOfFlight) < 0.01){
           break;
         }
   
-        timeOfFlight = timeOfFlightInterp().get(distance);
+        timeOfFlight = timeOfFlightInterp.get(distance);
       }
   
       return vituralPose;

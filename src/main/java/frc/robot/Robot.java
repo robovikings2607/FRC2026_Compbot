@@ -9,6 +9,8 @@ import com.ctre.phoenix6.HootAutoReplay;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utilities.RobotLogger;
@@ -37,8 +39,13 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        double start = Timer.getFPGATimestamp();
         m_timeAndJoystickReplay.update();
+        SmartDashboard.putNumber("Runtime/timeANdJoystickReplay", Timer.getFPGATimestamp() -start);
+        start = Timer.getFPGATimestamp();
         CommandScheduler.getInstance().run();
+        SmartDashboard.putNumber("Runtime/scheduler", Timer.getFPGATimestamp() -start);
+
         
 /*         if(RobotController.getUserButton()){
             //m_robotContainer.hood.getMotor().setPosition(0.0);

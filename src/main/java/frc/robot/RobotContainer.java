@@ -14,6 +14,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -99,6 +100,13 @@ public class RobotContainer {
     private boolean fixedShot = false;
     private boolean operatorEnabled = false;
     
+    // Slew rate limiters for shoot-on-the-move — limit acceleration while shooting
+    // Units: m/s per second for translation, rad/s per second for rotation
+    private final SlewRateLimiter m_xLimiter = new SlewRateLimiter(3.0);
+    private final SlewRateLimiter m_yLimiter = new SlewRateLimiter(3.0);
+    private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(Math.PI * 2);
+    private Shoot shootCommand;
+
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
     public final TurretSubsystem turret = new TurretSubsystem(this);
@@ -115,7 +123,7 @@ public class RobotContainer {
         configureBindings();
         configureNamedCommands();
         createTuningToggles();
-        configureSysIdBindings(null);
+        //configureSysIdBindings(drivetrain);
         
         kicker.setDefaultCommand(new PulseKicker(this));
 
@@ -148,8 +156,9 @@ public class RobotContainer {
         driverController.rightBumper.onTrue(new ReverseRollers(this));
 
         //Shooter
-        driverController.rightTriggerButton.whileTrue(new Shoot(this));
         //driverController.buttonA.onTrue(new PIDTuningIntake(this));
+        shootCommand = new Shoot(this);
+        driverController.rightTriggerButton.whileTrue(shootCommand);
         //driverController.buttonB.onTrue(new DeactivateTurret(this));
         //driverController.buttonX.onTrue(new ActivateTurret(this));
         //driverController.buttonY.onTrue(new FixShooter(this));
@@ -302,21 +311,29 @@ public class RobotContainer {
         return fieldCentricDrive;
     }
 
+    private double slewIfShooting(double input, SlewRateLimiter limiter) {
+        if (shootCommand.isScheduled()) {
+            return limiter.calculate(input);
+        }
+        limiter.reset(input);
+        return input;
+    }
+
      // This method is called to modify the drivetrain mode
     private void setDrivetrainMode() {
         if (getFieldCentric()) {
             drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() -> driveFieldCentric
-                .withVelocityX(-driverController.controller.getLeftY() * MaxSpeed * driveSpeedScale) // Drive forward with negative Y (forward)
-                .withVelocityY(-driverController.controller.getLeftX() * MaxSpeed * driveSpeedScale) // Drive left with negative X (left)
-                .withRotationalRate(-driverController.controller.getRightX() * MaxAngularRate * driveSpeedScale) // Drive counterclockwise with negative X (left)
+                .withVelocityX(slewIfShooting(-driverController.controller.getLeftY() * MaxSpeed * driveSpeedScale, m_xLimiter)) // Drive forward with negative Y (forward)
+                .withVelocityY(slewIfShooting(-driverController.controller.getLeftX() * MaxSpeed * driveSpeedScale, m_yLimiter)) // Drive left with negative X (left)
+                .withRotationalRate(slewIfShooting(-driverController.controller.getRightX() * MaxAngularRate * driveSpeedScale, m_rotLimiter)) // Drive counterclockwise with negative X (left)
             ));
         } else {
             drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
                     drivetrain.applyRequest(() -> driveRobotCentric
-                    .withVelocityX(-driverController.controller.getLeftY() * MaxSpeed * driveSpeedScale) // Drive forward with negative Y (forward)
-                    .withVelocityY(-driverController.controller.getLeftX() * MaxSpeed * driveSpeedScale) // Drive left with negative X (left)
-                    .withRotationalRate(-driverController.controller.getRightX() * MaxAngularRate * driveSpeedScale) // Drive counterclockwise with negative X (left)
+                    .withVelocityX(slewIfShooting(-driverController.controller.getLeftY() * MaxSpeed * driveSpeedScale, m_xLimiter)) // Drive forward with negative Y (forward)
+                    .withVelocityY(slewIfShooting(-driverController.controller.getLeftX() * MaxSpeed * driveSpeedScale, m_yLimiter)) // Drive left with negative X (left)
+                    .withRotationalRate(slewIfShooting(-driverController.controller.getRightX() * MaxAngularRate * driveSpeedScale, m_rotLimiter)) // Drive counterclockwise with negative X (left)
                     ));
         }
     }

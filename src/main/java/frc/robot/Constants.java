@@ -34,7 +34,9 @@ public final class Constants {
   }
 
   public static final class ShooterConstants{
-    public static final double BOT_TO_SHOOTER_DISTANCE = -Math.sqrt(Math.pow(Units.inchesToMeters(5.75), 2) + Math.pow(Units.inchesToMeters(-6.75), 2)); //shouldn't be negative
+    public static final double distanceOffset = Units.inchesToMeters(-3.5);
+
+    public static final double BOT_TO_SHOOTER_DISTANCE = -Math.sqrt(Math.pow(Units.inchesToMeters(5.75), 2) + Math.pow(Units.inchesToMeters(-6.75), 2)) + distanceOffset; //shouldn't be negative
     public static final double BOT_TO_SHOOTER_ANGLE = Math.atan2(Units.inchesToMeters(5.75), Units.inchesToMeters(-6.75));
 
     public static final Transform2d  BOT_TO_SHOOTER_TRANSFORM = new Transform2d(-6.75, 5.75, new Rotation2d());
@@ -101,8 +103,8 @@ public final class Constants {
     public static final int ENCODER_ID = 19;
 
     //Positions (in encoder ticks)
-    public static final double RETRACTED = 0.419434;
-    public static final double DEPLOYED = 0.247314;
+    public static final double RETRACTED = 0.443115;
+    public static final double DEPLOYED = 0.245605;
 
     //Speed (in volts)
     public static final double FORCE_DOWN_SPEED = 2.0;

@@ -82,9 +82,14 @@ public class Shoot extends Command {
 
     controlShooting(distance);
 
-    if(flywheel.goodToShoot() && hood.goodToShoot()){
+    if(flywheel.goodToShoot() && hood.goodToShoot() && robot.turret.goodToShoot()){
       setFeedingStates();
       controlFeeding(KickerState.FORWARD);
+    }
+    else{
+      spindexer.setState(SpindexerState.OFF);
+      feeder.setState(FeederState.OFF);
+      controlFeeding(KickerState.OFF);
     }
   }
 

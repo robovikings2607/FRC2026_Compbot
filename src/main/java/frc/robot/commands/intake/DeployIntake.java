@@ -46,9 +46,6 @@ public class DeployIntake extends Command {
   @Override
   public void execute() {
     intake.controlIntake(); //needs to be in execute to check for jam
-    if(!hasPulsed && timer.get() > 3.0){
-      kicker.controlMotor(null);
-    }
   }
 
   // Called once the command ends or is interrupted.
