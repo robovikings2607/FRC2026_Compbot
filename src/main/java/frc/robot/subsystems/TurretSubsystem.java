@@ -242,6 +242,10 @@ public class TurretSubsystem extends SubsystemBase {
     return fixedShot;
   }
 
+  public boolean goodToShoot(){
+    return Math.abs(turretMotor.getClosedLoopError().getValueAsDouble()) < 90.0 * rotationsPerDegree;
+  }
+
   public void logNumber(String key, double value){
     RobotLogger.logDouble(key, value);
   }
