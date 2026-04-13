@@ -31,8 +31,17 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
   protected final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0.0);
 
   
-  public MotorSubsystemBase(int canId, TalonFXConfiguration config) {
+  public MotorSubsystemBase(
+    int canId, 
+    TalonFXConfiguration config,
+    double gearRatio) {
+    
     motor = new TalonFX(canId);
+    
+    // FORCIBLY INJECT THE RATIO INTO THE CONFIG
+    // This guarantees it is set, even if the student forgot to add it 
+    // to the config object in the child class.
+    config.Feedback.SensorToMechanismRatio = gearRatio;    
     motor.getConfigurator().apply(config);
    }
 
@@ -98,21 +107,13 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
     motor.setControl(motionMagicRequest.withPosition(angle));
   }
 
-  @Override
-  public void periodic() {
-
-    RobotLogger.logDouble(getNTKey() + "TargetVelocity", targetMetric);
-    RobotLogger.logDouble(getNTKey() + "ActualVelocity", motor.getVelocity().getValueAsDouble());
+  protected void logCoreMotorMetrics() {
     RobotLogger.logDouble(getNTKey() + "MotorVoltage", motor.getMotorVoltage().getValueAsDouble());   
     RobotLogger.logDouble(getNTKey() + "Motor Temp (C)", motor.getDeviceTemp().getValueAsDouble());
-
     RobotLogger.logDouble(getNTKey() + "Target " + getMetricUnitName(), getTargetMetric());
     RobotLogger.logDouble(getNTKey() + "Actual " + getMetricUnitName(), getActualMetric());
-
   }
 
-  public abstract String getNTSubsystemKey();
-  
   public String getNTKey() {
     return getNTSubsystemKey() + "/";
   }
@@ -132,8 +133,15 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
   }
 
   //Abstract methods that the inheritor must define
+/*
+* Returns the label for the Network Tables key that metrics will be stored under (within RobotData) 
+* for example: "Flywheel"
+*/
+  protected abstract String getNTSubsystemKey();
 
-  /** Returns the label for the dashboard (e.g. "Degrees" or "RPM") */
+  /** Returns the label for the dashboard (e.g. "Degrees" or "RPM") 
+   * Use one of the constants in MetricUnitsNameConstants
+  */
   protected abstract String getMetricUnitName();
   
   /** Returns the current target as a raw double for graphing */
