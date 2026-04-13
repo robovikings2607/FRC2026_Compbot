@@ -31,10 +31,10 @@ public final class ShooterUtils {
       double robotRotation = MathUtil.inputModulus(robotPose.getRotation().getDegrees(), -180, 180);
   
       double shooterX = robotPose.getX() 
-                + Units.inchesToMeters(ShooterConstants.BOT_TO_SHOOTER_DISTANCE)
+                + ShooterConstants.BOT_TO_SHOOTER_DISTANCE
                 * Math.cos(Math.PI + ShooterConstants.BOT_TO_SHOOTER_ANGLE + Math.toRadians(robotRotation));
       double shooterY = robotPose.getY()
-                + Units.inchesToMeters(ShooterConstants.BOT_TO_SHOOTER_DISTANCE)
+                + ShooterConstants.BOT_TO_SHOOTER_DISTANCE
                 * Math.sin(Math.PI + ShooterConstants.BOT_TO_SHOOTER_ANGLE + Math.toRadians(robotRotation)); 
       return new Translation2d(shooterX, shooterY);
   
@@ -89,15 +89,17 @@ public final class ShooterUtils {
     public static final InterpolatingDoubleTreeMap timeOfFlightInterp = new InterpolatingDoubleTreeMap();
 
     static {
-      timeOfFlightInterp.put(0.0, 0.7);
-      timeOfFlightInterp.put(2.5, 0.7);
-      timeOfFlightInterp.put(3.0, 0.8);
-      timeOfFlightInterp.put(3.5, 0.9);
-      timeOfFlightInterp.put(4.0, 1.0);
-      timeOfFlightInterp.put(4.5, 1.1);
-      timeOfFlightInterp.put(5.0, 1.2);
-      timeOfFlightInterp.put(5.5, 1.3);
-      timeOfFlightInterp.put(6.0, 1.4);
+      timeOfFlightInterp.put(0.0, 1.0);
+      timeOfFlightInterp.put(1.5, 1.0);
+      timeOfFlightInterp.put(2.0, 1.15);
+      timeOfFlightInterp.put(2.5, 1.2);
+      timeOfFlightInterp.put(3.0, 1.25);
+      timeOfFlightInterp.put(3.5, 1.25);
+      timeOfFlightInterp.put(4.0, 1.2);
+      timeOfFlightInterp.put(4.5, 1.5);
+      timeOfFlightInterp.put(5.0, 1.5);
+      timeOfFlightInterp.put(5.5, 1.6);
+      timeOfFlightInterp.put(6.0, 1.7);
     }
   
     public static Translation2d virtualTarget(CommandSwerveDrivetrain drivetrain, Pose2d robotPose){
@@ -117,7 +119,7 @@ public final class ShooterUtils {
     public static Translation2d stuypulesShootOnMove(CommandSwerveDrivetrain drivetrain, Pose2d robotPose){
       Translation2d goalPose = determineShootingGoal(robotPose);
       // Translation2d shooterPose = getShooterPose(robotPose);
-      Translation2d shooterPose = futureShooterPose(drivetrain, robotPose, false);
+      Translation2d shooterPose = futureShooterPose(drivetrain, robotPose, true);
       Translation2d vituralPose = goalPose;
   
       double distance = shooterPose.getDistance(goalPose);
@@ -126,7 +128,7 @@ public final class ShooterUtils {
       // double vx = drivetrain.getState().Speeds.vxMetersPerSecond;
       // double vy = drivetrain.getState().Speeds.vyMetersPerSecond;
   
-      double[] v = tangentialVelocities(drivetrain, robotPose, false);
+      double[] v = tangentialVelocities(drivetrain, robotPose, true);
       double vx = v[0];
       double vy = v[1];
   
@@ -194,7 +196,7 @@ public final class ShooterUtils {
     Translation2d r = shooterPose.minus(robotPose.getTranslation());
 
     double vx = fieldRelativeChassisSpeeds.vxMetersPerSecond - omega * r.getY();
-    double vy = fieldRelativeChassisSpeeds.vyMetersPerSecond - omega * r.getX();
+    double vy = fieldRelativeChassisSpeeds.vyMetersPerSecond + omega * r.getX();
 
     if(useAccel){
       Translation2d fieldAccel = new Translation2d(ax, ay).rotateBy(robotPose.getRotation());

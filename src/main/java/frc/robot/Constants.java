@@ -34,12 +34,12 @@ public final class Constants {
   }
 
   public static final class ShooterConstants{
-    public static final double distanceOffset = Units.inchesToMeters(-3.5);
+    public static final double distanceOffset = Units.inchesToMeters(0);
 
-    public static final double BOT_TO_SHOOTER_DISTANCE = -Math.sqrt(Math.pow(Units.inchesToMeters(5.75), 2) + Math.pow(Units.inchesToMeters(-6.75), 2)) + distanceOffset; //shouldn't be negative
-    public static final double BOT_TO_SHOOTER_ANGLE = Math.atan2(Units.inchesToMeters(5.75), Units.inchesToMeters(-6.75));
+    public static final double BOT_TO_SHOOTER_DISTANCE = -Math.sqrt(Math.pow(Units.inchesToMeters(-5.75), 2) + Math.pow(Units.inchesToMeters(-6.75), 2)) + distanceOffset; //shouldn't be negative
+    public static final double BOT_TO_SHOOTER_ANGLE = Math.atan2(Units.inchesToMeters(-5.75), Units.inchesToMeters(-6.75));
 
-    public static final Transform2d  BOT_TO_SHOOTER_TRANSFORM = new Transform2d(-6.75, 5.75, new Rotation2d());
+    public static final Transform2d  BOT_TO_SHOOTER_TRANSFORM = new Transform2d(-6.75, -5.75, new Rotation2d());
   }
 
   public static final class TurretConstants {
@@ -47,8 +47,8 @@ public final class Constants {
 
     public static final double OFFSET = 0.0;  
 
-    public static final double MAX_ANGLE = 248.2 - 20.0 + (OFFSET * 10.0/360.0);
-    public static final double MIN_ANGLE = -149.988 + 20.0 + (OFFSET * 10.0/360.0);
+    public static final double MAX_ANGLE = 248.2 - 14.094 + (OFFSET * 10.0/360.0);
+    public static final double MIN_ANGLE = -149.988 + 14.094 + (OFFSET * 10.0/360.0);
   }
 
   public static final class FlywheelConstants {
@@ -75,15 +75,15 @@ public final class Constants {
 
     //Encoder 
     public static final double DISCONTINUITY_POINT = 0.0;
-    public static final double MAGNET_OFFSET = 0.71;
-    public static final double ENCODER_MIN = 0.005;
-    public static final double ENCODER_MAX = -0.831299;
+    public static final double MAGNET_OFFSET = 0.0;
+    public static final double ENCODER_MIN = -0.01; //real "zero" is -0.05, just don't want to break
+    public static final double ENCODER_MAX = -0.876953;
 
     //PID Values
     public static final double P = 7.0;
     public static final double I = 0.0;
     public static final double D = 0.0;
-    public static final double TOLERANCE = 0.01; //equates to +/- 0.05 degrees of error, may need to change
+    public static final double TOLERANCE = 0.1; //equates to +/- 0.5 degrees of error, may need to change
 
     public static final double GEAR_RATIO = 350.0/25.0; //Hood Gear:Shaft Gear
 
