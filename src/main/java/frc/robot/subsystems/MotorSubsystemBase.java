@@ -17,7 +17,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utilities.RobotLogger;
 
@@ -107,6 +107,10 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
     motor.setControl(motionMagicRequest.withPosition(angle));
   }
 
+  protected void logDouble(String key, double value) {
+    RobotLogger.logDouble(getNTKey() + key, value);
+  }
+
   protected void logCoreMotorMetrics() {
     RobotLogger.logDouble(getNTKey() + "MotorVoltage", motor.getMotorVoltage().getValueAsDouble());   
     RobotLogger.logDouble(getNTKey() + "Motor Temp (C)", motor.getDeviceTemp().getValueAsDouble());
@@ -128,8 +132,8 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
 /**
  * Retrieves the current actual velocity of the mechanism in RPM.
  */
-  public double getActualVelocityRpm() {
-    return motor.getVelocity().getValue().in(RPM);
+  public double getActualVelocityRPS() {
+    return motor.getVelocity().getValueAsDouble();
   }
 
   //Abstract methods that the inheritor must define

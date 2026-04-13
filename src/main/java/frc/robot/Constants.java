@@ -118,7 +118,7 @@ public final class Constants {
     public static final double LEFT_LL_YAW_OFFSET_DEGREES = -50.357;                
   }
   public static final class MetricUnitsNameConstants {
-    public static final String RPM = "RPS";
+    public static final String RPS = "RPS";
     public static final String DEGREES = "Degrees";    
   }
 

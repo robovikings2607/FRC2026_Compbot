@@ -2,19 +2,34 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.Constants.MetricUnitsNameConstants;
+import frc.robot.utilities.RobotLogger;
+import frc.robot.utilities.ShooterUtils;
 
 import static edu.wpi.first.units.Units.Amps;
+
+import java.util.function.Supplier;
 
 public class FlywheelSubsystemTemplate extends MotorSubsystemBase{
 
     private static final double GEAR_RATIO = 1.0;
+    private double targetRPM;   
+    private InterpolatingDoubleTreeMap flywheelInterp = new InterpolatingDoubleTreeMap();
+    private final Supplier<Pose2d> robotPoseSupplier;
 
-    public FlywheelSubsystemTemplate() {
+    public FlywheelSubsystemTemplate(Supplier<Pose2d> robotPoseSupplier) {
         super(FlywheelConstants.FLYWHEEL_ID, getMotorConfiguration(), GEAR_RATIO);
+
+        this.robotPoseSupplier = robotPoseSupplier;
     }
 
     protected String getNTSubsystemKey() {
@@ -22,16 +37,29 @@ public class FlywheelSubsystemTemplate extends MotorSubsystemBase{
     }
 
     protected String getMetricUnitName() {
-        return MetricUnitsNameConstants.RPM;
+        return MetricUnitsNameConstants.RPS;
     }
   
 
     protected double getTargetMetric() {
-        return 0.0;
+        return targetRPM;
     }
     
+  @Override
+  public void periodic() {
+    Pose2d robotPose = robotPoseSupplier.get();
+
+    Translation2d goalPose = FieldLocations.BLUE_HUB;
+
+    double distance = robotPose.getTranslation().getDistance(goalPose);
+    targetRPM = getGoal(distance);
+
+    logDouble("Distance", distance);
+    logCoreMotorMetrics();
+  }
+
     protected double getActualMetric() {
-        return getActualVelocityRpm();
+        return getActualVelocityRPS();
     }
 
 
@@ -59,4 +87,25 @@ public class FlywheelSubsystemTemplate extends MotorSubsystemBase{
         return config;
     }
     
+    public void createInterpMap(){
+        //key = distance from goal
+        //value = speed of flywheel in rps 
+        flywheelInterp.put(0.0, -40.0);
+        flywheelInterp.put(1.5, -40.0);
+        flywheelInterp.put(2.0, -42.5);
+        flywheelInterp.put(2.5, -45.0);
+        flywheelInterp.put(3.0, -47.5);
+        flywheelInterp.put(3.5, -50.0);
+        flywheelInterp.put(4.0, -52.5);
+        flywheelInterp.put(4.5, -54.0);
+        flywheelInterp.put(5.0, -56.5);
+        flywheelInterp.put(5.5, -61.0);
+        flywheelInterp.put(5.8, -61.0);
+        //shootingInterp.put(6.0, 0.0);
+    }
+
+    public double getGoal(double distance){
+        return flywheelInterp.get(distance);
+    }
+
 }
