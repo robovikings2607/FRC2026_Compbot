@@ -27,13 +27,9 @@ public class FlywheelSubsystemTemplate extends MotorSubsystemBase{
     private final Supplier<Pose2d> robotPoseSupplier;
 
     public FlywheelSubsystemTemplate(Supplier<Pose2d> robotPoseSupplier) {
-        super(FlywheelConstants.FLYWHEEL_ID, getMotorConfiguration(), GEAR_RATIO);
+        super("Flywheel", FlywheelConstants.FLYWHEEL_ID, getMotorConfiguration(), GEAR_RATIO);
 
         this.robotPoseSupplier = robotPoseSupplier;
-    }
-
-    protected String getNTSubsystemKey() {
-        return "Flywheel";
     }
 
     protected String getMetricUnitName() {

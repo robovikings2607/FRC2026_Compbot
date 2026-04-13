@@ -19,11 +19,17 @@ import edu.wpi.first.units.measure.Voltage;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.utilities.ISysIdTunable;
 import frc.robot.utilities.RobotLogger;
+import frc.robot.utilities.SysIdBuilder;
 
-public abstract class MotorSubsystemBase extends SubsystemBase {
+public abstract class MotorSubsystemBase extends SubsystemBase implements ISysIdTunable {
   protected final TalonFX motor;
+  protected final String subsystemName;
   protected double targetMetric;
+  private final SysIdRoutine sysIdRoutine; 
+
 
   protected final VoltageOut voltageRequest = new VoltageOut(0.0);
   protected final VelocityVoltage velocityRequest = new VelocityVoltage(0.0);
@@ -32,10 +38,25 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
 
   
   public MotorSubsystemBase(
+    String subsystemName,
     int canId, 
     TalonFXConfiguration config,
     double gearRatio) {
     
+    this(subsystemName, canId, config, gearRatio, 0.0);
+
+   }
+
+  public MotorSubsystemBase(
+    String subsystemName,
+    int canId, 
+    TalonFXConfiguration config,
+    double gearRatio,
+    double stepVoltage
+    ) {
+
+    this.subsystemName = subsystemName;
+
     motor = new TalonFX(canId);
     
     // FORCIBLY INJECT THE RATIO INTO THE CONFIG
@@ -43,7 +64,15 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
     // to the config object in the child class.
     config.Feedback.SensorToMechanismRatio = gearRatio;    
     motor.getConfigurator().apply(config);
+
+    sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
+        motor, this, subsystemName, stepVoltage
+    );        
    }
+ 
+    public SysIdRoutine getSysIdRoutine() {
+      return sysIdRoutine;
+    }    
 
   /*
    * Tells the motor to run with a specific voltage
@@ -111,6 +140,10 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
     RobotLogger.logDouble(getNTKey() + key, value);
   }
 
+  protected void logBoolean(String key, Boolean value) {
+    RobotLogger.logBoolean(getNTKey() + key, value);
+  }
+
   protected void logCoreMotorMetrics() {
     RobotLogger.logDouble(getNTKey() + "MotorVoltage", motor.getMotorVoltage().getValueAsDouble());   
     RobotLogger.logDouble(getNTKey() + "Motor Temp (C)", motor.getDeviceTemp().getValueAsDouble());
@@ -119,7 +152,7 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
   }
 
   public String getNTKey() {
-    return getNTSubsystemKey() + "/";
+    return subsystemName + "/";
   }
 
   /**
@@ -133,15 +166,21 @@ public abstract class MotorSubsystemBase extends SubsystemBase {
  * Retrieves the current actual velocity of the mechanism in RPM.
  */
   public double getActualVelocityRPS() {
-    return motor.getVelocity().getValueAsDouble();
+    return motor.getVelocity().getValue().in(RotationsPerSecond);    
+  }
+
+  protected void configureMotorForSysId() {
+      // --- THE SYSID FIX: FORCE HIGH-SPEED DATA LOGGING ---
+      // We tell the motor to send Voltage, Position, and Velocity at 250 Hz (every 4 milliseconds)
+      motor.getMotorVoltage().setUpdateFrequency(250.0);
+      motor.getPosition().setUpdateFrequency(250.0);
+      motor.getVelocity().setUpdateFrequency(250.0);
+          
+      // (Optional but recommended) Wait for the CAN bus to apply the changes
+      try { Thread.sleep(250); } catch (InterruptedException e) {}
   }
 
   //Abstract methods that the inheritor must define
-/*
-* Returns the label for the Network Tables key that metrics will be stored under (within RobotData) 
-* for example: "Flywheel"
-*/
-  protected abstract String getNTSubsystemKey();
 
   /** Returns the label for the dashboard (e.g. "Degrees" or "RPM") 
    * Use one of the constants in MetricUnitsNameConstants
