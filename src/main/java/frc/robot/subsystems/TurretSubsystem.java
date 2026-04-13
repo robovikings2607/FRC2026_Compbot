@@ -24,6 +24,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
@@ -168,6 +169,18 @@ public class TurretSubsystem extends SubsystemBase {
     else{
       turretMotor.setControl(positionVoltage.withPosition(wantedEncoderPos));
     }
+
+    // Estimate and log the vector of the turret aiming for display on the 2D or 3D field.
+    // Try and debug if needed
+
+    double distance = GeometryUtil.getTargetDistance(shooterPose, goalPose);
+    var turretHeading = wantedEncoderPos + robotRotation;
+    double targetX = shooterPose.getX() + distance * Math.cos(Units.degreesToRadians(turretHeading));
+    double targetY = shooterPose.getY() + distance * Math.sin(Units.degreesToRadians(turretHeading));
+    Pose2d turretAim = new Pose2d(new Translation2d(targetX,targetY),new Rotation2d(Units.degreesToRadians(turretHeading)));
+    RobotLogger.logStruct("Turret/ShooterPose", Translation2d.struct, shooterPose);    
+    RobotLogger.logStruct("Turret/AprilTagPoses", Pose2d.struct, turretAim);
+
 
     RobotLogger.logBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());
     RobotLogger.logBoolean("UserButtonPressed", RobotController.getUserButton());
