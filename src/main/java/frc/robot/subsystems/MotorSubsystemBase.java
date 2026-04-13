@@ -13,9 +13,13 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.TalonFXSimState;
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.RobotController;
+
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,7 +32,9 @@ public abstract class MotorSubsystemBase extends SubsystemBase implements ISysId
   protected final TalonFX motor;
   protected final String subsystemName;
   protected double targetMetric;
+  protected final TalonFXSimState simState;
   private final SysIdRoutine sysIdRoutine; 
+
 
 
   protected final VoltageOut voltageRequest = new VoltageOut(0.0);
@@ -64,6 +70,8 @@ public abstract class MotorSubsystemBase extends SubsystemBase implements ISysId
     // to the config object in the child class.
     config.Feedback.SensorToMechanismRatio = gearRatio;    
     motor.getConfigurator().apply(config);
+
+    simState = motor.getSimState();
 
     sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(
         motor, this, subsystemName, stepVoltage
@@ -180,6 +188,16 @@ public abstract class MotorSubsystemBase extends SubsystemBase implements ISysId
       try { Thread.sleep(250); } catch (InterruptedException e) {}
   }
 
+    @Override
+    public void simulationPeriodic() {
+        simState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        double appliedVolts = simState.getMotorVoltage();
+
+        // 4. Pass the voltage and the 20ms loop time to the child class!
+        updateMechanismSimulation(appliedVolts, 0.020);
+    }
+
+
   //Abstract methods that the inheritor must define
 
   /** Returns the label for the dashboard (e.g. "Degrees" or "RPM") 
@@ -192,5 +210,13 @@ public abstract class MotorSubsystemBase extends SubsystemBase implements ISysId
   
   /** Returns the current actual sensor reading as a raw double for graphing */
   protected abstract double getActualMetric();
+
+ /**
+  * Called automatically during simulationPeriodic.
+  * The child class MUST implement this to update its specific WPILib physics model.
+  * @param appliedVolts The voltage currently being applied by the TalonFX
+  * @param dtSeconds The standard robot loop time (0.020 seconds)
+  */
+  protected abstract void updateMechanismSimulation(double appliedVolts, double dtSeconds);
 
 }

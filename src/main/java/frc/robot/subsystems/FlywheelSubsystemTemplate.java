@@ -4,10 +4,15 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.FieldLocations;
 import frc.robot.Constants.FlywheelConstants;
@@ -16,6 +21,7 @@ import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.ShooterUtils;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.function.Supplier;
 
@@ -26,10 +32,29 @@ public class FlywheelSubsystemTemplate extends MotorSubsystemBase{
     private InterpolatingDoubleTreeMap flywheelInterp = new InterpolatingDoubleTreeMap();
     private final Supplier<Pose2d> robotPoseSupplier;
 
+    private final double kMomentOfInertia = 0.006; // Estimated mass/inertia of the feeder wheel (kg*m^2)
+    private final TalonFXSimState motorSimState = motor.getSimState();
+    private final FlywheelSim flywheelSim;
+
+
     public FlywheelSubsystemTemplate(Supplier<Pose2d> robotPoseSupplier) {
         super("Flywheel", FlywheelConstants.FLYWHEEL_ID, getMotorConfiguration(), GEAR_RATIO);
 
         this.robotPoseSupplier = robotPoseSupplier;
+
+        var flywheelPlant = LinearSystemId.createFlywheelSystem(
+                DCMotor.getKrakenX60(1), // Motor
+                kMomentOfInertia,        // J (kg * m^2)
+                GEAR_RATIO               // Gearing
+        );
+
+        // 2. Initialize the simulator with the plant
+        feederPhysicsSim = new FlywheelSim(
+            flywheelPlant,           // The physics model we just created
+            DCMotor.getKrakenX60(1), // The motor type (used by sim to calculate current draw)
+            GEAR_RATIO               // The gearing
+        );    
+        
     }
 
     protected String getMetricUnitName() {
@@ -102,6 +127,17 @@ public class FlywheelSubsystemTemplate extends MotorSubsystemBase{
 
     public double getGoal(double distance){
         return flywheelInterp.get(distance);
+    }
+
+    @Override
+    protected void updateMechanismSimulation(double appliedVolts, double dtSeconds) {
+
+        flywheelSim.setInputVoltage(appliedVolts);
+        flywheelSim.update(dtSeconds);
+
+        AngularVelocity mechanismVelocity = flywheelSim.getAngularVelocity();
+
+        simState.setRotorVelocity(mechanismVelocity.in(RotationsPerSecond));
     }
 
 }
