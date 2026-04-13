@@ -5,7 +5,7 @@
     "data": {
       "commands": [
         {
-          "type": "sequential",
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -13,14 +13,14 @@
                 "data": {
                   "name": "Shoot"
                 }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 2.0
+                }
               }
             ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 4.0
           }
         },
         {
@@ -32,14 +32,7 @@
                 "data": {
                   "name": "DeployIntake"
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
+              },
               {
                 "type": "sequential",
                 "data": {
@@ -58,36 +51,36 @@
                     }
                   ]
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "2252 Auto Start"
-                }
               },
               {
-                "type": "path",
+                "type": "sequential",
                 "data": {
-                  "pathName": "2522 Stay In Neutral"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "2522 Depot And Shoot"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "2522Depot And Shoot 2"
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "2252 Auto Start"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "2522 Stay In Neutral"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "2522 Depot And Shoot"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "2522Depot And Shoot 2"
+                      }
+                    }
+                  ]
                 }
               }
             ]

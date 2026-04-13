@@ -13,14 +13,7 @@
                 "data": {
                   "name": "DeployIntake"
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
+              },
               {
                 "type": "sequential",
                 "data": {
@@ -28,7 +21,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 6.5
+                        "waitTime": 4.75
                       }
                     },
                     {
@@ -39,30 +32,30 @@
                     }
                   ]
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "AllianceToNeutral1 (RightBump)"
-                }
               },
               {
-                "type": "path",
+                "type": "sequential",
                 "data": {
-                  "pathName": "Copy of WrapAroundCollectFuel (LeftBump)"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Copy of WrapToAlliance (LeftBump)"
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "AllianceToNeutral1 (RightBump)"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "Copy of WrapAroundCollectFuel (LeftBump)"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "Copy of WrapToAlliance (LeftBump)"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -77,22 +70,34 @@
                 "data": {
                   "name": "DeployIntake"
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
+              },
               {
                 "type": "sequential",
                 "data": {
                   "commands": [
                     {
+                      "type": "race",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "ShootOnTheMove"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.8
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
                       "type": "wait",
                       "data": {
-                        "waitTime": 4.5
+                        "waitTime": 4.0
                       }
                     },
                     {
