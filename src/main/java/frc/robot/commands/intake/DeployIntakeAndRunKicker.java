@@ -16,46 +16,42 @@ import frc.robot.subsystems.IntakeSubsystem.IntakeState;
 import frc.robot.subsystems.KickerSubsystem.KickerState;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class DeployIntake extends Command {
+public class DeployIntakeAndRunKicker extends DeployIntake {
   /** Creates a new RunIntake. */
 
   RobotContainer robot;
-  IntakeSubsystem intake;
-  KickerSubsystem kicker;
   Timer timer = new Timer();
   boolean hasPulsed = false;
 
-  public DeployIntake(RobotContainer robot) {
-    // Use addRequirements() here to declare subsystem dependencies.
+  public DeployIntakeAndRunKicker(RobotContainer robot) {
+    super(robot);
     this.robot = robot;
-    intake = robot.intake;
-    kicker = robot.kicker;
-
-    addRequirements(intake);
+    addRequirements(robot.kicker);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    
-    intake.setState(IntakeState.DEPLOYED);
-    timer.start();
+    super.initialize();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intake.controlIntake(); //needs to be in execute to check for jam
+    super.execute();
+    robot.kicker.controlMotor(KickerState.FORWARD);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    super.end(interrupted);
+    robot.kicker.controlMotor(KickerState.OFF);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return super.isFinished();
   }
 }

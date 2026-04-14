@@ -13,14 +13,7 @@
                 "data": {
                   "name": "DeployIntake"
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
+              },
               {
                 "type": "sequential",
                 "data": {
@@ -39,75 +32,29 @@
                     }
                   ]
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "AllianceToNeutral1 (LeftBump)"
-                }
               },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "WrapAroundCollectFuel (LeftBump)"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "WrapToAlliance (LeftBump)"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "DeployIntake"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
               {
                 "type": "sequential",
                 "data": {
                   "commands": [
                     {
-                      "type": "wait",
+                      "type": "path",
                       "data": {
-                        "waitTime": 5.5
+                        "pathName": "AllianceToNeutral1 (LeftBump)"
                       }
                     },
                     {
-                      "type": "named",
+                      "type": "path",
                       "data": {
-                        "name": "ShootOnTheMove"
+                        "pathName": "WrapAroundCollectFuel (LeftBump)"
                       }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "WrapToAlliance (LeftBump)"
+                      }
+                    },
                     {
                       "type": "path",
                       "data": {
@@ -123,7 +70,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "DepotToShoot"
+                        "pathName": "2522Depot And Shoot 2"
                       }
                     }
                   ]

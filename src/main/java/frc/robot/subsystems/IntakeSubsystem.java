@@ -121,12 +121,12 @@ public class IntakeSubsystem extends SubsystemBase {
   //Pivot Controls
   public void deployPivotControl(){
     output = pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), PivotConstants.DEPLOYED, Timer.getFPGATimestamp());
-    pivotMotor.set(output);
+    pivotMotor.set(-output);
   }  
   
   public void retractPivotControl(){
     output = pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), PivotConstants.RETRACTED, Timer.getFPGATimestamp());
-    pivotMotor.set(output);
+    pivotMotor.set(-output);
   }
 
   public void forceDownControl(){

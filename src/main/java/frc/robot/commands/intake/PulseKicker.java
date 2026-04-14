@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.KickerSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.IntakeState;
+import frc.robot.subsystems.IntakeSubsystem.RollerState;
 import frc.robot.subsystems.KickerSubsystem.KickerState;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -36,6 +38,11 @@ public class PulseKicker extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if(robot.intake.getRollerState() == RollerState.NORMAL) {
+      kicker.controlMotor(KickerState.FORWARD);
+      return;
+    }
+
     if(timer.get() > 3.0 && !hasPulsed){
       kicker.controlMotor(KickerState.FORWARD);
       timer.restart();

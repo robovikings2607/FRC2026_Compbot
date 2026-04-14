@@ -130,22 +130,22 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   public void createFerryingInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps
-    ferryingInterp.put(0.0, -35.0);
-    ferryingInterp.put(3.5, -35.0);
-    ferryingInterp.put(4.0, -38.0);
-    ferryingInterp.put(4.5, -41.0);
-    ferryingInterp.put(5.0, -44.0);
-    ferryingInterp.put(5.5, -47.0);
-    ferryingInterp.put(6.0, -50.0);
-    ferryingInterp.put(6.5, -53.0);
-    ferryingInterp.put(7.0, -56.0);
-    ferryingInterp.put(8.0, -65.0);
+    ferryingInterp.put(0.0, -37.0);
+    ferryingInterp.put(3.5, -37.0);
+    ferryingInterp.put(4.0, -40.0);
+    ferryingInterp.put(4.5, -43.0);
+    ferryingInterp.put(5.0, -46.0);
+    ferryingInterp.put(5.5, -49.0);
+    ferryingInterp.put(6.0, -52.0);
+    ferryingInterp.put(6.5, -55.0);
+    ferryingInterp.put(7.0, -58.0);
+    ferryingInterp.put(8.0, -67.0);
     //over bump
-    ferryingInterp.put(10.5, -41.0);
-    ferryingInterp.put(11.0, -44.0);
-    ferryingInterp.put(11.5, -47.0);
-    ferryingInterp.put(12.5, -53.0);
-    ferryingInterp.put(13.0, -56.0);
+    ferryingInterp.put(10.5, -45.0);
+    ferryingInterp.put(11.0, -49.0);
+    ferryingInterp.put(11.5, -51.0);
+    ferryingInterp.put(12.5, -57.0);
+    ferryingInterp.put(13.0, -60.0);
 
     //ferryingInterp.put(6.0, 0.0);
   }
