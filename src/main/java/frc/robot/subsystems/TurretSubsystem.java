@@ -170,8 +170,8 @@ public class TurretSubsystem extends SubsystemBase {
     // Estimate and log the vector of the turret aiming for display on the 2D or 3D field.
     // Try and debug if needed
 
-    double distance = GeometryUtil.getTargetDistance(shooterPose, goalPose);
-    var turretHeading = wantedEncoderPos + robotRotation;
+    double distance = shooterPose.getDistance(goalPose);
+    var turretHeading = (wantedEncoderPos * 36.0) + robotRotation;
     double targetX = shooterPose.getX() + distance * Math.cos(Units.degreesToRadians(turretHeading));
     double targetY = shooterPose.getY() + distance * Math.sin(Units.degreesToRadians(turretHeading));
     Pose2d turretAim = new Pose2d(new Translation2d(targetX,targetY),new Rotation2d(Units.degreesToRadians(turretHeading)));
