@@ -49,7 +49,7 @@ public class FlywheelSubsystemTemplate extends MotorSubsystemBase{
         );
 
         // 2. Initialize the simulator with the plant
-        feederPhysicsSim = new FlywheelSim(
+        flywheelSim = new FlywheelSim(
             flywheelPlant,           // The physics model we just created
             DCMotor.getKrakenX60(1), // The motor type (used by sim to calculate current draw)
             GEAR_RATIO               // The gearing
