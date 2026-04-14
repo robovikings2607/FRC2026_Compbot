@@ -35,6 +35,7 @@ import frc.robot.commands.DoNothing;
 import frc.robot.commands.drivetrain.ToggleHighLowGear;
 import frc.robot.commands.intake.ReverseRollers;
 import frc.robot.commands.intake.DeployIntake;
+import frc.robot.commands.intake.DeployIntakeAndRunKicker;
 import frc.robot.commands.intake.ForceIntakeDown;
 import frc.robot.commands.intake.JostlePieces;
 import frc.robot.commands.intake.PIDTuningIntake;
@@ -151,7 +152,7 @@ public class RobotContainer {
         driverController.rightStick.onTrue(new ToggleHighLowGear(this));
 
         //Intake
-        driverController.leftTriggerButton.onTrue(new DeployIntake(this)); //will be deploy later
+        driverController.leftTriggerButton.onTrue(new DeployIntakeAndRunKicker(this)); //will be deploy later
         driverController.leftBumper.onTrue(new RetractIntake(this)); //will be retract later
         driverController.rightBumper.onTrue(new ReverseRollers(this));
 

@@ -84,7 +84,6 @@ public class KickerSubsystem extends SubsystemBase {
       case FORWARD:
         forwardControl();
         break;      
-      
       case REVERSE:
         reverseControl();
         break;

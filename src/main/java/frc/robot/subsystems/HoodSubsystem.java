@@ -171,7 +171,7 @@ public class HoodSubsystem extends SubsystemBase {
   public void disatnceTuningControl(){
     setGoalInDegrees(SmartDashboard.getNumber("Hood/Tuning/Goal(Degrees)", 0));
     output = -pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), goal, Timer.getFPGATimestamp());
-    motor.set(TalonSRXControlMode.PercentOutput, output);
+    motor.set(TalonSRXControlMode.PercentOutput, output*.2);
   }
 
   public void stopMotor(){

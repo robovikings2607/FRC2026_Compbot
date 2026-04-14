@@ -75,9 +75,9 @@ public final class Constants {
 
     //Encoder 
     public static final double DISCONTINUITY_POINT = 0.0;
-    public static final double MAGNET_OFFSET = 0.0;
-    public static final double ENCODER_MIN = -0.01; //real "zero" is -0.05, just don't want to break
-    public static final double ENCODER_MAX = -0.876953;
+    public static final double MAGNET_OFFSET = 0.32;
+    public static final double ENCODER_MIN = -0.05; //real "zero" is -0.05, just don't want to break
+    public static final double ENCODER_MAX = -0.9;
 
     //PID Values
     public static final double P = 7.0;
@@ -103,8 +103,8 @@ public final class Constants {
     public static final int ENCODER_ID = 19;
 
     //Positions (in encoder ticks)
-    public static final double RETRACTED = 0.443115;
-    public static final double DEPLOYED = 0.245605;
+    public static final double RETRACTED = -0.24;
+    public static final double DEPLOYED = -0.427;
 
     //Speed (in volts)
     public static final double FORCE_DOWN_SPEED = 2.0;
@@ -126,7 +126,7 @@ public final class Constants {
     public static final int MOTOR_ID = 14;
 
     //Speeds (in volts)
-    public static final double NORMAL_SPEED = 10.5;
+    public static final double NORMAL_SPEED = 11;
     public static final double JAMMED_SPEED = 12.0;
 
     //Current Limits
@@ -174,7 +174,7 @@ public final class Constants {
     public static final int MOTOR_ID = 21;
 
     //Speed (in volts)
-    public static final double SPEED = 2.0;
+    public static final double SPEED = 10;
 
     //Current Limits
     public static final double STATOR_LIMIT = 40.0;
