@@ -126,8 +126,8 @@ public final class Constants {
     public static final int MOTOR_ID = 14;
 
     //Speeds (in volts)
-    public static final double NORMAL_SPEED = 11;
-    public static final double JAMMED_SPEED = 12.0;
+    public static final double NORMAL_SPEED = -11;
+    public static final double JAMMED_SPEED = -12.0;
 
     //Current Limits
     public static final double STATOR_LIMIT = 120.0;
@@ -146,7 +146,7 @@ public final class Constants {
     //PID Values
     public static final double S = 0.0;
     public static final double V = 0.105;
-    public static final double P = 1.1;
+    public static final double P = 0.9;
     public static final double I = 0.0;
     public static final double D = 0.0;
 

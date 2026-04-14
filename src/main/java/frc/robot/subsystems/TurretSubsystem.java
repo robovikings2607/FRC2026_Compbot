@@ -136,6 +136,15 @@ public class TurretSubsystem extends SubsystemBase {
       isZeroed = true;
     }
     else if(!isZeroed){
+      if(robot.operatorController.povWest.getAsBoolean()){
+        turretMotor.set(0.06);
+      }
+      else if(robot.operatorController.povEast.getAsBoolean()){
+        turretMotor.set(-0.06);
+      }
+      else{
+        turretMotor.set(0.0);
+      }
       return;
     }
 

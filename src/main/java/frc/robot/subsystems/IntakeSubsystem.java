@@ -74,6 +74,8 @@ public class IntakeSubsystem extends SubsystemBase {
             .withSupplyCurrentLowerLimit(Amps.of(RollerConstants.SUPPLY_LOWER_LIMIT))
             .withSupplyCurrentLimitEnable(true)
     );
+
+    rollerMotor.getConfigurator().apply(configs);
   }
 
   public void configureEncoder(){}
@@ -323,7 +325,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
   }
 
-  
+
   public void updateLoggingData(){
     RobotLogger.logString("Intake/State", state.name());
     //Pivot
