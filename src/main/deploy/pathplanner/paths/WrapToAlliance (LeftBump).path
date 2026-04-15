@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 2.2794008559201138,
-        "y": 5.6070470756062765
+        "x": 1.8265477888730377,
+        "y": 5.76231098430813
       },
       "prevControl": {
-        "x": 2.732253922967189,
-        "y": 5.632924393723252
+        "x": 2.279400855920113,
+        "y": 5.788188302425106
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftWrapShot"
     }
   ],
   "rotationTargets": [
@@ -36,22 +36,9 @@
   ],
   "constraintZones": [
     {
-      "name": "Shooting",
-      "minWaypointRelativePos": 0.62,
-      "maxWaypointRelativePos": 1.0,
-      "constraints": {
-        "maxVelocity": 1.0,
-        "maxAcceleration": 2.0,
-        "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 720.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
-      }
-    },
-    {
       "name": "Over Bump",
       "minWaypointRelativePos": 0.23497636731938054,
-      "maxWaypointRelativePos": 1.0,
+      "maxWaypointRelativePos": 0.6076975016880509,
       "constraints": {
         "maxVelocity": 2.5,
         "maxAcceleration": 3.5,
@@ -66,7 +53,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.16,
-    "maxAcceleration": 5.0,
+    "maxAcceleration": 4.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -74,7 +61,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -0.0
   },
   "reversed": false,
   "folder": null,

@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.7724599283277,
-        "y": 4.267542736182914
+        "x": 7.23490727532097,
+        "y": 4.351997146932953
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.608326497869714,
-        "y": 4.565144422460703
+        "x": 7.070773844862985,
+        "y": 4.649598833210741
       },
       "isLocked": false,
       "linkedName": "2252AllianceToNeutralEnd"
@@ -68,8 +68,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.16,
-    "maxAcceleration": 5.0,
+    "maxVelocity": 2.5,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -85,5 +85,5 @@
     "velocity": 0,
     "rotation": -90.57872556560781
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

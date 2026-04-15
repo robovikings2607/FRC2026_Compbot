@@ -9,12 +9,6 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "DeployIntake"
-                }
-              },
-              {
                 "type": "sequential",
                 "data": {
                   "commands": [
@@ -38,6 +32,12 @@
                     }
                   ]
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntakeNoSOTM"
+                }
               }
             ]
           }
@@ -52,12 +52,6 @@
           "type": "race",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "DeployIntake"
-                }
-              },
               {
                 "type": "sequential",
                 "data": {
@@ -77,10 +71,16 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "DepotToShoot"
+                        "pathName": "2522Depot And Shoot 2"
                       }
                     }
                   ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntakeNoSOTM"
                 }
               }
             ]

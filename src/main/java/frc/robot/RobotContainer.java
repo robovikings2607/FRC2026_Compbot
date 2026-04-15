@@ -41,6 +41,7 @@ import frc.robot.commands.intake.JostlePieces;
 import frc.robot.commands.intake.PIDTuningIntake;
 import frc.robot.commands.intake.PulseKicker;
 import frc.robot.commands.intake.RetractIntake;
+import frc.robot.commands.intake.RetratctIntakeAndStopKicker;
 import frc.robot.commands.shooter.StopShooter;
 import frc.robot.commands.shooter.ToggleOperatorControls;
 import frc.robot.commands.shooter.ActivateTurret;
@@ -153,7 +154,7 @@ public class RobotContainer {
 
         //Intake
         driverController.leftTriggerButton.onTrue(new DeployIntakeAndRunKicker(this)); //will be deploy later
-        driverController.leftBumper.onTrue(new RetractIntake(this)); //will be retract later
+        driverController.leftBumper.onTrue(new RetratctIntakeAndStopKicker(this)); //will be retract later
         driverController.rightBumper.onTrue(new ReverseRollers(this));
 
         //Shooter
@@ -189,7 +190,8 @@ public class RobotContainer {
         //PathPlanner Commands
         NamedCommands.registerCommand("DoNothing", new DoNothing());
         NamedCommands.registerCommand("DeployIntake", new DeployIntakeAndRunKicker(this).raceWith(new WaitCommand(0.1)));
-        NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
+        NamedCommands.registerCommand("DeployIntakeNoSOTM", new DeployIntakeAndRunKicker(this));
+        NamedCommands.registerCommand("RetractIntake", new RetratctIntakeAndStopKicker(this));
         NamedCommands.registerCommand("Shoot", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(6.0)));
         NamedCommands.registerCommand("ShootOnTheMove", new Shoot(this));
     }

@@ -5,16 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "race",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "DeployIntake"
-                }
-              }
-            ]
+            "name": "DeployIntake"
           }
         },
         {
@@ -69,15 +62,15 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "DeployIntake"
+          }
+        },
+        {
           "type": "race",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "DeployIntake"
-                }
-              },
               {
                 "type": "parallel",
                 "data": {
