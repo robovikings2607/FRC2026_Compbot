@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -125,10 +126,13 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
   @Override
   public void periodic() {
-    yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
+    //yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
 
-    LimelightHelpers.SetRobotOrientation(FRONT_LIMELIGHT_NAME,  yaw, 0, 0, 0, 0, 0);
-    LimelightHelpers.SetRobotOrientation(BACK_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
+    LimelightHelpers.PoseEstimate frontMT1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(FRONT_LIMELIGHT_NAME);
+    LimelightHelpers.PoseEstimate backMT1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(BACK_LIMELIGHT_NAME);
+
+    LimelightHelpers.SetRobotOrientation(FRONT_LIMELIGHT_NAME,  frontMT1.pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation(BACK_LIMELIGHT_NAME, backMT1.pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
 
     LimelightHelpers.PoseEstimate frontRaw  = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(FRONT_LIMELIGHT_NAME);
     LimelightHelpers.PoseEstimate backRaw = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(BACK_LIMELIGHT_NAME);
@@ -255,7 +259,8 @@ public class LimelightSubsystem extends SubsystemBase {
         : 1.0 - mt.rawFiducials[0].ambiguity;
     double baseStd = (mt.tagCount >= 2) ? kMultiTagBaseStd : kSingleTagBaseStd;
     double xyStd   = baseStd * (1.0 / quality) * (1.0 + kDistStdScale * mt.avgTagDist);
-    Matrix<N3, N1> stdDevs = VecBuilder.fill(xyStd, xyStd, kLargeVariance);
+    //Matrix<N3, N1> stdDevs = VecBuilder.fill(xyStd, xyStd, kLargeVariance);
+    Matrix<N3, N1> stdDevs = VecBuilder.fill(xyStd, xyStd, 90); //n3 is in degrees, I believe
 
     return Optional.of(new CameraEstimate(mt.pose, mt.timestampSeconds, stdDevs, mt.tagCount));
   }
