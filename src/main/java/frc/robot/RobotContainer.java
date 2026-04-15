@@ -126,7 +126,7 @@ public class RobotContainer {
         createTuningToggles();
         //configureSysIdBindings(drivetrain);
         
-        kicker.setDefaultCommand(new PulseKicker(this));
+        //kicker.setDefaultCommand(new PulseKicker(this));
 
         autoChooser = AutoBuilder.buildAutoChooser();
         
@@ -167,7 +167,7 @@ public class RobotContainer {
         //Operator/Emergency
         operatorController.backButton.and(operatorController.startButton).onTrue(new ToggleOperatorControls(this));
         operatorController.buttonY.onTrue(new RetractIntake(this));
-        operatorController.buttonA.onTrue(new DeployIntake(this));
+        operatorController.buttonA.onTrue(new DeployIntakeAndRunKicker(this));
         operatorController.buttonB.onTrue(new DeactivateTurret(this));
         operatorController.buttonX.onTrue(new ActivateTurret(this));
         operatorController.leftBumper.onTrue(new JostlePieces(this));
@@ -188,7 +188,7 @@ public class RobotContainer {
     public void configureNamedCommands(){
         //PathPlanner Commands
         NamedCommands.registerCommand("DoNothing", new DoNothing());
-        NamedCommands.registerCommand("DeployIntake", new DeployIntake(this));
+        NamedCommands.registerCommand("DeployIntake", new DeployIntakeAndRunKicker(this).raceWith(new WaitCommand(0.1)));
         NamedCommands.registerCommand("RetractIntake", new RetractIntake(this));
         NamedCommands.registerCommand("Shoot", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(6.0)));
         NamedCommands.registerCommand("ShootOnTheMove", new Shoot(this));

@@ -5,7 +5,7 @@
     "data": {
       "commands": [
         {
-          "type": "race",
+          "type": "sequential",
           "data": {
             "commands": [
               {

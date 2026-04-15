@@ -46,7 +46,7 @@ public class DeployIntakeAndRunKicker extends DeployIntake {
   @Override
   public void end(boolean interrupted) {
     super.end(interrupted);
-    robot.kicker.controlMotor(KickerState.OFF);
+    //robot.kicker.controlMotor(KickerState.OFF);
   }
 
   // Returns true when the command should end.

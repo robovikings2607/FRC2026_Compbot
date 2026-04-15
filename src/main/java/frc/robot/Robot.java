@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.RobotController;
@@ -57,6 +58,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledInit() {
+        m_robotContainer.intake.getPivotMotor().setNeutralMode(NeutralModeValue.Brake);
     }
 
     @Override
@@ -64,7 +66,9 @@ public class Robot extends TimedRobot {
     }
 
     @Override
-    public void disabledExit() {}
+    public void disabledExit() {
+        m_robotContainer.intake.getPivotMotor().setNeutralMode(NeutralModeValue.Coast);
+    }
 
     @Override
     public void autonomousInit() {

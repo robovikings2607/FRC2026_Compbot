@@ -47,7 +47,7 @@ public final class Constants {
 
     public static final double OFFSET = 0.0;  
 
-    public static final double MAX_ANGLE = 248.2 - 14.094 + (OFFSET * 10.0/360.0);
+    public static final double MAX_ANGLE = 248.2 - 19.094 + (OFFSET * 10.0/360.0);
     public static final double MIN_ANGLE = -149.988 + 14.094 + (OFFSET * 10.0/360.0);
   }
 
