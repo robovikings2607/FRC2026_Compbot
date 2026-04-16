@@ -11,7 +11,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "DeployIntake"
+                  "name": "DeployIntakeNoSOTM"
                 }
               },
               {
@@ -55,7 +55,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "DeployIntake"
+                  "name": "DeployIntakeNoSOTM"
                 }
               },
               {
