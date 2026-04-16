@@ -51,6 +51,15 @@ public final class ShooterUtils {
       else{
         return robotPose.getX() < Units.inchesToMeters(469.11);
       }
+    }    
+    
+    public static boolean inOppoAllianceZone(Pose2d robotPose){
+      if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){
+        return robotPose.getX() > Units.inchesToMeters(469.11);
+      }
+      else{
+        return robotPose.getX() < Units.inchesToMeters(182.11);
+      }
     }
   
     public static Translation2d determineShootingGoal(Pose2d robotPose){
