@@ -43,7 +43,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     //configureControlModes();
     createShootingInterpMap();
     createFerryingInterpMap();
-    createTuningData();
+    //createTuningData();
   }
 
   @Override
@@ -229,9 +229,9 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   public void updateLoggingData(){
     RobotLogger.logDouble("Flywheel/Goal(RPS)", goal);
     RobotLogger.logDouble("Flywheel/CurrentRPS", motor.getVelocity().getValueAsDouble());
-    RobotLogger.logDouble("Flywheel/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Flywheel/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Flywheel/Voltage", motor.getMotorVoltage().getValueAsDouble());
+    //RobotLogger.logDouble("Flywheel/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
+    //RobotLogger.logDouble("Flywheel/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
+    //RobotLogger.logDouble("Flywheel/Voltage", motor.getMotorVoltage().getValueAsDouble());
     RobotLogger.logBoolean("Flywheel/GoodToShoot", goodToShoot());
     RobotLogger.logString("Flywheel/State", state.name());
   }

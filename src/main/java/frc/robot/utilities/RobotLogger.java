@@ -13,6 +13,7 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringEntry;
 import edu.wpi.first.networktables.StructArrayPublisher;
@@ -93,6 +94,7 @@ public class RobotLogger {
     }
 
     public static void logDouble(String key, double value) {
+        if(!Constants.DISABLE_LOGGING){
         DoubleLogEntry entry = doubleLogs.computeIfAbsent(key, 
             k -> new DoubleLogEntry(log, getDecoratedKey(k)));
         entry.append(value);
@@ -101,9 +103,11 @@ public class RobotLogger {
             SmartDashboard.putNumber(getDecoratedKey(key), value);
         }
     }
+    }
 
     
     public static void logBoolean(String key, boolean value) {
+        if(!Constants.DISABLE_LOGGING){
         BooleanLogEntry entry = booleanLogs.computeIfAbsent(key, 
             k -> new BooleanLogEntry(log, getDecoratedKey(k)));
         entry.append(value);
@@ -112,9 +116,11 @@ public class RobotLogger {
             SmartDashboard.putBoolean(getDecoratedKey(key), value);
         }
     }
+    }
 
     
     public static void logString(String key, String value){
+        if(!Constants.DISABLE_LOGGING){
         StringLogEntry entry = stringLogs.computeIfAbsent(key, 
             k -> new StringLogEntry(log, getDecoratedKey(k)));
         entry.append(value);
@@ -123,6 +129,7 @@ public class RobotLogger {
             SmartDashboard.putString(getDecoratedKey(key), value);
         }
     }
+    }
 
     /**
      * Logs a single Struct object (like ChassisSpeeds or Pose2d)
@@ -130,6 +137,7 @@ public class RobotLogger {
     @SuppressWarnings("unchecked")
     public static <T> void logStruct(String key, edu.wpi.first.util.struct.Struct<T> structType, T value) {
         
+        if(!Constants.DISABLE_LOGGING){
         StructLogEntry<T> logEntry = (StructLogEntry<T>) structLogs.computeIfAbsent(key, 
             k -> StructLogEntry.create(log, getDecoratedKey(k), structType));
         logEntry.append(value);
@@ -140,13 +148,14 @@ public class RobotLogger {
             publisher.set(value);
         }
     }
+    }
 
     /**
      * Logs an array of Struct objects (like SwerveModuleState[])
      */
     @SuppressWarnings("unchecked")
     public static <T> void logStructArray(String key, edu.wpi.first.util.struct.Struct<T> structType, T[] value) {
-        
+        if(!Constants.DISABLE_LOGGING){
         StructArrayLogEntry<T> logEntry = (StructArrayLogEntry<T>) structArrayLogs.computeIfAbsent(key, 
             k -> StructArrayLogEntry.create(log, getDecoratedKey(k), structType));
         logEntry.append(value);
@@ -156,6 +165,7 @@ public class RobotLogger {
                 k -> NetworkTableInstance.getDefault().getTable(getLoggingTableKey()).getStructArrayTopic(k, structType).publish());
             publisher.set(value);
         }
+    }
     }    
 
 // =========================================================

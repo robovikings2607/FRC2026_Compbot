@@ -15,6 +15,7 @@ import edu.wpi.first.math.util.Units;
 
 public final class Constants { 
   public static final Pose2d EMPTY_POSE = new Pose2d();
+  public static final boolean DISABLE_LOGGING = false;
 
   public static final class Simulation {
     public static final Pose2d LEFT_BOTTOM_CORNER = new Pose2d(new Translation2d(-8.2423, -4.0513), new Rotation2d());  // 2023 game LEFT_BOTTOM_CORNER was at -8.2423, -4.0513
@@ -75,12 +76,12 @@ public final class Constants {
 
     //Encoder 
     public static final double DISCONTINUITY_POINT = 0.0;
-    public static final double MAGNET_OFFSET = 0.32;
+    public static final double MAGNET_OFFSET = 0.35;
     public static final double ENCODER_MIN = -0.05; //real "zero" is -0.05, just don't want to break
     public static final double ENCODER_MAX = -0.9;
 
     //PID Values
-    public static final double P = 7.0;
+    public static final double P = 6.5;
     public static final double I = 0.0;
     public static final double D = 0.0;
     public static final double TOLERANCE = 0.1; //equates to +/- 0.5 degrees of error, may need to change

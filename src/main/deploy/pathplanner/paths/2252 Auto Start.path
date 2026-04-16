@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5119724819024043,
-        "y": 5.473357925900616
+        "x": 3.5991440798858774,
+        "y": 5.788188302425108
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.061212553495008,
-        "y": 5.516476462196862
+        "x": 5.148384151478481,
+        "y": 5.831306838721354
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftStartPoint"
     },
     {
       "anchor": {
@@ -20,28 +20,28 @@
         "y": 6.435121255349501
       },
       "prevControl": {
-        "x": 5.3295800146109595,
-        "y": 5.542353780313837
+        "x": 5.488188302425106,
+        "y": 5.141255349500714
       },
       "nextControl": {
-        "x": 7.042547892086732,
-        "y": 6.59523445348753
+        "x": 6.998263823606294,
+        "y": 6.651330870681901
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.23490727532097,
-        "y": 4.351997146932953
+        "x": 7.105520684736091,
+        "y": 4.559015691868759
       },
       "prevControl": {
-        "x": 7.166354770662074,
-        "y": 5.437411804032138
+        "x": 7.036968180077195,
+        "y": 5.644430348967944
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "2252AllianceToNeutralEnd"
+      "linkedName": "preloadwrap"
     }
   ],
   "rotationTargets": [
@@ -100,7 +100,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": -90.1629202438701
   },
   "useDefaultConstraints": true
 }

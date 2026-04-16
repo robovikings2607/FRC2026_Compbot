@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.23490727532097,
-        "y": 4.351997146932953
+        "x": 7.105520684736091,
+        "y": 4.559015691868759
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.070773844862985,
-        "y": 4.649598833210741
+        "x": 6.941387254278106,
+        "y": 4.856617378146548
       },
       "isLocked": false,
-      "linkedName": "2252AllianceToNeutralEnd"
+      "linkedName": "preloadwrap"
     },
     {
       "anchor": {
