@@ -165,7 +165,7 @@ public final class Constants {
     public static final double SPEED = 12.0; 
 
     //Current Limits
-    public static final double STATOR_LIMIT = 30.0;
+    public static final double STATOR_LIMIT = 90.0;
     public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
     public static final double SUPPLY_LOWER_LIMIT = 10.0;
   }

@@ -329,18 +329,18 @@ public class IntakeSubsystem extends SubsystemBase {
   public void updateLoggingData(){
     RobotLogger.logString("Intake/State", state.name());
     //Pivot
-    RobotLogger.logDouble("Intake/Pivot/Output", output);
-    RobotLogger.logDouble("Intake/Pivot/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
-    RobotLogger.logDouble("Intake/Pivot/Goal", pid.getSetpoint());
-    RobotLogger.logBoolean("Intake/Pivot/AtGoal", pid.atSetpoint());
-    RobotLogger.logDouble("Intake/Pivot/StatorCurrent", pivotMotor.getStatorCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Intake/Pivot/SupplyCurrent", pivotMotor.getSupplyCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Intake/Pivot/Voltage", pivotMotor.getMotorVoltage().getValueAsDouble());
+    //RobotLogger.logDouble("Intake/Pivot/Output", output);
+    //RobotLogger.logDouble("Intake/Pivot/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
+    //RobotLogger.logDouble("Intake/Pivot/Goal", pid.getSetpoint());
+    //RobotLogger.logBoolean("Intake/Pivot/AtGoal", pid.atSetpoint());
+    //RobotLogger.logDouble("Intake/Pivot/StatorCurrent", pivotMotor.getStatorCurrent().getValueAsDouble());
+    //RobotLogger.logDouble("Intake/Pivot/SupplyCurrent", pivotMotor.getSupplyCurrent().getValueAsDouble());
+    //RobotLogger.logDouble("Intake/Pivot/Voltage", pivotMotor.getMotorVoltage().getValueAsDouble());
     RobotLogger.logString("Intake/Pivot/State", pivotState.name());
     //Roller
     RobotLogger.logDouble("Intake/Roller/StatorCurrent", rollerMotor.getStatorCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Intake/Roller/SupplyCurrent", rollerMotor.getSupplyCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Intake/Roller/Voltage", rollerMotor.getMotorVoltage().getValueAsDouble());
+    //RobotLogger.logDouble("Intake/Roller/SupplyCurrent", rollerMotor.getSupplyCurrent().getValueAsDouble());
+    //RobotLogger.logDouble("Intake/Roller/Voltage", rollerMotor.getMotorVoltage().getValueAsDouble());
     RobotLogger.logString("Intake/Roller/State", rollerState.name());
   }
 
