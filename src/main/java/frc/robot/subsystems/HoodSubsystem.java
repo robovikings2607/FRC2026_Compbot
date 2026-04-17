@@ -41,7 +41,7 @@ public class HoodSubsystem extends SubsystemBase {
     configurePID();
     createShootingInterpMap();
     createFerryingInterpMap();
-    createTuningData();
+    //createTuningData();
   }
 
   @Override
@@ -211,13 +211,13 @@ public class HoodSubsystem extends SubsystemBase {
   }
 
   public void updateLoggingData(){
-    RobotLogger.logDouble("Hood/Output", output);
-    RobotLogger.logDouble("Hood/Goal(Degrees)", encoderTicksToDegrees(goal));
-    RobotLogger.logDouble("Hood/CurrentDegrees", encoderTicksToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
-    RobotLogger.logDouble("Hood/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
-    RobotLogger.logDouble("Hood/StatorCurrent", motor.getStatorCurrent());
-    RobotLogger.logDouble("Hood/SupplyCurrent", motor.getSupplyCurrent());
-    RobotLogger.logDouble("Hood/Voltage", motor.getMotorOutputVoltage());
+    //RobotLogger.logDouble("Hood/Output", output);
+    //RobotLogger.logDouble("Hood/Goal(Degrees)", encoderTicksToDegrees(goal));
+    //RobotLogger.logDouble("Hood/CurrentDegrees", encoderTicksToDegrees(encoder.getAbsolutePosition().getValueAsDouble()));
+    //RobotLogger.logDouble("Hood/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
+    //RobotLogger.logDouble("Hood/StatorCurrent", motor.getStatorCurrent());
+    //RobotLogger.logDouble("Hood/SupplyCurrent", motor.getSupplyCurrent());
+    //RobotLogger.logDouble("Hood/Voltage", motor.getMotorOutputVoltage());
     RobotLogger.logBoolean("Hood/GoodToShoot", goodToShoot());
     RobotLogger.logString("Hood/State", state.name());
   }

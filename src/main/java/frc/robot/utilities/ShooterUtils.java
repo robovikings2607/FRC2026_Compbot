@@ -51,6 +51,15 @@ public final class ShooterUtils {
       else{
         return robotPose.getX() < Units.inchesToMeters(469.11);
       }
+    }    
+    
+    public static boolean inOppoAllianceZone(Pose2d robotPose){
+      if(DriverStation.getAlliance().isEmpty() || DriverStation.getAlliance().get().equals(Alliance.Blue)){
+        return robotPose.getX() > Units.inchesToMeters(469.11);
+      }
+      else{
+        return robotPose.getX() < Units.inchesToMeters(182.11);
+      }
     }
   
     public static Translation2d determineShootingGoal(Pose2d robotPose){
@@ -119,7 +128,7 @@ public final class ShooterUtils {
     public static Translation2d stuypulesShootOnMove(CommandSwerveDrivetrain drivetrain, Pose2d robotPose){
       Translation2d goalPose = determineShootingGoal(robotPose);
       // Translation2d shooterPose = getShooterPose(robotPose);
-      Translation2d shooterPose = futureShooterPose(drivetrain, robotPose, true);
+      Translation2d shooterPose = futureShooterPose(drivetrain, robotPose, false);
       Translation2d vituralPose = goalPose;
   
       double distance = shooterPose.getDistance(goalPose);
@@ -128,7 +137,7 @@ public final class ShooterUtils {
       // double vx = drivetrain.getState().Speeds.vxMetersPerSecond;
       // double vy = drivetrain.getState().Speeds.vyMetersPerSecond;
   
-      double[] v = tangentialVelocities(drivetrain, robotPose, true);
+      double[] v = tangentialVelocities(drivetrain, robotPose, false);
       double vx = v[0];
       double vy = v[1];
   

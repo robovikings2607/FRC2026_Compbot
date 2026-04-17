@@ -19,6 +19,12 @@
                       }
                     },
                     {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.0
+                      }
+                    },
+                    {
                       "type": "path",
                       "data": {
                         "pathName": "WrapAroundCollectFuel (LeftBump)"
@@ -46,6 +52,12 @@
           "type": "named",
           "data": {
             "name": "Shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DeployIntake"
           }
         },
         {
@@ -80,16 +92,10 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "DeployIntakeNoSOTM"
+                  "name": "ShootOnTheMove"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
           }
         }
       ]

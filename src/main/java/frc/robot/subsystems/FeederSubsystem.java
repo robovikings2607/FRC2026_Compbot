@@ -78,6 +78,7 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
     REVERSE,
     DYNAMIC,
     PID_TUNING,
+    FULL_FIELD,
     OFF
   }
 
@@ -101,6 +102,11 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
 
   public void dynamicControl(){
     goal = FeederConstants.SPEED * robot.flywheel.percentOfGoal();
+    motor.setControl(pid.withVelocity(goal));
+  }
+
+  public void fullFieldControl(){
+    goal = 75.0;
     motor.setControl(pid.withVelocity(goal));
   }
 
@@ -139,6 +145,10 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
 
       case OFF:
         coastOut();
+        break;
+
+      case FULL_FIELD:
+        fullFieldControl();
         break;
     
       default:

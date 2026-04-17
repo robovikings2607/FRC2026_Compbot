@@ -53,6 +53,7 @@ public class KickerSubsystem extends SubsystemBase {
 
   public enum KickerState{
     FORWARD,
+    SHOOTING,
     REVERSE,
     OFF
   }
@@ -73,6 +74,10 @@ public class KickerSubsystem extends SubsystemBase {
     motor.setVoltage(-KickerConstants.SPEED);
   }
 
+  public void shootingControl(){
+    motor.setVoltage(3.0);
+  }
+
   public void stopMotor(){
     motor.stopMotor();
   }
@@ -91,6 +96,10 @@ public class KickerSubsystem extends SubsystemBase {
       case OFF:
         stopMotor();
         break;
+
+      case SHOOTING:
+        shootingControl();
+        break;
     
       default:
         stopMotor();
@@ -99,9 +108,9 @@ public class KickerSubsystem extends SubsystemBase {
   }
 
   public void updateLoggingData(){
-    RobotLogger.logDouble("Kicker/Voltage", motor.getMotorVoltage().getValueAsDouble());
+    /* RobotLogger.logDouble("Kicker/Voltage", motor.getMotorVoltage().getValueAsDouble());
     RobotLogger.logDouble("Kicker/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Kicker/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Kicker/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble()); */
     RobotLogger.logString("Kicker/State", state.name());
   }
 

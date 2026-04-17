@@ -171,7 +171,7 @@ public class RobotContainer {
 
         //Operator/Emergency
         operatorController.backButton.and(operatorController.startButton).onTrue(new ToggleOperatorControls(this));
-        operatorController.buttonY.onTrue(new RetractIntake(this));
+        operatorController.buttonY.onTrue(new RetratctIntakeAndStopKicker(this));
         operatorController.buttonA.onTrue(new DeployIntakeAndRunKicker(this));
         operatorController.buttonB.onTrue(new DeactivateTurret(this));
         operatorController.buttonX.onTrue(new ActivateTurret(this));

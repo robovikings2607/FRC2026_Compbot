@@ -83,13 +83,21 @@ public class Shoot extends Command {
     controlShooting(distance);
 
     if(flywheel.goodToShoot() && hood.goodToShoot() && robot.turret.goodToShoot()){
-      setFeedingStates();
-      controlFeeding(KickerState.FORWARD);
+      if(ShooterUtils.inOppoAllianceZone(robotPose)){
+        feeder.setState(FeederState.FULL_FIELD);
+        spindexer.setState(SpindexerState.FORWARD);
+        //kicker.setState(KickerState.SHOOTING);
+      }
+      else{
+        setFeedingStates();
+      }
+      kicker.controlMotor(KickerState.SHOOTING);
+      controlFeeding();
     }
     else{
       spindexer.setState(SpindexerState.OFF);
       feeder.setState(FeederState.OFF);
-      controlFeeding(KickerState.OFF);
+      controlFeeding();
     }
   }
 
@@ -100,9 +108,10 @@ public class Shoot extends Command {
     flywheel.setState(FlywheelState.OFF);
     spindexer.setState(SpindexerState.OFF);
     feeder.setState(FeederState.OFF);
+    kicker.controlMotor(KickerState.FORWARD);
     
     controlShooting(0);
-    controlFeeding(KickerState.OFF);
+    controlFeeding();
   }
 
   // Returns true when the command should end.
@@ -146,9 +155,9 @@ public class Shoot extends Command {
     flywheel.controlMotor(distance);
   }
 
-  public void controlFeeding(KickerState kickerState){
+  public void controlFeeding(){
     feeder.controlMotor();
     spindexer.controlMotor();
-    kicker.controlMotor(kickerState);
+    //kicker.controlMotor();
   }
 }

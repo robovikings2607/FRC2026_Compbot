@@ -77,8 +77,8 @@ public class TurretSubsystem extends SubsystemBase {
     magicMotionRequest = new MotionMagicVoltage(0.0);
     positionVoltage = new PositionVoltage(0.0);
 
-    logNumber2("Turret/BootUpPose", turretMotor.getPosition().getValueAsDouble());
-    logNumber2("SetOffset", 0.0);    
+    //logNumber2("Turret/BootUpPose", turretMotor.getPosition().getValueAsDouble());
+    //logNumber2("SetOffset", 0.0);    
     //logNumber2("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());        
   }
 
@@ -89,7 +89,7 @@ public class TurretSubsystem extends SubsystemBase {
         slot0Configs.kS = 1.0; // Voltage output to overcome static friction
         //slot0Configs.kV = 0.12; // A velocity target of 1 rps requires this voltage output.
         //slot0Configs.kA = 0.01; // An acceleration of 1 rps/s requires this voltage output
-        slot0Configs.kP = 16.0; // A position error of 2.5 rotations requires this voltage output
+        slot0Configs.kP = 13.0; // A position error of 2.5 rotations requires this voltage output
         slot0Configs.kI = 0; // no output for integrated error
         slot0Configs.kD = 0.35; // A velocity error of 1 rps requires this voltage output
 
@@ -153,12 +153,12 @@ public class TurretSubsystem extends SubsystemBase {
     double robotRotation = robotPose.getRotation().getDegrees();
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
 
-    RobotLogger.logStruct("Shooter/Pose", Pose2d.struct, new Pose2d(shooterPose.getX(), shooterPose.getY(), shooterPose.getAngle()));
+    //RobotLogger.logStruct("Shooter/Pose", Pose2d.struct, new Pose2d(shooterPose.getX(), shooterPose.getY(), shooterPose.getAngle()));
 
     Translation2d goalPose = ShooterUtils.stuypulesShootOnMove(robot.drivetrain, robotPose);
 
-    RobotLogger.logDouble("NoSOTMDistance", shooterPose.getDistance(ShooterUtils.determineShootingGoal(robotPose)));
-    RobotLogger.logDouble("SOTMDistance", shooterPose.getDistance(goalPose));
+    //RobotLogger.logDouble("NoSOTMDistance", shooterPose.getDistance(ShooterUtils.determineShootingGoal(robotPose)));
+    //RobotLogger.logDouble("SOTMDistance", shooterPose.getDistance(goalPose));
 
     //checks alliance and aims at corresponding hub
     currentEncoderPos = turretMotor.getPosition().getValueAsDouble();
@@ -191,10 +191,10 @@ public class TurretSubsystem extends SubsystemBase {
     RobotLogger.logStruct("Turret/AprilTagPoses", Pose2d.struct, turretAim);
 
 
-    RobotLogger.logBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());
-    RobotLogger.logBoolean("UserButtonPressed", RobotController.getUserButton());
+    //RobotLogger.logBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());
+    //RobotLogger.logBoolean("UserButtonPressed", RobotController.getUserButton());
 
-    logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        
+    //logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        
     logNumber("Turret/CurrentPose", currentEncoderPos);        
     logNumber2("Turret/TargetPose", targetEncoderPos);        
     logNumber2("Turret/WantedPose", wantedEncoderPos);        

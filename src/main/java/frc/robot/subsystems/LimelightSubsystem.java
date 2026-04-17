@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -28,13 +29,13 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
 
   /** Reject single-tag estimates with pose ambiguity above this threshold. */
-  private static final double kAmbiguityThreshold = 1e9; //0.3
+  private static final double kAmbiguityThreshold = 0.3;
 
   /**
    * Minimum average tag area (% of image) required for single-tag estimates.
    * Multi-tag estimates use the lower kMinTagAreaMulti threshold.
    */
-  private static final double kMinTagAreaSingle = 0.2;
+  private static final double kMinTagAreaSingle = 0.1;
   private static final double kMinTagAreaMulti  = 0.05;
 
   private static final double kMaxTagArea = 4.9;
@@ -138,14 +139,17 @@ public class LimelightSubsystem extends SubsystemBase {
   public void periodic() {
     yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
 
+    //double frontHeading = (Math.abs(yaw - frontMT1.pose.getRotation().getDegrees()) > 40) ? yaw : frontMT1.pose.getRotation().getDegrees();
+    //%double backHeading = (Math.abs(yaw - backMT1.pose.getRotation().getDegrees()) > 40) ? yaw : backMT1.pose.getRotation().getDegrees();
+
     LimelightHelpers.SetRobotOrientation(FRONT_LIMELIGHT_NAME,  yaw, 0, 0, 0, 0, 0);
     LimelightHelpers.SetRobotOrientation(BACK_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
 
     LimelightHelpers.PoseEstimate frontRaw  = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(FRONT_LIMELIGHT_NAME);
     LimelightHelpers.PoseEstimate backRaw = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(BACK_LIMELIGHT_NAME);
 
-    RobotLogger.logBoolean("Limelight/" + FRONT_LIMELIGHT_NAME  + "/hasTargets", frontRaw  != null && frontRaw.tagCount  > 0);
-    RobotLogger.logBoolean("Limelight/" + BACK_LIMELIGHT_NAME + "/hasTargets", backRaw != null && backRaw.tagCount > 0);    
+/*     RobotLogger.logBoolean("Limelight/" + FRONT_LIMELIGHT_NAME  + "/hasTargets", frontRaw  != null && frontRaw.tagCount  > 0);
+    RobotLogger.logBoolean("Limelight/" + BACK_LIMELIGHT_NAME + "/hasTargets", backRaw != null && backRaw.tagCount > 0);   */  
 
     Optional<CameraEstimate> frontEst  = frontVisionEnabled ? processCamera(frontRaw,  FRONT_LIMELIGHT_NAME) : Optional.empty();
     Optional<CameraEstimate> backEst = backVisionEnabled  ? processCamera(backRaw, BACK_LIMELIGHT_NAME)  : Optional.empty();
@@ -189,13 +193,19 @@ public class LimelightSubsystem extends SubsystemBase {
         RobotLogger.logStruct("Limelight/" + "Robot/robotPose", Pose2d.struct, est.pose);           
       }
     });
+
+    LimelightHelpers.PoseEstimate frontMT1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(FRONT_LIMELIGHT_NAME);
+    LimelightHelpers.PoseEstimate backMT1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(BACK_LIMELIGHT_NAME);
+
+    //updateFieldVisualization(frontMT1.pose, getTagPoses(frontMT1).toArray(Pose2d[]::new), "front-mt1");
+    updateFieldVisualization(backMT1.pose, getTagPoses(backMT1).toArray(Pose2d[]::new), "back-mt1");
   }
 
   // -------------------------------------------------------------------------
   // Per-camera filtering
   // -------------------------------------------------------------------------
 
-  /**
+/**
    * Applies 254-inspired filtering to a raw MegaTag2 estimate.
    *
    * <p>Checks applied:
@@ -214,49 +224,49 @@ public class LimelightSubsystem extends SubsystemBase {
    */
   private Optional<CameraEstimate> processCamera(LimelightHelpers.PoseEstimate mt, String name) {
     if (mt == null || mt.tagCount == 0) {
-      RobotLogger.logBoolean("Limelight/" + name + "/no Tags", true);                         
+      //RobotLogger.logBoolean("Limelight/" + name + "/no Tags", true);                         
       return Optional.empty();
     }
-    RobotLogger.logBoolean("Limelight/" + name + "/no Tags", false);                             
+    //RobotLogger.logBoolean("Limelight/" + name + "/no Tags", false);                             
 
     if (mt.timestampSeconds <= lastSubmittedTimestamp) {
-      RobotLogger.logBoolean("Limelight/" + name + "/bad Timestamp", true);                                   
+      //RobotLogger.logBoolean("Limelight/" + name + "/bad Timestamp", true);                                   
       return Optional.empty();
     }
-    RobotLogger.logBoolean("Limelight/" + name + "/bad Timestamp", false);                                       
+    //RobotLogger.logBoolean("Limelight/" + name + "/bad Timestamp", false);                                       
 
     if (mt.tagCount < 2) {
       // Single-tag extra checks
       if (mt.rawFiducials != null) {
         for (LimelightHelpers.RawFiducial f : mt.rawFiducials) {
           if (f.ambiguity > kAmbiguityThreshold) {
-            RobotLogger.logBoolean("Limelight/" + name + "/bad Ambuguity", true);                                                   
+      //      RobotLogger.logBoolean("Limelight/" + name + "/bad Ambuguity", true);                                                   
             return Optional.empty();
           }
         }
       }
-      RobotLogger.logBoolean("Limelight/" + name + "/bad Ambuguity", false);                                                         
+      //RobotLogger.logBoolean("Limelight/" + name + "/bad Ambuguity", false);                                                         
 
       if (mt.avgTagArea < kMinTagAreaSingle || mt.avgTagArea > kMaxTagArea) {
-        RobotLogger.logBoolean("Limelight/" + name + "/bad Area", true);                                                                 
+        //RobotLogger.logBoolean("Limelight/" + name + "/bad Area", true);                                                                 
         return Optional.empty();
       }
-      RobotLogger.logBoolean("Limelight/" + name + "/bad Area", false);                                                                       
+      //RobotLogger.logBoolean("Limelight/" + name + "/bad Area", false);                                                                       
     } 
     else {
       if (mt.avgTagArea < kMinTagAreaMulti) {
-        RobotLogger.logBoolean("Limelight/" + name + "/bad MinTagAreaMulti", true);                                                                               
+        //RobotLogger.logBoolean("Limelight/" + name + "/bad MinTagAreaMulti", true);                                                                               
         return Optional.empty();
       }
-      RobotLogger.logBoolean("Limelight/" + name + "/bad MinTagAreaMulti", false);                                                                                     
+      //RobotLogger.logBoolean("Limelight/" + name + "/bad MinTagAreaMulti", false);                                                                                     
     }
 
     // Reject poses suspiciously close to the field origin (likely a bad solve)
     if (mt.pose.getTranslation().getNorm() < kMinPoseNorm) {
-      RobotLogger.logBoolean("Limelight/" + name + "/bad PoseNorm", true);                                                                                           
+      //RobotLogger.logBoolean("Limelight/" + name + "/bad PoseNorm", true);                                                                                           
       return Optional.empty();
     }
-    RobotLogger.logBoolean("Limelight/" + name + "/bad PoseNorm", false);                                                                                               
+    //RobotLogger.logBoolean("Limelight/" + name + "/bad PoseNorm", false);                                                                                               
 
     // Quality-scaled standard deviations.
     // quality = 1.0 for multi-tag; 1.0 - ambiguity for single-tag (per 254's metric).
@@ -267,6 +277,7 @@ public class LimelightSubsystem extends SubsystemBase {
     double baseStd = (mt.tagCount >= 2) ? kMultiTagBaseStd : kSingleTagBaseStd;
     double xyStd   = baseStd * (1.0 / quality) * (1.0 + kDistStdScale * mt.avgTagDist);
     Matrix<N3, N1> stdDevs = VecBuilder.fill(xyStd, xyStd, kLargeVariance);
+    //Matrix<N3, N1> stdDevs = VecBuilder.fill(xyStd, xyStd, Units.degreesToRadians(90)); //n3 is in degrees, I believe
 
     return Optional.of(new CameraEstimate(mt.pose, mt.timestampSeconds, stdDevs, mt.tagCount));
   }

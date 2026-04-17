@@ -108,9 +108,9 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void updateLoggingData(){
-    RobotLogger.logDouble("Spindexer/Voltage", motor.getMotorVoltage().getValueAsDouble());
+    /* RobotLogger.logDouble("Spindexer/Voltage", motor.getMotorVoltage().getValueAsDouble());
     RobotLogger.logDouble("Spindexer/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Spindexer/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Spindexer/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble()); */
     RobotLogger.logString("Spindexer/State", state.name());
   }
 
