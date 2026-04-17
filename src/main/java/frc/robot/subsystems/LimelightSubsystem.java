@@ -34,7 +34,7 @@ public class LimelightSubsystem extends SubsystemBase {
    * Minimum average tag area (% of image) required for single-tag estimates.
    * Multi-tag estimates use the lower kMinTagAreaMulti threshold.
    */
-  private static final double kMinTagAreaSingle = 0.2;
+  private static final double kMinTagAreaSingle = 0.1;
   private static final double kMinTagAreaMulti  = 0.05;
 
   private static final double kMaxTagArea = 4.9;
@@ -248,11 +248,16 @@ public class LimelightSubsystem extends SubsystemBase {
     RobotLogger.logBoolean("Limelight/" + name + "/bad PoseNorm", false);                                                                                               
 
     // Quality-scaled standard deviations.
-    // quality = 1.0 for multi-tag; 1.0 - ambiguity for single-tag (per 254's metric).
+    // quality = 1 - worstAmbiguity for both multi-tag and single-tag
     // stddev scales with 1/quality so higher ambiguity → less trust.
     // An additional distance term accounts for tag size / measurement noise at range.
-    double quality = (mt.tagCount >= 2) ? 1.0
-        : 1.0 - mt.rawFiducials[0].ambiguity;
+    double worstAmbiguity = 0.0;
+    if (mt.rawFiducials != null) {
+      for (LimelightHelpers.RawFiducial f : mt.rawFiducials) {
+        if (f.ambiguity > worstAmbiguity) worstAmbiguity = f.ambiguity;
+      }
+    }
+    double quality = 1.0 - worstAmbiguity;
     double baseStd = (mt.tagCount >= 2) ? kMultiTagBaseStd : kSingleTagBaseStd;
     double xyStd   = baseStd * (1.0 / quality) * (1.0 + kDistStdScale * mt.avgTagDist);
     Matrix<N3, N1> stdDevs = VecBuilder.fill(xyStd, xyStd, kLargeVariance);
