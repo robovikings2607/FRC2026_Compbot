@@ -166,8 +166,8 @@ public final class Constants {
 
     //Current Limits
     public static final double STATOR_LIMIT = 90.0;
-    public static final double SUPPLY_LIMIT = 40.0; //equivalent to breaker
-    public static final double SUPPLY_LOWER_LIMIT = 10.0;
+    public static final double SUPPLY_LIMIT = 70.0; //equivalent to breaker
+    public static final double SUPPLY_LOWER_LIMIT = 40.0;
   }
 
   public static final class KickerConstants {

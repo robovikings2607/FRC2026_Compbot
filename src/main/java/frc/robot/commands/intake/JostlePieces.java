@@ -43,12 +43,18 @@ public class JostlePieces extends Command {
         timer.get() < 0.25 && intake.getState().equals(IntakeState.RETRACTED)){
       intake.setState(IntakeState.RETRACTED);
       intake.controlIntake();
+      if(timer.get() > 0.25){
+        timer.restart();
+      }
     }
 
     if((timer.get() > 0.25 && intake.getState().equals(IntakeState.RETRACTED)) || 
         timer.get() < 0.25 && intake.getState().equals(IntakeState.DEPLOYED)){
       intake.setState(IntakeState.DEPLOYED);
       intake.controlIntake();
+      if(timer.get() > 0.25){
+        timer.restart();
+      }    
     }
   }
 

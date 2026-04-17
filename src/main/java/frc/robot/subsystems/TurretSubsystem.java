@@ -131,21 +131,23 @@ public class TurretSubsystem extends SubsystemBase {
       turretMotor.setPosition(currentEncoderPos);
     }
 
-    if(!magnet.get() && !isZeroed){
+    if(!magnet.get()){
       turretMotor.setPosition(92.74 * rotationsPerDegree);
       isZeroed = true;
-    }
-    else if(!isZeroed){
-      if(robot.operatorController.povWest.getAsBoolean()){
+ 
+    }     
+
+    if(robot.operatorController.povWest.getAsBoolean()){
         turretMotor.set(0.06);
+        return;
       }
-      else if(robot.operatorController.povEast.getAsBoolean()){
+    else if(robot.operatorController.povEast.getAsBoolean()){
         turretMotor.set(-0.06);
-      }
-      else{
-        turretMotor.set(0.0);
-      }
-      return;
+        return;
+    }
+
+    if(!isZeroed){
+        return;
     }
 
     Pose2d robotPose = robot.drivetrain.getState().Pose;
