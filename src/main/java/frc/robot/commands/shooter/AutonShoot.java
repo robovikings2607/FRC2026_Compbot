@@ -7,6 +7,7 @@ package frc.robot.commands.shooter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
@@ -25,7 +26,7 @@ import frc.robot.subsystems.SpindexerSubsystem.SpindexerState;
 import frc.robot.utilities.ShooterUtils;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class Shoot extends Command {
+public class AutonShoot extends Command {
   /** Creates a new TransferPieces. */
 
   RobotContainer robot;
@@ -34,8 +35,9 @@ public class Shoot extends Command {
   HoodSubsystem hood;
   FlywheelSubsystem flywheel;
   KickerSubsystem kicker;
+  Timer timer = new Timer();
 
-  public Shoot(RobotContainer robot) {
+  public AutonShoot(RobotContainer robot) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.robot = robot;
     feeder = robot.feeder;
@@ -44,13 +46,13 @@ public class Shoot extends Command {
     flywheel = robot.flywheel;
     kicker = robot.kicker;
 
-    addRequirements(feeder, hood, flywheel, kicker);
+    addRequirements(feeder, spindexer, hood, flywheel, kicker);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    timer.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -88,10 +90,10 @@ public class Shoot extends Command {
       if(ShooterUtils.inOppoAllianceZone(robotPose)){
         feeder.setState(FeederState.FULL_FIELD);
       if(robot.operatorController.rightBumper.getAsBoolean()){
-        //spindexer.setState(SpindexerState.REVERSE);
+        spindexer.setState(SpindexerState.REVERSE);
       }
       else{
-        //spindexer.setState(SpindexerState.FORWARD);
+        spindexer.setState(SpindexerState.FORWARD);
     }        //kicker.setState(KickerState.SHOOTING);
       }
       else{
@@ -101,7 +103,7 @@ public class Shoot extends Command {
       controlFeeding();
     }
     else{
-      //spindexer.setState(SpindexerState.OFF);
+      spindexer.setState(SpindexerState.OFF);
       feeder.setState(FeederState.OFF);
       controlFeeding();
     }
@@ -112,7 +114,7 @@ public class Shoot extends Command {
   public void end(boolean interrupted) {
     hood.setState(HoodState.OFF);
     flywheel.setState(FlywheelState.OFF);
-    //spindexer.setState(SpindexerState.OFF);
+    spindexer.setState(SpindexerState.OFF);
     feeder.setState(FeederState.OFF);
     kicker.controlMotor(KickerState.FORWARD);
     
@@ -152,12 +154,13 @@ public class Shoot extends Command {
   }
 
   public void setFeedingStates(){
+    double time = timer.get();
     feeder.setState(FeederState.FORWARD);
-    if(robot.operatorController.rightBumper.getAsBoolean()){
-      //spindexer.setState(SpindexerState.REVERSE);
+    if((time > 2.0 && time < 2.2) || (time > 4.0 && time < 4.2)){
+      spindexer.setState(SpindexerState.REVERSE);
     }
     else{
-      //spindexer.setState(SpindexerState.FORWARD);
+      spindexer.setState(SpindexerState.FORWARD);
     }
   }
 
@@ -168,7 +171,7 @@ public class Shoot extends Command {
 
   public void controlFeeding(){
     feeder.controlMotor();
-   // spindexer.controlMotor();
+    spindexer.controlMotor();
     //kicker.controlMotor();
   }
 }

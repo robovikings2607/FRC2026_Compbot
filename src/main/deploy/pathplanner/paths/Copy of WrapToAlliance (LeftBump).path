@@ -36,19 +36,6 @@
   ],
   "constraintZones": [
     {
-      "name": "Shooting",
-      "minWaypointRelativePos": 0.5482781904118808,
-      "maxWaypointRelativePos": 1.0,
-      "constraints": {
-        "maxVelocity": 1.0,
-        "maxAcceleration": 3.0,
-        "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 720.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
-      }
-    },
-    {
       "name": "Over Bump",
       "minWaypointRelativePos": 0.23497636731938054,
       "maxWaypointRelativePos": 1.0,
@@ -79,7 +66,7 @@
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 1.0,
     "rotation": -90.0
   },
   "useDefaultConstraints": true

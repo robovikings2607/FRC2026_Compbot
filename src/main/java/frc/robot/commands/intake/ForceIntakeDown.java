@@ -10,6 +10,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.PivotConstants;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.IntakeState;
 
@@ -45,12 +46,12 @@ public class ForceIntakeDown extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-
+    intake.getPivotMotor().stopMotor();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return intake.getPivotMotor().getStatorCurrent().getValueAsDouble() > PivotConstants.FORCED_DOWN_THRESHOLD;
   }
 }

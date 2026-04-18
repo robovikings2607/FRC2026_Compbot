@@ -71,7 +71,7 @@ public class KickerSubsystem extends SubsystemBase {
   }
   
   public void reverseControl(){
-    motor.setVoltage(-KickerConstants.SPEED);
+    motor.setVoltage(-3.0);
   }
 
   public void shootingControl(){

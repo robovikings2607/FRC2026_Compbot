@@ -39,6 +39,17 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if(robot.operatorController.rightBumper.getAsBoolean()){
+      setState(SpindexerState.REVERSE);
+    }
+    else if(robot.turret.goodToShoot() && robot.flywheel.goodToShoot() && robot.hood.goodToShoot()){
+      setState(SpindexerState.FORWARD);
+    }
+    else{
+      setState(SpindexerState.OFF);
+    }
+
+    controlMotor();
     updateLoggingData();
 
   

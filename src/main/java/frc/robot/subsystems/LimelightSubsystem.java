@@ -224,6 +224,10 @@ public class LimelightSubsystem extends SubsystemBase {
     }
     //RobotLogger.logBoolean("Limelight/" + name + "/bad Timestamp", false);                                       
 
+    if(hasBlackListedTags(mt)){
+      return Optional.empty();
+    }
+
     if (mt.tagCount < 2) {
       // Single-tag extra checks
       if (mt.rawFiducials != null) {
@@ -374,7 +378,7 @@ public class LimelightSubsystem extends SubsystemBase {
   }
 
   private boolean hasBlackListedTags(LimelightHelpers.PoseEstimate cameraPose) {
-    int[] blackList = {7, 6, 17};
+    int[] blackList = {13,14, 16, 15, 29, 30, 31, 32};
     for (int i = 0; i < cameraPose.rawFiducials.length; i++) {
       for (int j = 0; j < blackList.length; j++) {
         if (cameraPose.rawFiducials[i].id == blackList[j]) { return true; }

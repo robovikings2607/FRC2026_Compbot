@@ -38,6 +38,7 @@ import frc.robot.commands.intake.DeployIntake;
 import frc.robot.commands.intake.DeployIntakeAndRunKicker;
 import frc.robot.commands.intake.ForceIntakeDown;
 import frc.robot.commands.intake.JostlePieces;
+import frc.robot.commands.intake.KickerDefaultCommand;
 import frc.robot.commands.intake.PIDTuningIntake;
 import frc.robot.commands.intake.PulseKicker;
 import frc.robot.commands.intake.RetractIntake;
@@ -45,6 +46,7 @@ import frc.robot.commands.intake.RetratctIntakeAndStopKicker;
 import frc.robot.commands.shooter.StopShooter;
 import frc.robot.commands.shooter.ToggleOperatorControls;
 import frc.robot.commands.shooter.ActivateTurret;
+import frc.robot.commands.shooter.AutonShoot;
 import frc.robot.commands.shooter.DeactivateTurret;
 import frc.robot.commands.shooter.FixShooter;
 import frc.robot.commands.shooter.ReverseSpindexer;
@@ -127,7 +129,7 @@ public class RobotContainer {
         createTuningToggles();
         //configureSysIdBindings(drivetrain);
         
-        //kicker.setDefaultCommand(new PulseKicker(this));
+        kicker.setDefaultCommand(new KickerDefaultCommand(this));
 
         autoChooser = AutoBuilder.buildAutoChooser();
         
@@ -153,14 +155,15 @@ public class RobotContainer {
         driverController.rightStick.onTrue(new ToggleHighLowGear(this));
 
         //Intake
-        driverController.leftTriggerButton.onTrue(new DeployIntakeAndRunKicker(this)); //will be deploy later
-        driverController.leftBumper.onTrue(new RetratctIntakeAndStopKicker(this)); //will be retract later
+        driverController.leftTriggerButton.onTrue(new DeployIntake(this)); //will be deploy later
+        driverController.leftBumper.onTrue(new RetractIntake(this)); //will be retract later
         driverController.rightBumper.onTrue(new ReverseRollers(this));
 
         //Shooter
         //driverController.buttonA.onTrue(new PIDTuningIntake(this));
         shootCommand = new Shoot(this);
         driverController.rightTriggerButton.whileTrue(shootCommand);
+        RobotLogger.logBoolean("ShootCommandSchedules", shootCommand.isScheduled());
         //driverController.buttonB.onTrue(new DeactivateTurret(this));
         //driverController.buttonX.onTrue(new ActivateTurret(this));
         //driverController.buttonY.onTrue(new FixShooter(this));
@@ -168,12 +171,12 @@ public class RobotContainer {
         //Operator/Emergency
         operatorController.backButton.and(operatorController.startButton).onTrue(new ToggleOperatorControls(this));
         operatorController.buttonY.onTrue(new RetractIntake(this));
-        operatorController.buttonA.onTrue(new DeployIntakeAndRunKicker(this));
+        operatorController.buttonA.onTrue(new DeployIntake(this));
         operatorController.buttonB.onTrue(new DeactivateTurret(this));
         operatorController.buttonX.onTrue(new ActivateTurret(this));
         operatorController.leftBumper.onTrue(new JostlePieces(this));
         operatorController.leftTriggerButton.onTrue(new FixShooter(this));
-        operatorController.rightBumper.whileTrue(new ReverseSpindexer(this));
+        //operatorController.rightBumper.whileTrue(new ReverseSpindexer(this));
         operatorController.rightTriggerButton.onTrue(new ForceIntakeDown(this));
 
         // Idle while the robot is disabled. This ensures the configured
@@ -192,7 +195,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("DeployIntake", new DeployIntakeAndRunKicker(this).raceWith(new WaitCommand(0.1)));
         NamedCommands.registerCommand("DeployIntakeNoSOTM", new DeployIntakeAndRunKicker(this));
         NamedCommands.registerCommand("RetractIntake", new RetratctIntakeAndStopKicker(this));
-        NamedCommands.registerCommand("Shoot", (new Shoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(6.0)));
+        NamedCommands.registerCommand("Shoot", (new AutonShoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(6.0)));
         NamedCommands.registerCommand("ShootOnTheMove", new Shoot(this));
     }
 

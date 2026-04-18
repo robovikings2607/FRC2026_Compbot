@@ -106,7 +106,7 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void fullFieldControl(){
-    goal = 75.0;
+    goal = 80.0;
     motor.setControl(pid.withVelocity(goal));
   }
 
