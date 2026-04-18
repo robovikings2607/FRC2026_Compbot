@@ -1,6 +1,67 @@
-// Copyback (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// =============================================================================
+// HOW THIS WORKS
+// =============================================================================
+//
+// We have two cameras. Both estimate where the robot is on the field by looking
+// at AprilTags (the black-and-white targets mounted around the field).
+//
+// FRONT CAMERA — bolted to the robot, never moves.
+//   Uses MegaTag2 (MT2), which combines what it sees with the gyro heading to
+//   get a more stable position estimate. We send it the robot's current heading
+//   every loop so it can do that math. Works well with any tags in view.
+//
+// TURRET CAMERA — mounted on the turret, rotates with it.
+//   Only looks at hub tags (IDs 2 and 3). Uses MT1, which doesn't need a
+//   heading — it solves for the full camera position from the tags alone.
+//
+//   We can't use MT2 here because MT2 has two assumptions that break on a
+//   rotating camera: (1) it needs to know the camera's heading, which would
+//   require sending gyro + turret angle every loop, and (2) it assumes the
+//   camera is at a fixed spot on the robot, but our camera orbits the turret
+//   center so its position in robot space changes every time the turret moves.
+//   MT1 makes neither assumption — it figures out where the camera is from
+//   scratch each frame using only what it sees.
+//
+//   Because the camera spins, we can't just ask "where is the robot?" directly.
+//   Instead, we tell the Limelight the camera has no offset from the robot center,
+//   so it gives us back the camera's position on the field. Then we do the math:
+//
+//     camera position on field
+//     - camera position on robot  (a point on a circle of radius TURRET_RADIUS,
+//                                  rotating with the turret)
+//     = robot position on field
+//
+//   The turret moves during the ~30ms it takes the camera to capture and process
+//   an image, so we can't just use the current turret angle. Instead we log the
+//   turret angle every loop into a timestamped history buffer, then look up the
+//   angle at the exact moment the image was taken.
+//
+//   We skip any reading where the turret was spinning fast, since the angle
+//   lookup is less reliable and the Limelight solve gets noisier.
+//
+// =============================================================================
+// TUNING TODO LIST
+// =============================================================================
+//
+// Geometry (measure from CAD or on the physical robot):
+//   TURRET_CENTER_X / TURRET_CENTER_Y  — where the turret spins from, relative to robot center
+//   TURRET_RADIUS                      — distance from turret center to camera lens
+//   CAM_PITCH_DEG                      — how far the camera tilts up/down on its mount
+//   CAM_ROLL_DEG                       — any sideways tilt on the mount
+//   CAM_UP_M                           — camera height above the floor
+//   Camera is assumed to be 0 deg relative to the turret
+//
+// Verify sign conventions:
+//   Rotate the turret CCW (left) — confirm getTurretAngleDegrees() increases
+//       If it decreases, negate the value in getTurretAngleDegrees()
+//
+// Filtering thresholds
+//   kAmbiguityThreshold     — raise if too many readings are rejected, lower for less noise
+//   kMinTagArea             — raise if readings are noisy at long range
+//   kMaxTurretRateDegPerSec — lower if poses glitch during fast slews; raise if too restrictive
+//   kMaxHeadingErrorDeg     — how far the MT1 heading can disagree with the gyro before rejecting
+//
+// =============================================================================
 
 package frc.robot.subsystems;
 
@@ -9,13 +70,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -25,61 +89,87 @@ import frc.robot.utilities.RobotLogger;
 public class LimelightSubsystem extends SubsystemBase {
 
   // -------------------------------------------------------------------------
-  // Vision filtering constants (tunable)
+  // Camera names
+  // -------------------------------------------------------------------------
+  private static final String FRONT_NAME  = "limelight-front";
+  private static final String TURRET_NAME = "limelight-back";
+
+  // Only look at hub tags with the turret camera — ignore everything else
+  private static final int[] HUB_TAG_IDS = {2, 3};
+
+  // -------------------------------------------------------------------------
+  // Turret camera geometry (TODO: fill from CAD measurements)
   // -------------------------------------------------------------------------
 
-  /** Reject single-tag estimates with pose ambiguity above this threshold. */
-  private static final double kAmbiguityThreshold = 0.5;
+  // Where the turret spins from, measured from the robot center (meters)
+  private static final double TURRET_CENTER_X = 0.0;
+  private static final double TURRET_CENTER_Y = 0.0;
 
-  /**
-   * Minimum average tag area (% of image) required for single-tag estimates.
-   * Multi-tag estimates use the lower kMinTagAreaMulti threshold.
-   */
-  private static final double kMinTagAreaSingle = 0.075;
-  private static final double kMinTagAreaMulti  = 0.05;
+  // How far the camera is from the turret center (meters)
+  private static final double TURRET_RADIUS = 0.0;
 
-  private static final double kMaxTagArea = 4.9;
+  // Which way the camera points when the turret encoder reads 0, relative to robot forward
+  // (degrees, positive = counterclockwise)
+  private static final double CAM_YAW_OFFSET_DEG = 0.0;
 
-  /**
-   * Reject any pose whose translation norm is below this value.
-   * Catches bad solves that report a position near the field origin.
-   */
-  private static final double kMinPoseNorm = 0.5; // meters
+  // Camera tilt — these don't change as the turret rotates (TODO: measure)
+  private static final double CAM_PITCH_DEG = 0.0;
+  private static final double CAM_ROLL_DEG  = 0.0;
 
-  /**
-   * Base XY standard deviation for multi-tag and single-tag estimates (meters).
-   * Scaled up linearly with average tag distance.
-   */
-  private static final double kMultiTagBaseStd  = 0.15;
-  private static final double kSingleTagBaseStd = 0.3;
+  // How high the camera is off the ground (meters)
+  private static final double CAM_UP_M = 0.267;
 
-  /** Per-meter distance scaling factor applied to base stddev. */
-  private static final double kDistStdScale = 0.03;
+  // -------------------------------------------------------------------------
+  // Filtering constants
+  // -------------------------------------------------------------------------
+  private static final double kAmbiguityThreshold = 0.3;
+  private static final double kMinTagArea         = 0.1;
+  private static final double kMaxTagArea         = 4.9;
+  private static final double kMinPoseNorm           = 0.5;
+  private static final double kMaxHeadingErrorDeg    = 30.0;
 
-  /** Large variance used for the rotation component — we trust the gyro, not vision heading. */
+  // Skip turret camera readings when the turret is spinning too fast — at high
+  // speed the angle we look up may be wrong, and the LL pose solve gets noisy.
+  // This also catches the turret snapping back when it hits a soft limit.
+  private static final double kMaxTurretRateDegPerSec = 60.0;
+
+  // Static position uncertainty (meters) for each camera.
+  // We also tell the filter to never correct gyro heading from vision (1e9).
+  private static final double kFrontStd  = 0.2;
+  private static final double kTurretStd = 0.15;
   private static final double kLargeVariance = 1e9;
 
   // -------------------------------------------------------------------------
-  // Camera names
+  // Turret angle + speed snapshot, stored every loop and looked up by timestamp
   // -------------------------------------------------------------------------
-  private final String FRONT_LIMELIGHT_NAME  = "limelight-front";
-  private final String BACK_LIMELIGHT_NAME = "limelight-back";
+  private static class TurretState {
+    // storing the raw double here instead of Rotation2d, since turret uses 0-360 - which will interpolate incorrectly with a [-180, 180] bound Rotation2d
+    final double angleDeg;
+    final double rateDegsPerSec;
+
+    TurretState(double angleDeg, double rateDegsPerSec) {
+      this.angleDeg       = angleDeg;
+      this.rateDegsPerSec = rateDegsPerSec;
+    }
+
+    static TurretState interpolate(TurretState a, TurretState b, double t) {
+      return new TurretState(
+          MathUtil.interpolate(a.angleDeg, b.angleDeg, t),
+          MathUtil.interpolate(a.rateDegsPerSec, b.rateDegsPerSec, t));
+    }
+  }
 
   // -------------------------------------------------------------------------
   // State
   // -------------------------------------------------------------------------
-  RobotContainer robot;
+  private final RobotContainer robot;
 
-  Pose2d frontFieldVisionPose;
-  Pose2d[] frontFieldVisionDetections;
-  Pose2d backFieldVisionPose;
-  Pose2d[] backFieldVisionDetections;
+  // Stores the last 0.5 s of turret snapshots so we can look up where the
+  // turret was pointing at the exact moment the camera captured an image
+  private final TimeInterpolatableBuffer<TurretState> turretBuffer =
+      TimeInterpolatableBuffer.createBuffer(TurretState::interpolate, 0.5);
 
-
-  double yaw;
   private AprilTagFieldLayout tagLayout;
-
-  /** Timestamp of the last measurement submitted to the pose estimator. */
   private double lastSubmittedTimestamp = 0.0;
 
   // -------------------------------------------------------------------------
@@ -105,17 +195,26 @@ public class LimelightSubsystem extends SubsystemBase {
   public LimelightSubsystem(RobotContainer robot) {
     this.robot = robot;
 
-    LimelightHelpers.setPipelineIndex(FRONT_LIMELIGHT_NAME, 0);
-    LimelightHelpers.SetIMUMode(FRONT_LIMELIGHT_NAME, 0);
+    // Front camera: bolted to the robot, uses MegaTag2 (requires us to send the robot's heading)
+    LimelightHelpers.setPipelineIndex(FRONT_NAME, 0);
+    LimelightHelpers.SetIMUMode(FRONT_NAME, 1);
 
-    LimelightHelpers.setPipelineIndex(BACK_LIMELIGHT_NAME, 0);
-    LimelightHelpers.SetIMUMode(BACK_LIMELIGHT_NAME, 0);
-    //LimelightHelpers.SetIMUAssistAlpha(BACK_LIMELIGHT_NAME, 0.01);
+    // Turret camera: only look at hub tags, use MT1 (no heading needed)
+    LimelightHelpers.setPipelineIndex(TURRET_NAME, 0);
+    LimelightHelpers.SetIMUMode(TURRET_NAME, 0);
+    LimelightHelpers.SetFiducialIDFiltersOverride(TURRET_NAME, HUB_TAG_IDS);
+
+    // Tell the LL the camera has no horizontal offset from the robot center.
+    // This makes mt.pose equal to the camera's position on the field,
+    // so we can do the offset math ourselves using the actual turret angle.
+    // Yaw is 0 here — we add turret rotation ourselves each loop.
+    // Pitch and roll are the fixed tilt of the camera on its mount.
+    LimelightHelpers.setCameraPose_RobotSpace(TURRET_NAME, 0, 0, CAM_UP_M, CAM_ROLL_DEG, CAM_PITCH_DEG, 0);
 
     try {
-      java.io.File deployDir = edu.wpi.first.wpilibj.Filesystem.getDeployDirectory();
-      java.io.File fieldJsonFile = new java.io.File(deployDir, "2026-rebuilt-welded.json");
-      tagLayout = new edu.wpi.first.apriltag.AprilTagFieldLayout(fieldJsonFile.toPath());
+      java.io.File fieldJsonFile = new java.io.File(
+          edu.wpi.first.wpilibj.Filesystem.getDeployDirectory(), "2026-rebuilt-welded.json");
+      tagLayout = new AprilTagFieldLayout(fieldJsonFile.toPath());
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -126,223 +225,119 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
   @Override
   public void periodic() {
-    yaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
+    double yaw      = robot.drivetrain.getState().Pose.getRotation().getDegrees();
+    double fpgaTime = Timer.getFPGATimestamp();
 
-    //double frontHeading = (Math.abs(yaw - frontMT1.pose.getRotation().getDegrees()) > 40) ? yaw : frontMT1.pose.getRotation().getDegrees();
-    //%double backHeading = (Math.abs(yaw - backMT1.pose.getRotation().getDegrees()) > 40) ? yaw : backMT1.pose.getRotation().getDegrees();
+    turretBuffer.addSample(fpgaTime, new TurretState(
+        robot.turret.getTurretAngleDegrees(),
+        robot.turret.getTurretRateDegPerSec()));
 
-    LimelightHelpers.SetRobotOrientation(FRONT_LIMELIGHT_NAME,  yaw, 0, 0, 0, 0, 0);
-    LimelightHelpers.SetRobotOrientation(BACK_LIMELIGHT_NAME, yaw, 0, 0, 0, 0, 0);
+    // --- Front camera (fixed, MT2) ---
+    LimelightHelpers.SetRobotOrientation(FRONT_NAME, yaw, 0, 0, 0, 0, 0);
+    LimelightHelpers.PoseEstimate frontRaw =
+        LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(FRONT_NAME);
+    Optional<CameraEstimate> frontEst = processFrontCamera(frontRaw);
 
-    LimelightHelpers.PoseEstimate frontRaw  = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(FRONT_LIMELIGHT_NAME);
-    LimelightHelpers.PoseEstimate backRaw = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(BACK_LIMELIGHT_NAME);
+    Pose2d frontVizPose = frontEst.isPresent() ? frontRaw.pose : Constants.EMPTY_POSE;
+    updateFieldVisualization(frontVizPose, getTagPoses(frontRaw), FRONT_NAME);
 
-/*     RobotLogger.logBoolean("Limelight/" + FRONT_LIMELIGHT_NAME  + "/hasTargets", frontRaw  != null && frontRaw.tagCount  > 0);
-    RobotLogger.logBoolean("Limelight/" + BACK_LIMELIGHT_NAME + "/hasTargets", backRaw != null && backRaw.tagCount > 0);   */  
+    // --- Turret camera (MT1) ---
+    LimelightHelpers.PoseEstimate turretRaw =
+        LimelightHelpers.getBotPoseEstimate_wpiBlue(TURRET_NAME);
+    Optional<CameraEstimate> turretEst = processTurretCamera(turretRaw);
 
-    Optional<CameraEstimate> frontEst  = processCamera(frontRaw,  FRONT_LIMELIGHT_NAME);
-    Optional<CameraEstimate> backEst = processCamera(backRaw, BACK_LIMELIGHT_NAME);
+    Pose2d turretVizPose = turretEst.isPresent() ? turretEst.get().pose : Constants.EMPTY_POSE;
+    updateFieldVisualization(turretVizPose, getTagPoses(turretRaw), TURRET_NAME);
 
-    if (frontEst.isPresent()) {
-      frontFieldVisionPose = frontRaw.pose;
-      frontFieldVisionDetections = getTagPoses(frontRaw).toArray(Pose2d[]::new);
-    } else {
-      frontFieldVisionPose = Constants.EMPTY_POSE;
-      frontFieldVisionDetections =  new Pose2d[]{};
-    }
-    
-    updateFieldVisualization(frontFieldVisionPose,  frontFieldVisionDetections,  FRONT_LIMELIGHT_NAME);
-
-    if (backEst.isPresent()) {
-      backFieldVisionPose = backRaw.pose;
-      backFieldVisionDetections = getTagPoses(backRaw).toArray(Pose2d[]::new);
-    } else {
-      backFieldVisionPose = Constants.EMPTY_POSE;
-      backFieldVisionDetections =  new Pose2d[]{};
-    }
-
-    updateFieldVisualization(backFieldVisionPose,  backFieldVisionDetections,  BACK_LIMELIGHT_NAME);
-
-    // Fuse both cameras before submitting a single update to the pose estimator.
-    // This avoids two correlated updates hitting the Kalman filter independently.
-    Optional<CameraEstimate> toSubmit;
-    if (frontEst.isPresent() && backEst.isPresent()) {
-      toSubmit = Optional.of(fuseEstimates(frontEst.get(), backEst.get()));
-    } else if (frontEst.isPresent()) {
-      toSubmit = frontEst;
-    } else {
-      toSubmit = backEst;
-    }
+    // Prefer turret camera (locked on hub) over front camera
+    Optional<CameraEstimate> toSubmit = turretEst.isPresent() ? turretEst : frontEst;
 
     toSubmit.ifPresent(est -> {
       if (est.timestampSeconds > lastSubmittedTimestamp) {
         robot.drivetrain.addVisionMeasurement(est.pose, est.timestampSeconds, est.stdDevs);
         lastSubmittedTimestamp = est.timestampSeconds;
-        RobotLogger.logDouble("Limelight/" + "Robot/fusedtimestamped", est.timestampSeconds);                   
-        RobotLogger.logStruct("Limelight/" + "Robot/robotPose", Pose2d.struct, est.pose);           
+        RobotLogger.logStruct("Limelight/Robot/pose", Pose2d.struct, est.pose);
+        RobotLogger.logDouble("Limelight/Robot/timestamp", est.timestampSeconds);
       }
     });
-
-    LimelightHelpers.PoseEstimate frontMT1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(FRONT_LIMELIGHT_NAME);
-    LimelightHelpers.PoseEstimate backMT1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(BACK_LIMELIGHT_NAME);
-
-    //updateFieldVisualization(frontMT1.pose, getTagPoses(frontMT1).toArray(Pose2d[]::new), "front-mt1");
-    updateFieldVisualization(backMT1.pose, getTagPoses(backMT1).toArray(Pose2d[]::new), "back-mt1");
   }
 
   // -------------------------------------------------------------------------
-  // Per-camera filtering
+  // Front camera (fixed mount, MT2)
   // -------------------------------------------------------------------------
+  private Optional<CameraEstimate> processFrontCamera(LimelightHelpers.PoseEstimate mt) {
+    if (mt == null || mt.tagCount == 0) return Optional.empty();
+    if (mt.timestampSeconds <= lastSubmittedTimestamp) return Optional.empty();
+    
+    if (mt.pose.getTranslation().getNorm() < kMinPoseNorm) return Optional.empty();
 
-/**
-   * Applies 254-inspired filtering to a raw MegaTag2 estimate.
-   *
-   * <p>Checks applied:
-   * <ol>
-   *   <li>Null / zero-tag guard</li>
-   *   <li>Single-tag: ambiguity threshold</li>
-   *   <li>Single-tag: minimum tag area</li>
-   *   <li>Multi-tag: minimum tag area</li>
-   *   <li>Pose norm check (rejects solves near the field origin)</li>
-   *   <li>Timestamp deduplication</li>
-   * </ol>
-   *
-   * <p>Standard deviations are scaled with average tag distance so that
-   * farther (less reliable) observations receive proportionally less weight
-   * in the Kalman filter.
-   */
-  private Optional<CameraEstimate> processCamera(LimelightHelpers.PoseEstimate mt, String name) {
-    if (mt == null || mt.tagCount == 0) {
-      //RobotLogger.logBoolean("Limelight/" + name + "/no Tags", true);                         
-      return Optional.empty();
-    }
-    //RobotLogger.logBoolean("Limelight/" + name + "/no Tags", false);                             
-
-    if (mt.timestampSeconds <= lastSubmittedTimestamp) {
-      //RobotLogger.logBoolean("Limelight/" + name + "/bad Timestamp", true);                                   
-      return Optional.empty();
-    }
-    //RobotLogger.logBoolean("Limelight/" + name + "/bad Timestamp", false);                                       
-
-    if(hasBlackListedTags(mt)){
-      return Optional.empty();
-    }
-
-    if (mt.tagCount < 2) {
-      // Single-tag extra checks
-      if (mt.rawFiducials != null) {
-        for (LimelightHelpers.RawFiducial f : mt.rawFiducials) {
-          if (f.ambiguity > kAmbiguityThreshold) {
-      //      RobotLogger.logBoolean("Limelight/" + name + "/bad Ambuguity", true);                                                   
-            return Optional.empty();
-          }
-        }
-      }
-      //RobotLogger.logBoolean("Limelight/" + name + "/bad Ambuguity", false);                                                         
-
-      if (mt.avgTagArea < kMinTagAreaSingle || mt.avgTagArea > kMaxTagArea) {
-        //RobotLogger.logBoolean("Limelight/" + name + "/bad Area", true);                                                                 
-        return Optional.empty();
-      }
-      //RobotLogger.logBoolean("Limelight/" + name + "/bad Area", false);                                                                       
-    } 
-    else {
-      if (mt.avgTagArea < kMinTagAreaMulti) {
-        //RobotLogger.logBoolean("Limelight/" + name + "/bad MinTagAreaMulti", true);                                                                               
-        return Optional.empty();
-      }
-      //RobotLogger.logBoolean("Limelight/" + name + "/bad MinTagAreaMulti", false);                                                                                     
-    }
-
-    // Reject poses suspiciously close to the field origin (likely a bad solve)
-    if (mt.pose.getTranslation().getNorm() < kMinPoseNorm) {
-      //RobotLogger.logBoolean("Limelight/" + name + "/bad PoseNorm", true);                                                                                           
-      return Optional.empty();
-    }
-    //RobotLogger.logBoolean("Limelight/" + name + "/bad PoseNorm", false);                                                                                               
-
-    // Quality-scaled standard deviations.
-    // quality = 1.0 for multi-tag; 1.0 - ambiguity for single-tag (per 254's metric).
-    // stddev scales with 1/quality so higher ambiguity → less trust.
-    // An additional distance term accounts for tag size / measurement noise at range.
-    double quality = (mt.tagCount >= 2) ? 1.0
-        : 1.0 - mt.rawFiducials[0].ambiguity;
-    double baseStd = (mt.tagCount >= 2) ? kMultiTagBaseStd : kSingleTagBaseStd;
-    double xyStd   = baseStd * (1.0 / quality) * (1.0 + kDistStdScale * mt.avgTagDist);
-    Matrix<N3, N1> stdDevs = VecBuilder.fill(xyStd, xyStd, kLargeVariance);
-    //Matrix<N3, N1> stdDevs = VecBuilder.fill(xyStd, xyStd, Units.degreesToRadians(90)); //n3 is in degrees, I believe
+    Matrix<N3, N1> stdDevs = VecBuilder.fill(kFrontStd, kFrontStd, kLargeVariance);
 
     return Optional.of(new CameraEstimate(mt.pose, mt.timestampSeconds, stdDevs, mt.tagCount));
   }
 
   // -------------------------------------------------------------------------
-  // Inverse-variance weighted fusion of two camera estimates
+  // Turret camera (MT1)
   // -------------------------------------------------------------------------
+  private Optional<CameraEstimate> processTurretCamera(LimelightHelpers.PoseEstimate mt) {
+    if (mt == null || mt.tagCount == 0) return Optional.empty();
+    if (mt.timestampSeconds <= lastSubmittedTimestamp) return Optional.empty();
 
-  /**
-   * Fuses two per-camera estimates into one using inverse-variance weighting,
-   * matching 254's approach in VisionSubsystem.fuseEstimates().
-   *
-   * <p>Because both cameras share the same gyro via MegaTag2, we keep the
-   * rotation from the more recent estimate and only fuse translation.
-   */
-  private CameraEstimate fuseEstimates(CameraEstimate a, CameraEstimate b) {
-    // Work in variance space
-    double varAx = sq(a.stdDevs.get(0, 0));
-    double varAy = sq(a.stdDevs.get(1, 0));
-    double varBx = sq(b.stdDevs.get(0, 0));
-    double varBy = sq(b.stdDevs.get(1, 0));
+    if (mt.rawFiducials != null) {
+      for (LimelightHelpers.RawFiducial f : mt.rawFiducials) {
+        if (f.ambiguity > kAmbiguityThreshold) return Optional.empty();
+      }
+    }
+    if (mt.avgTagArea < kMinTagArea || mt.avgTagArea > kMaxTagArea) return Optional.empty();
+    if (mt.pose.getTranslation().getNorm() < kMinPoseNorm) return Optional.empty();
 
-    double wAx = 1.0 / varAx, wBx = 1.0 / varBx;
-    double wAy = 1.0 / varAy, wBy = 1.0 / varBy;
+    // Find out where the turret was pointing when this image was taken.
+    // If the image is too old to be in our history, skip it.
+    Optional<TurretState> stateOpt = turretBuffer.getSample(mt.timestampSeconds);
+    if (stateOpt.isEmpty()) return Optional.empty();
+    TurretState state = stateOpt.get();
 
-    Pose2d fusedPose = new Pose2d(
-        new Translation2d(
-            (a.pose.getX() * wAx + b.pose.getX() * wBx) / (wAx + wBx),
-            (a.pose.getY() * wAy + b.pose.getY() * wBy) / (wAy + wBy)),
-        // Both rotations are gyro-derived via MT2; use the newer one
-        (a.timestampSeconds >= b.timestampSeconds)
-            ? a.pose.getRotation()
-            : b.pose.getRotation());
+    // Skip this reading if the turret was spinning fast when the photo was taken.
+    if (Math.abs(state.rateDegsPerSec) > kMaxTurretRateDegPerSec) return Optional.empty();
 
-    Matrix<N3, N1> fusedStdDevs = VecBuilder.fill(
-        Math.sqrt(1.0 / (wAx + wBx)),
-        Math.sqrt(1.0 / (wAy + wBy)),
-        kLargeVariance);
+    // Because we told the LL the camera is at the robot center (no offset),
+    // mt.pose is where the camera is on the field. From there, we subtract
+    // the camera's position on the robot (which rotates with the turret)
+    // to get where the robot center actually is.
+    Rotation2d turretAngle = Rotation2d.fromDegrees(state.angleDeg);
+    Rotation2d cameraYaw   = Rotation2d.fromDegrees(state.angleDeg + CAM_YAW_OFFSET_DEG);
+    double camX = TURRET_CENTER_X + TURRET_RADIUS * turretAngle.getCos();
+    double camY = TURRET_CENTER_Y + TURRET_RADIUS * turretAngle.getSin();
+    Transform2d robotToCamera = new Transform2d(camX, camY, cameraYaw);
 
-    double fusedTimestamp = Math.max(a.timestampSeconds, b.timestampSeconds);
-    int fusedTagCount     = a.tagCount + b.tagCount;
+    Pose2d robotPose = mt.pose.transformBy(robotToCamera.inverse());
 
-    return new CameraEstimate(fusedPose, fusedTimestamp, fusedStdDevs, fusedTagCount);
+    if (robotPose.getTranslation().getNorm() < kMinPoseNorm) return Optional.empty();
+
+    // MT1 also estimates which way the robot is facing. If that disagrees
+    // with the gyro by more than kMaxHeadingErrorDeg, something went wrong.
+    Rotation2d gyroYaw = robot.drivetrain.getState().Pose.getRotation();
+    double headingError = Math.abs(robotPose.getRotation().minus(gyroYaw).getDegrees());
+    if (headingError > kMaxHeadingErrorDeg) return Optional.empty();
+
+    Matrix<N3, N1> stdDevs = VecBuilder.fill(kTurretStd, kTurretStd, kLargeVariance);
+
+    return Optional.of(new CameraEstimate(robotPose, mt.timestampSeconds, stdDevs, mt.tagCount));
   }
-
-  private static double sq(double x) { return x * x; }
 
   // -------------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------------
-
-  private void updateFieldVisualization(
-      Pose2d robotPose,
-      Pose2d[] aprilTagPoses,
-      String name) {
-
-      RobotLogger.logStruct("Limelight/" + name + "/RobotPose", Pose2d.struct, robotPose);    
-      RobotLogger.logStructArray("Limelight/" + name + "/AprilTagPoses", Pose2d.struct, aprilTagPoses);
+private void updateFieldVisualization(Pose2d robotPose, List<Pose2d> tagPoses, String name) {
+    RobotLogger.logStruct("Limelight/" + name + "/RobotPose", Pose2d.struct, robotPose);
+    RobotLogger.logStructArray("Limelight/" + name + "/AprilTagPoses",
+        Pose2d.struct, tagPoses.toArray(Pose2d[]::new));
   }
 
-  public boolean isValidUpdate(LimelightHelpers.PoseEstimate mt2) {
-    return mt2 != null && mt2.tagCount > 0;
-  }
-
-  public void configureCameraOffset() {
-    LimelightHelpers.SetFidcuial3DOffset(FRONT_LIMELIGHT_NAME, yaw, yaw, yaw);
-  }
-
-  public List<Pose2d> getTagPoses(LimelightHelpers.PoseEstimate mt2) {
+  public List<Pose2d> getTagPoses(LimelightHelpers.PoseEstimate mt) {
     ArrayList<Pose2d> tagPoses = new ArrayList<>();
-    if (tagLayout != null && mt2.rawFiducials != null) {
-      for (LimelightHelpers.RawFiducial tag : mt2.rawFiducials) {
+    if (tagLayout != null && mt != null && mt.rawFiducials != null) {
+      for (LimelightHelpers.RawFiducial tag : mt.rawFiducials) {
         var pose3d = tagLayout.getTagPose(tag.id);
         if (pose3d.isPresent()) {
           tagPoses.add(pose3d.get().toPose2d());
@@ -350,50 +345,5 @@ public class LimelightSubsystem extends SubsystemBase {
       }
     }
     return tagPoses;
-  }
-
-  private LimelightHelpers.PoseEstimate getBestPose(
-      LimelightHelpers.PoseEstimate frontCamera, LimelightHelpers.PoseEstimate backCamera) {
-
-    boolean fronteliminated  = false;
-    boolean backeliminated = false;
-
-    double minTagSize = 0.1;
-
-    if (isValidUpdate(frontCamera))  { fronteliminated  = true; }
-    if (isValidUpdate(backCamera)) { backeliminated = true; }
-    if (fronteliminated && backeliminated) { return null; }
-
-    if (frontCamera.avgTagArea  < minTagSize) { fronteliminated  = true; }
-    if (backCamera.avgTagArea < minTagSize) { backeliminated = true; }
-    if (fronteliminated && backeliminated) { return null; }
-
-    if (frontCamera.tagCount > backCamera.tagCount) {
-      return frontCamera;
-    } else if (backCamera.tagCount > frontCamera.tagCount) {
-      return backCamera;
-    } else {
-      return (backCamera.avgTagArea > frontCamera.avgTagArea) ? backCamera : frontCamera;
-    }
-  }
-
-  private boolean hasBlackListedTags(LimelightHelpers.PoseEstimate cameraPose) {
-    int[] blackList = {7, 12, 13,14, 16, 15, 29, 30, 31, 32, 23, 28};
-    for (int i = 0; i < cameraPose.rawFiducials.length; i++) {
-      for (int j = 0; j < blackList.length; j++) {
-        if (cameraPose.rawFiducials[i].id == blackList[j]) { return true; }
-      }
-    }
-    return false;
-  }
-
-  private boolean hasWhiteListedTags(LimelightHelpers.PoseEstimate cameraPose) {
-    int[] whiteList = {2, 3, 4, 5, 8, 9, 10, 11, 18, 19, 20, 21, 24, 25, 26, 27};
-    for (int i = 0; i < cameraPose.rawFiducials.length; i++) {
-      for (int j = 0; j < whiteList.length; j++) {
-        if (cameraPose.rawFiducials[i].id == whiteList[j]) { return true; }
-      }
-    }
-    return false;
   }
 }

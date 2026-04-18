@@ -265,6 +265,14 @@ public class TurretSubsystem extends SubsystemBase {
     return turretMotor;
   }
 
+  public double getTurretAngleDegrees() {
+    return turretMotor.getPosition().getValueAsDouble() * (1.0 / rotationsPerDegree);
+  }
+
+  public double getTurretRateDegPerSec() {
+    return turretMotor.getVelocity().getValueAsDouble() * (1.0 / rotationsPerDegree);
+  }
+
   public boolean isFixed(){
     return fixedShot;
   }
