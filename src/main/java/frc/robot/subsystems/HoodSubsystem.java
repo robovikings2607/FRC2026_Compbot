@@ -98,7 +98,7 @@ public class HoodSubsystem extends SubsystemBase {
     shootingInterp.put(2.0, -1.0);
     shootingInterp.put(2.5, -2.0);
     shootingInterp.put(3.0, -4.0);
-    shootingInterp.put(3.5, -6.0);
+    shootingInterp.put(3.5, -7.0);
     shootingInterp.put(4.0, -9.0);
     shootingInterp.put(4.5, -12.0);
     shootingInterp.put(5.0, -14.0);

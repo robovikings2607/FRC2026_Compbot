@@ -93,7 +93,7 @@ public class RobotContainer {
     private boolean fieldCentricDrive = true;
     private boolean lowGear = true;
     private double highGear = 1.0; // 0.6 or 60% (max speed) for competition
-    private double slowGear = 0.3; // 0.2 or 20% of max speed for competition
+    private double slowGear = 0.2; // 0.2 or 20% of max speed for competition
     private double driveSpeedScale = (lowGear ? slowGear : highGear);
     public OI driverController = new OI(OI.kDriverControllerPort);
     public OI operatorController = new OI(OI.kOperatorControllerPort);
@@ -106,8 +106,8 @@ public class RobotContainer {
     
     // Slew rate limiters for shoot-on-the-move — limit acceleration while shooting
     // Units: m/s per second for translation, rad/s per second for rotation
-    private final SlewRateLimiter m_xLimiter = new SlewRateLimiter(3.0);
-    private final SlewRateLimiter m_yLimiter = new SlewRateLimiter(3.0);
+    private final SlewRateLimiter m_xLimiter = new SlewRateLimiter(4.0);
+    private final SlewRateLimiter m_yLimiter = new SlewRateLimiter(4.0);
     private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(Math.PI * 2);
     private Shoot shootCommand;
 
@@ -158,6 +158,7 @@ public class RobotContainer {
         driverController.leftTriggerButton.onTrue(new DeployIntake(this)); //will be deploy later
         driverController.leftBumper.onTrue(new RetractIntake(this)); //will be retract later
         driverController.rightBumper.onTrue(new ReverseRollers(this));
+        driverController.buttonA.whileTrue(drivetrain.applyRequest(() -> brake));
 
         //Shooter
         //driverController.buttonA.onTrue(new PIDTuningIntake(this));
@@ -195,7 +196,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("DeployIntake", new DeployIntakeAndRunKicker(this).raceWith(new WaitCommand(0.1)));
         NamedCommands.registerCommand("DeployIntakeNoSOTM", new DeployIntakeAndRunKicker(this));
         NamedCommands.registerCommand("RetractIntake", new RetratctIntakeAndStopKicker(this));
-        NamedCommands.registerCommand("Shoot", (new AutonShoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(6.0)));
+        NamedCommands.registerCommand("Shoot", (new AutonShoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(7.0)));
         NamedCommands.registerCommand("ShootOnTheMove", new Shoot(this));
     }
 
@@ -247,6 +248,14 @@ public class RobotContainer {
         lowGear = !lowGear;
         driveSpeedScale = (lowGear ? slowGear : highGear);
         RobotLogger.logBoolean("HighGear", !lowGear);
+    }
+
+    public void setLowGear(boolean lowGear){
+        this.lowGear = lowGear;
+        driveSpeedScale = (lowGear ? slowGear : highGear);
+                RobotLogger.logBoolean("HighGear", !lowGear);
+
+
     }
 
     public boolean isLowGear(){

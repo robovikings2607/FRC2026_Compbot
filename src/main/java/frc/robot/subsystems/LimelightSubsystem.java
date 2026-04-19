@@ -29,13 +29,13 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
 
   /** Reject single-tag estimates with pose ambiguity above this threshold. */
-  private static final double kAmbiguityThreshold = 0.3;
+  private static final double kAmbiguityThreshold = 0.5;
 
   /**
    * Minimum average tag area (% of image) required for single-tag estimates.
    * Multi-tag estimates use the lower kMinTagAreaMulti threshold.
    */
-  private static final double kMinTagAreaSingle = 0.1;
+  private static final double kMinTagAreaSingle = 0.075;
   private static final double kMinTagAreaMulti  = 0.05;
 
   private static final double kMaxTagArea = 4.9;
@@ -50,11 +50,11 @@ public class LimelightSubsystem extends SubsystemBase {
    * Base XY standard deviation for multi-tag and single-tag estimates (meters).
    * Scaled up linearly with average tag distance.
    */
-  private static final double kMultiTagBaseStd  = 0.2;
-  private static final double kSingleTagBaseStd = 0.4;
+  private static final double kMultiTagBaseStd  = 0.15;
+  private static final double kSingleTagBaseStd = 0.3;
 
   /** Per-meter distance scaling factor applied to base stddev. */
-  private static final double kDistStdScale = 0.05;
+  private static final double kDistStdScale = 0.03;
 
   /** Large variance used for the rotation component — we trust the gyro, not vision heading. */
   private static final double kLargeVariance = 1e9;
@@ -378,7 +378,7 @@ public class LimelightSubsystem extends SubsystemBase {
   }
 
   private boolean hasBlackListedTags(LimelightHelpers.PoseEstimate cameraPose) {
-    int[] blackList = {13,14, 16, 15, 29, 30, 31, 32};
+    int[] blackList = {7, 12, 13,14, 16, 15, 29, 30, 31, 32, 23, 28};
     for (int i = 0; i < cameraPose.rawFiducials.length; i++) {
       for (int j = 0; j < blackList.length; j++) {
         if (cameraPose.rawFiducials[i].id == blackList[j]) { return true; }

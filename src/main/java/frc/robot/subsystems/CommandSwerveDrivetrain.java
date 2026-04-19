@@ -15,11 +15,15 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.math.MathUsageId;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -42,6 +46,8 @@ import frc.robot.utilities.RobotLogger;
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem{
     private static final double kSimLoopPeriod = 0.004; // 4 ms
+    private static final double fieldLengthMeters = 16.548 - Units.inchesToMeters(11.375);
+    private static final double fieldWidthMeters = 8.052 - Units.inchesToMeters(10.375);
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
 
@@ -301,7 +307,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        
+        Pose2d currentPose = getState().Pose;
+        double clampedX = MathUtil.clamp(currentPose.getX(), Units.inchesToMeters(11.375), fieldLengthMeters);
+        double clampedY = MathUtil.clamp(currentPose.getY(), Units.inchesToMeters(10.375), fieldWidthMeters);
+
+        if(clampedX != currentPose.getX() || clampedY != currentPose.getY()){
+            resetPose(new Pose2d(clampedX, clampedY, currentPose.getRotation()));
+        }
+
 
         RobotLogger.logDouble("DriveTrain/vX", getState().Speeds.vxMetersPerSecond);
         RobotLogger.logDouble("DriveTrain/vY", getState().Speeds.vyMetersPerSecond);

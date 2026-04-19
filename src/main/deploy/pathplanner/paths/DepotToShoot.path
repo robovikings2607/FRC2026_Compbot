@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.6417319098457896,
-        "y": 6.0
+        "x": 0.64807272728024,
+        "y": 5.442552337906891
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.512783169300406,
-        "y": 5.804684290864721
+        "x": 2.0335555555555556,
+        "y": 5.389477777777777
       },
       "isLocked": false,
-      "linkedName": "DepotToShootStart"
+      "linkedName": "depot end"
     },
     {
       "anchor": {
-        "x": 2.2794008559201138,
-        "y": 5.6070470756062765
+        "x": 2.111511111111111,
+        "y": 4.015511111111111
       },
       "prevControl": {
-        "x": 0.7510969953685147,
-        "y": 6.001465017520035
+        "x": 2.0920222222222224,
+        "y": 4.668388888888888
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,8 +47,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.16,
-    "maxAcceleration": 4.5,
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -64,5 +64,5 @@
     "velocity": 0,
     "rotation": 180.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

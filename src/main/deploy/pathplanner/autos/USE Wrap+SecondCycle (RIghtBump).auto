@@ -11,7 +11,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "DeployIntake"
+                  "name": "DeployIntakeNoSOTM"
                 }
               },
               {
@@ -21,19 +21,25 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral1 (LeftBump)"
+                        "pathName": "AllianceToNeutral1 (RightBump)"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.0
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Copy of CollectFuel (LeftBump)"
+                        "pathName": "Copy of WrapAroundCollectFuel (LeftBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Copy of NeutralToAlliance1 (LeftBump)"
+                        "pathName": "Copy of WrapToAlliance (LeftBump)"
                       }
                     }
                   ]
@@ -55,7 +61,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "DeployIntake"
+                  "name": "DeployIntakeNoSOTM"
                 }
               },
               {
@@ -65,13 +71,13 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral2 (LeftBump)"
+                        "pathName": "AllianceToNeutral2 (RightBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "NeutralToAlliance2 (LeftBump)"
+                        "pathName": "NeutralToAlliance2 (RightBump)"
                       }
                     }
                   ]

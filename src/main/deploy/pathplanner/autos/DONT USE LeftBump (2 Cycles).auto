@@ -11,7 +11,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "DeployIntake"
+                  "name": "DeployIntakeNoSOTM"
                 }
               },
               {
@@ -21,19 +21,19 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral1 (RightBump)"
+                        "pathName": "AllianceToNeutral1 (LeftBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "CollectFuel (RightBump)"
+                        "pathName": "Copy of CollectFuel (LeftBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "NeutralToAlliance1 (RightBump)"
+                        "pathName": "Copy of NeutralToAlliance1 (LeftBump)"
                       }
                     }
                   ]
@@ -55,7 +55,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "DeployIntake"
+                  "name": "DeployIntakeNoSOTM"
                 }
               },
               {
@@ -65,13 +65,13 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral2 (RightBump)"
+                        "pathName": "AllianceToNeutral2 (LeftBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "NeutralToAlliance2 (RightBump)"
+                        "pathName": "NeutralToAlliance2 (LeftBump)"
                       }
                     }
                   ]

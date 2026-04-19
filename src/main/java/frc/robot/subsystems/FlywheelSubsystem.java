@@ -113,17 +113,17 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   public void createShootingInterpMap(){
     //key = distance from goal
     //value = speed of flywheel in rps 
-    shootingInterp.put(0.0, -40.0);
-    shootingInterp.put(1.5, -40.0);
-    shootingInterp.put(2.0, -42.5);
-    shootingInterp.put(2.5, -45.0);
+    shootingInterp.put(0.0, -41.0);
+    shootingInterp.put(1.5, -41.0);
+    shootingInterp.put(2.0, -43.5);
+    shootingInterp.put(2.5, -46.0);
     shootingInterp.put(3.0, -47.5);
-    shootingInterp.put(3.5, -50.0);
-    shootingInterp.put(4.0, -52.5);
-    shootingInterp.put(4.5, -54.0);
-    shootingInterp.put(5.0, -56.5);
-    shootingInterp.put(5.5, -61.0);
-    shootingInterp.put(5.8, -61.0);
+    shootingInterp.put(3.5, -52.0);
+    shootingInterp.put(4.0, -53.5);
+    shootingInterp.put(4.5, -56.0);
+    shootingInterp.put(5.0, -58.5);
+    shootingInterp.put(5.5, -62.0);
+    shootingInterp.put(5.8, -62.0);
     //shootingInterp.put(6.0, 0.0);
   }
 

@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.514436536180309,
-        "y": 6.0
+        "x": 3.5991440798858774,
+        "y": 5.788188302425108
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.373357058125742,
-        "y": 6.009311981020167
+        "x": 2.616219048513485,
+        "y": 5.709093725136454
       },
       "isLocked": false,
-      "linkedName": "StartTopLeft"
+      "linkedName": null
     },
     {
       "anchor": {
@@ -20,26 +20,35 @@
         "y": 6.0
       },
       "prevControl": {
-        "x": 1.7176512455516018,
-        "y": 6.020071174371845
+        "x": 1.5878740875585917,
+        "y": 5.915741572125382
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "StartToDepotEnd"
+      "linkedName": "DepotToShootStart"
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 0,
+      "constraints": {
+        "maxVelocity": 4.16,
+        "maxAcceleration": 4.5,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-<<<<<<< HEAD
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-=======
-    "maxVelocity": 5.12,
-    "maxAcceleration": 5.12,
->>>>>>> a63424b00a8b34610f4015bc1d90ce8ee56de492
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -47,21 +56,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-<<<<<<< HEAD
-    "rotation": 179.3156249787365
-=======
     "rotation": 180.0
->>>>>>> a63424b00a8b34610f4015bc1d90ce8ee56de492
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-<<<<<<< HEAD
-    "rotation": 179.3072889462837
-=======
     "rotation": 180.0
->>>>>>> a63424b00a8b34610f4015bc1d90ce8ee56de492
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

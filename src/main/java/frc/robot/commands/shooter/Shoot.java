@@ -58,6 +58,8 @@ public class Shoot extends Command {
   public void execute() {
     Pose2d robotPose = robot.drivetrain.getState().Pose;
 
+    robot.setLowGear(true);
+
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
     Translation2d goalPose = ShooterUtils.stuypulesShootOnMove(robot.drivetrain, robotPose);
 
@@ -110,6 +112,7 @@ public class Shoot extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    robot.setLowGear(false);
     hood.setState(HoodState.OFF);
     flywheel.setState(FlywheelState.OFF);
     //spindexer.setState(SpindexerState.OFF);

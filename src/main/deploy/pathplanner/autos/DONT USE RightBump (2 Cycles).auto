@@ -25,21 +25,15 @@
                       }
                     },
                     {
-                      "type": "wait",
+                      "type": "path",
                       "data": {
-                        "waitTime": 1.5
+                        "pathName": "CollectFuel (RightBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Copy of WrapAroundCollectFuel (LeftBump)"
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "Copy of WrapToAlliance (LeftBump)"
+                        "pathName": "NeutralToAlliance1 (RightBump)"
                       }
                     }
                   ]

@@ -127,7 +127,7 @@ public final class Constants {
     public static final int MOTOR_ID = 14;
 
     //Speeds (in volts)
-    public static final double NORMAL_SPEED = -11;
+    public static final double NORMAL_SPEED = -11.1;
     public static final double JAMMED_SPEED = -12.0;
 
     //Current Limits
