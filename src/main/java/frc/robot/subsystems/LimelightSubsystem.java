@@ -76,6 +76,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -305,12 +306,7 @@ public class LimelightSubsystem extends SubsystemBase {
     // the camera's position on the robot (which rotates with the turret)
     // to get where the robot center actually is.
     Rotation2d turretAngle = Rotation2d.fromDegrees(state.angleDeg);
-    Rotation2d cameraYaw   = Rotation2d.fromDegrees(state.angleDeg + CAM_YAW_OFFSET_DEG);
-    double camX = TURRET_CENTER_X + TURRET_RADIUS * turretAngle.getCos();
-    double camY = TURRET_CENTER_Y + TURRET_RADIUS * turretAngle.getSin();
-    Transform2d robotToCamera = new Transform2d(camX, camY, cameraYaw);
-
-    Pose2d robotPose = mt.pose.transformBy(robotToCamera.inverse());
+    Pose2d robotPose = cameraToRobotPose(mt.pose, turretAngle, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_RADIUS);
 
     if (robotPose.getTranslation().getNorm() < kMinPoseNorm) return Optional.empty();
 
@@ -328,6 +324,16 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------------
+
+  public static Pose2d cameraToRobotPose(
+      Pose2d cameraPose, Rotation2d turretAngle,
+      double turretCenterX, double turretCenterY, double turretRadius) {
+    Translation2d cameraTranslation = new Translation2d(turretCenterX, turretCenterY)  // start at turret pivot in robot frame
+        .plus(new Translation2d(turretRadius, 0).rotateBy(turretAngle));               // add radius rotated to current turret angle
+
+    Transform2d robotToCamera = new Transform2d(cameraTranslation, turretAngle);        // camera pose in robot frame (position + heading)
+    return cameraPose.transformBy(robotToCamera.inverse());                             // camera field pose -> robot field pose
+  }
 private void updateFieldVisualization(Pose2d robotPose, List<Pose2d> tagPoses, String name) {
     RobotLogger.logStruct("Limelight/" + name + "/RobotPose", Pose2d.struct, robotPose);
     RobotLogger.logStructArray("Limelight/" + name + "/AprilTagPoses",
