@@ -12,9 +12,9 @@ public class LimelightTurretTransformTest {
 
     private static final double DELTA = 1e-6;
 
-    private static final double TURRET_CENTER_X = 0.1;
-    private static final double TURRET_CENTER_Y = -0.05;
-    private static final double TURRET_RADIUS   = 0.3;
+    private static final double TURRET_CENTER_X = 1;
+    private static final double TURRET_CENTER_Y = -1;
+    private static final double TURRET_RADIUS   = 2;
 
     // Forward direction: given a known robot pose and turret angle, produce the
     // camera field pose that the Limelight would report as mt.pose.
@@ -22,12 +22,6 @@ public class LimelightTurretTransformTest {
         Translation2d cameraInRobot = new Translation2d(TURRET_CENTER_X, TURRET_CENTER_Y)
                 .plus(new Translation2d(TURRET_RADIUS, 0).rotateBy(turretAngle));
         return robotPose.transformBy(new Transform2d(cameraInRobot, turretAngle));
-    }
-
-    private void assertPoseEquals(Pose2d expected, Pose2d actual) {
-        assertEquals(expected.getX(), actual.getX(), DELTA, "X");
-        assertEquals(expected.getY(), actual.getY(), DELTA, "Y");
-        assertEquals(expected.getRotation().getDegrees(), actual.getRotation().getDegrees(), DELTA, "heading");
     }
 
     @Test
@@ -60,6 +54,20 @@ public class LimelightTurretTransformTest {
 
         // Verify out test function lets us go the other way: field -> camera reported pose
         assertEquals(cameraReportedPose, toCameraFieldPose(expectedRobotPose, turretAngle));
+    }
+
+    @Test
+    public void testWithRawNumbers() {
+        Rotation2d turretAngle = Rotation2d.fromDegrees(90);
+        Rotation2d robotHeading = Rotation2d.fromDegrees(0);
+
+        // Camera says we are at (3, 5) pointing 90 degrees.
+        Pose2d cameraPose = new Pose2d(4,5, turretAngle);
+
+        // Robot is at (3, 4) pointing 0 degrees.
+        Pose2d expectedRobotPose = new Pose2d(3, 4, robotHeading);
+
+        assertEquals(expectedRobotPose, LimelightSubsystem.cameraToRobotPose(cameraPose, turretAngle, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_RADIUS));
     }
 
     @Test
