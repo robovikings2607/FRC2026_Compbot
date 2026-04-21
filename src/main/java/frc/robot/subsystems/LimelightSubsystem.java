@@ -76,9 +76,11 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -95,18 +97,19 @@ public class LimelightSubsystem extends SubsystemBase {
   private static final String TURRET_NAME = "limelight-back";
 
   // Only look at hub tags with the turret camera — ignore everything else
-  private static final int[] HUB_TAG_IDS = {2, 3};
+  private static final int[] HUB_TAG_IDS = {2, 3, 4, 5, 8, 9 , 10, 11, 18, 19, 20, 21, 24, 25, 26, 27};
+  private static final int[] FRONT_CAM_BLACKLIST = {};
 
   // -------------------------------------------------------------------------
   // Turret camera geometry (TODO: fill from CAD measurements)
   // -------------------------------------------------------------------------
 
   // Where the turret spins from, measured from the robot center (meters)
-  private static final double TURRET_CENTER_X = 0.0;
-  private static final double TURRET_CENTER_Y = 0.0;
+  private static final double TURRET_CENTER_X = Units.inchesToMeters(-6.75);
+  private static final double TURRET_CENTER_Y = Units.inchesToMeters(-5.75);
 
   // How far the camera is from the turret center (meters)
-  private static final double TURRET_RADIUS = 0.0;
+  private static final double TURRET_RADIUS = Units.inchesToMeters(4.625);
 
   // Which way the camera points when the turret encoder reads 0, relative to robot forward
   // (degrees, positive = counterclockwise)
@@ -139,6 +142,9 @@ public class LimelightSubsystem extends SubsystemBase {
   private static final double kTurretStd = 0.15;
   private static final double kLargeVariance = 1e9;
 
+  //Translation 2d from center of turret to camera
+  private static final Translation2d CAM_TO_TURRET = new Translation2d(Units.inchesToMeters(4.625), 0.0);
+  private static final Rotation2d CAM_TO_TURRET_ANGLE = CAM_TO_TURRET.getAngle();
   // -------------------------------------------------------------------------
   // Turret angle + speed snapshot, stored every loop and looked up by timestamp
   // -------------------------------------------------------------------------
@@ -270,6 +276,7 @@ public class LimelightSubsystem extends SubsystemBase {
     if (mt.timestampSeconds <= lastSubmittedTimestamp) return Optional.empty();
     
     if (mt.pose.getTranslation().getNorm() < kMinPoseNorm) return Optional.empty();
+    if(hasBlackListedTags(mt, FRONT_CAM_BLACKLIST)) return Optional.empty();
 
     Matrix<N3, N1> stdDevs = VecBuilder.fill(kFrontStd, kFrontStd, kLargeVariance);
 
@@ -306,8 +313,8 @@ public class LimelightSubsystem extends SubsystemBase {
     // to get where the robot center actually is.
     Rotation2d turretAngle = Rotation2d.fromDegrees(state.angleDeg);
     Rotation2d cameraYaw   = Rotation2d.fromDegrees(state.angleDeg + CAM_YAW_OFFSET_DEG);
-    double camX = TURRET_CENTER_X + TURRET_RADIUS * turretAngle.getCos();
-    double camY = TURRET_CENTER_Y + TURRET_RADIUS * turretAngle.getSin();
+    double camX = TURRET_CENTER_X + TURRET_RADIUS * (turretAngle.plus(CAM_TO_TURRET_ANGLE)).getCos();
+    double camY = TURRET_CENTER_Y + TURRET_RADIUS * (turretAngle.plus(CAM_TO_TURRET_ANGLE)).getSin();
     Transform2d robotToCamera = new Transform2d(camX, camY, cameraYaw);
 
     Pose2d robotPose = mt.pose.transformBy(robotToCamera.inverse());
@@ -345,5 +352,14 @@ private void updateFieldVisualization(Pose2d robotPose, List<Pose2d> tagPoses, S
       }
     }
     return tagPoses;
+  }
+
+  private boolean hasBlackListedTags(LimelightHelpers.PoseEstimate cameraPose, int[] blackList) {
+    for (int i = 0; i < cameraPose.rawFiducials.length; i++) {
+      for (int j = 0; j < blackList.length; j++) {
+        if (cameraPose.rawFiducials[i].id == blackList[j]) { return true; }
+      }
+    }
+    return false;
   }
 }
