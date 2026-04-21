@@ -14,13 +14,13 @@ public class LimelightTurretTransformTest {
 
     private static final double TURRET_CENTER_X = 1;
     private static final double TURRET_CENTER_Y = -1;
-    private static final double TURRET_RADIUS   = 2;
+    private static final Translation2d TURRET_TO_CAM = new Translation2d(2, 0);
 
     // Forward direction: given a known robot pose and turret angle, produce the
     // camera field pose that the Limelight would report as mt.pose.
     private Pose2d toCameraFieldPose(Pose2d robotPose, Rotation2d turretAngle) {
         Translation2d cameraInRobot = new Translation2d(TURRET_CENTER_X, TURRET_CENTER_Y)
-                .plus(new Translation2d(TURRET_RADIUS, 0).rotateBy(turretAngle));
+                .plus(TURRET_TO_CAM.rotateBy(turretAngle));
         return robotPose.transformBy(new Transform2d(cameraInRobot, turretAngle));
     }
 
@@ -35,8 +35,8 @@ public class LimelightTurretTransformTest {
         Rotation2d turretAngle = Rotation2d.fromDegrees(30);
 
         // Find where the camera is inside the robot:
-        double camOffsetX = TURRET_CENTER_X + TURRET_RADIUS * turretAngle.getCos();
-        double camOffsetY = TURRET_CENTER_Y + TURRET_RADIUS * turretAngle.getSin();
+        double camOffsetX = TURRET_CENTER_X + TURRET_TO_CAM.rotateBy(turretAngle).getX();
+        double camOffsetY = TURRET_CENTER_Y + TURRET_TO_CAM.rotateBy(turretAngle).getY();
 
         // Rotate the above camera-in-robot coordinates by the robot rotation.
         // Also add robotX/Y here - it's zero above, but will make this correct if you adjust.
@@ -50,7 +50,7 @@ public class LimelightTurretTransformTest {
         Pose2d expectedRobotPose = new Pose2d(robotX, robotY, robotHeading);
 
         // Give the conversion function the camera pose in the field, make sure we get the robot pose out.
-        assertEquals(expectedRobotPose, LimelightSubsystem.cameraToRobotPose(cameraReportedPose, turretAngle, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_RADIUS));
+        assertEquals(expectedRobotPose, LimelightSubsystem.cameraToRobotPose(cameraReportedPose, turretAngle, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_TO_CAM));
 
         // Verify out test function lets us go the other way: field -> camera reported pose
         assertEquals(cameraReportedPose, toCameraFieldPose(expectedRobotPose, turretAngle));
@@ -67,14 +67,14 @@ public class LimelightTurretTransformTest {
         // Robot is at (3, 4) pointing 0 degrees.
         Pose2d expectedRobotPose = new Pose2d(3, 4, robotHeading);
 
-        assertEquals(expectedRobotPose, LimelightSubsystem.cameraToRobotPose(cameraPose, turretAngle, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_RADIUS));
+        assertEquals(expectedRobotPose, LimelightSubsystem.cameraToRobotPose(cameraPose, turretAngle, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_TO_CAM));
     }
 
     @Test
     public void turretForward_robotAtOrigin() {
         Pose2d robot = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
         Rotation2d turret = Rotation2d.fromDegrees(0);
-        assertEquals(robot, LimelightSubsystem.cameraToRobotPose(toCameraFieldPose(robot, turret), turret, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_RADIUS));
+        assertEquals(robot, LimelightSubsystem.cameraToRobotPose(toCameraFieldPose(robot, turret), turret, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_TO_CAM));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class LimelightTurretTransformTest {
         // Camera swung 90° left — camera sits to the left of robot center in field frame
         Pose2d robot = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
         Rotation2d turret = Rotation2d.fromDegrees(90);
-        assertEquals(robot, LimelightSubsystem.cameraToRobotPose(toCameraFieldPose(robot, turret), turret, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_RADIUS));
+        assertEquals(robot, LimelightSubsystem.cameraToRobotPose(toCameraFieldPose(robot, turret), turret, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_TO_CAM));
     }
 
     @Test
@@ -90,14 +90,14 @@ public class LimelightTurretTransformTest {
         // Robot facing 45°, turret pointing forward relative to robot
         Pose2d robot = new Pose2d(3, 4, Rotation2d.fromDegrees(45));
         Rotation2d turret = Rotation2d.fromDegrees(0);
-        assertEquals(robot, LimelightSubsystem.cameraToRobotPose(toCameraFieldPose(robot, turret), turret, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_RADIUS));
+        assertEquals(robot, LimelightSubsystem.cameraToRobotPose(toCameraFieldPose(robot, turret), turret, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_TO_CAM));
     }
 
     @Test
     public void turretAt45_robotRotated() {
         Pose2d robot = new Pose2d(2, 3, Rotation2d.fromDegrees(30));
         Rotation2d turret = Rotation2d.fromDegrees(45);
-        assertEquals(robot, LimelightSubsystem.cameraToRobotPose(toCameraFieldPose(robot, turret), turret, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_RADIUS));
+        assertEquals(robot, LimelightSubsystem.cameraToRobotPose(toCameraFieldPose(robot, turret), turret, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_TO_CAM));
     }
 
     @Test
@@ -105,6 +105,6 @@ public class LimelightTurretTransformTest {
         // Turret pointing 180° (behind robot)
         Pose2d robot = new Pose2d(5, 7, Rotation2d.fromDegrees(-30));
         Rotation2d turret = Rotation2d.fromDegrees(180);
-        assertEquals(robot, LimelightSubsystem.cameraToRobotPose(toCameraFieldPose(robot, turret), turret, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_RADIUS));
+        assertEquals(robot, LimelightSubsystem.cameraToRobotPose(toCameraFieldPose(robot, turret), turret, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_TO_CAM));
     }
 }

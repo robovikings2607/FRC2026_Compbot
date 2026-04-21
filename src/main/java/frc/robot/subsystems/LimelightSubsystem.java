@@ -27,8 +27,7 @@
 //   so it gives us back the camera's position on the field. Then we do the math:
 //
 //     camera position on field
-//     - camera position on robot  (a point on a circle of radius TURRET_RADIUS,
-//                                  rotating with the turret)
+//     - camera position on robot  (TURRET_TO_CAM offset, rotating with the turret)
 //     = robot position on field
 //
 //   The turret moves during the ~30ms it takes the camera to capture and process
@@ -45,7 +44,7 @@
 //
 // Geometry (measure from CAD or on the physical robot):
 //   TURRET_CENTER_X / TURRET_CENTER_Y  — where the turret spins from, relative to robot center
-//   TURRET_RADIUS                      — distance from turret center to camera lens
+//   TURRET_TO_CAM                      — Translation2d from turret pivot to camera lens (at turret angle=0)
 //   CAM_PITCH_DEG                      — how far the camera tilts up/down on its mount
 //   CAM_ROLL_DEG                       — any sideways tilt on the mount
 //   CAM_UP_M                           — camera height above the floor
@@ -109,8 +108,9 @@ public class LimelightSubsystem extends SubsystemBase {
   private static final double TURRET_CENTER_X = Units.inchesToMeters(-6.75);
   private static final double TURRET_CENTER_Y = Units.inchesToMeters(-5.75);
 
-  // How far the camera is from the turret center (meters)
-  private static final double TURRET_RADIUS = Units.inchesToMeters(4.625);
+  // Camera position relative to turret pivot, in the turret's own frame (X+ = turret forward, Y+ = turret left).
+  // At turret angle=0 this frame is aligned with the robot frame.
+  private static final Translation2d TURRET_TO_CAM = new Translation2d(0.0, Units.inchesToMeters(4.625));
 
   // Which way the camera points when the turret encoder reads 0, relative to robot forward
   // (degrees, positive = counterclockwise)
@@ -143,9 +143,6 @@ public class LimelightSubsystem extends SubsystemBase {
   private static final double kTurretStd = 0.15;
   private static final double kLargeVariance = 1e9;
 
-  //Translation 2d from center of turret to camera
-  private static final Translation2d CAM_TO_TURRET = new Translation2d(Units.inchesToMeters(4.625), 0.0);
-  private static final Rotation2d CAM_TO_TURRET_ANGLE = CAM_TO_TURRET.getAngle();
   // -------------------------------------------------------------------------
   // Turret angle + speed snapshot, stored every loop and looked up by timestamp
   // -------------------------------------------------------------------------
@@ -312,14 +309,10 @@ public class LimelightSubsystem extends SubsystemBase {
     // mt.pose is where the camera is on the field. From there, we subtract
     // the camera's position on the robot (which rotates with the turret)
     // to get where the robot center actually is.
-    Rotation2d turretAngle = Rotation2d.fromDegrees(state.angleDeg);
-    Rotation2d cameraYaw   = Rotation2d.fromDegrees(state.angleDeg + CAM_YAW_OFFSET_DEG);
-    double camX = TURRET_CENTER_X + TURRET_RADIUS * turretAngle.getCos();
-    double camY = TURRET_CENTER_Y + TURRET_RADIUS * turretAngle.getSin();
-    Transform2d robotToCamera = new Transform2d(camX, camY, cameraYaw);
+    Rotation2d turretAngle = Rotation2d.fromDegrees(state.angleDeg + CAM_YAW_OFFSET_DEG);
+    Pose2d robotPose = cameraToRobotPose(mt.pose, turretAngle, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_TO_CAM);
 
-    Pose2d robotPose = mt.pose.transformBy(robotToCamera.inverse());
-
+    // If the pose is right at (0,0), it's probably garbage from the LL.
     if (robotPose.getTranslation().getNorm() < kMinPoseNorm) return Optional.empty();
 
     // MT1 also estimates which way the robot is facing. If that disagrees
@@ -339,9 +332,9 @@ public class LimelightSubsystem extends SubsystemBase {
 
   public static Pose2d cameraToRobotPose(
       Pose2d cameraPose, Rotation2d turretAngle,
-      double turretCenterX, double turretCenterY, double turretRadius) {
+      double turretCenterX, double turretCenterY, Translation2d turretToCam) {
     Translation2d cameraTranslation = new Translation2d(turretCenterX, turretCenterY)  // start at turret pivot in robot frame
-        .plus(new Translation2d(turretRadius, 0).rotateBy(turretAngle));               // add radius rotated to current turret angle
+        .plus(turretToCam.rotateBy(turretAngle));                                      // add cam offset rotated to current turret angle
 
     Transform2d robotToCamera = new Transform2d(cameraTranslation, turretAngle);        // camera pose in robot frame (position + heading)
     return cameraPose.transformBy(robotToCamera.inverse());                             // camera field pose -> robot field pose
