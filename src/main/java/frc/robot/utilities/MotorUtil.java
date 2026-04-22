@@ -13,10 +13,11 @@ public class MotorUtil {
     private final TalonFX motor;    
     private final StatusSignal<Current> statorCurrentSignal;
     private final StatusSignal<Current> supplyCurrentSignal;    
-    private final StatusSignal<Angle> motorPositionSignal;  
-    private final StatusSignal<AngularVelocity> motorVelocitySignal;    
-    private final StatusSignal<Voltage> motorVoltageSignal;      
-    private final StatusSignal<Temperature> motorTemperatureSignal;      
+    private final StatusSignal<Angle> positionSignal;  
+    private final StatusSignal<AngularVelocity> velocitySignal;    
+    private final StatusSignal<Voltage> voltageSignal;      
+    private final StatusSignal<Temperature> temperatureSignal;      
+    private final StatusSignal<Double> closedLoopErrorSignal;          
 
     public MotorUtil(TalonFX motor) {
     
@@ -28,17 +29,20 @@ public class MotorUtil {
         supplyCurrentSignal = this.motor.getSupplyCurrent();
         supplyCurrentSignal.setUpdateFrequency(50);
 
-        motorPositionSignal = this.motor.getPosition();
-        motorPositionSignal.setUpdateFrequency(50);
+        positionSignal = this.motor.getPosition();
+        positionSignal.setUpdateFrequency(50);
 
-        motorVelocitySignal = this.motor.getVelocity();
-        motorVelocitySignal.setUpdateFrequency(50);
+        velocitySignal = this.motor.getVelocity();
+        velocitySignal.setUpdateFrequency(50);
 
-        motorVoltageSignal = this.motor.getMotorVoltage();
-        motorVoltageSignal.setUpdateFrequency(50);
+        voltageSignal = this.motor.getMotorVoltage();
+        voltageSignal.setUpdateFrequency(50);
 
-        motorTemperatureSignal = this.motor.getDeviceTemp();
-        motorTemperatureSignal.setUpdateFrequency(50);
+        temperatureSignal = this.motor.getDeviceTemp();
+        temperatureSignal.setUpdateFrequency(50);
+
+        closedLoopErrorSignal = this.motor.getClosedLoopError();
+        closedLoopErrorSignal.setUpdateFrequency(50);
     }
 
     /**
@@ -59,27 +63,35 @@ public class MotorUtil {
      * Retrieves the position of the mechanism controlled by the motor
      */
     public Angle getPosition() {
-        return motorPositionSignal.refresh().getValue();    
+        return positionSignal.refresh().getValue();    
     }
 
     /**
      * Retrieves the velocity of the motor
      */
     public AngularVelocity getVelocity() {
-        return motorVelocitySignal.refresh().getValue();    
+        return velocitySignal.refresh().getValue();    
     }
 
     /**
      * Retrieves the voltage being applied to the motor
      */
     public Voltage getMotorVoltage() {
-        return motorVoltageSignal.refresh().getValue();    
+        return voltageSignal.refresh().getValue();    
     }
 
-        /**
+    /**
      * Retrieves the temperature being applied to the motor
      */
     public Temperature getMotorTemperature() {
-        return motorTemperatureSignal.refresh().getValue();    
+        return temperatureSignal.refresh().getValue();    
     }
+
+    /**
+     * Retrieves the closed loop error of the motor
+     */
+    public Double getClosedLoopError() {
+        return closedLoopErrorSignal.refresh().getValue();    
+    }
+
 }

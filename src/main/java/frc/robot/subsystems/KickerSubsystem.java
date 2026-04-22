@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.KickerConstants;
 import frc.robot.commands.intake.PulseKicker;
+import frc.robot.utilities.MotorUtil;
 import frc.robot.utilities.RobotLogger;
 
 import static edu.wpi.first.units.Units.*;
@@ -21,11 +22,15 @@ public class KickerSubsystem extends SubsystemBase {
   private RobotContainer robot;
   private final TalonFX motor = new TalonFX(KickerConstants.MOTOR_ID);
   private KickerState state = KickerState.OFF;
+  private final MotorUtil motorUtil;
+
 
   public KickerSubsystem(RobotContainer robot) {
     this.robot = robot;
   
     configureMotor();
+
+    motorUtil = new MotorUtil(motor);
   }
 
   @Override
@@ -108,9 +113,9 @@ public class KickerSubsystem extends SubsystemBase {
   }
 
   public void updateLoggingData(){
-    /* RobotLogger.logDouble("Kicker/Voltage", motor.getMotorVoltage().getValueAsDouble());
-    RobotLogger.logDouble("Kicker/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Kicker/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble()); */
+    RobotLogger.logDouble("Kicker/Voltage", motorUtil.getMotorVoltage().in(Volts));
+    RobotLogger.logDouble("Kicker/StatorCurrent", motorUtil.getStatorCurrent().in(Amps));
+    RobotLogger.logDouble("Kicker/SupplyCurrent", motorUtil.getSupplyCurrent().in(Amps)); 
     RobotLogger.logString("Kicker/State", state.name());
   }
 

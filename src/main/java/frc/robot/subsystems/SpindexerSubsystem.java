@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.MotorUtil;
 import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.SysIdBuilder;
 import frc.robot.Constants.SpindexerConstants;
@@ -28,12 +29,15 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   /** Creates a new SpinDexerSubSystem. */
   private RobotContainer robot;
   private final TalonFX motor = new TalonFX(SpindexerConstants.MOTOR_ID);
+  private final MotorUtil motorUtil;
   private SpindexerState state = SpindexerState.OFF;
 
   public SpindexerSubsystem(RobotContainer robot) {
     this.robot = robot;
 
     configureMotor();
+
+    motorUtil = new MotorUtil(motor);
   }
 
   @Override
@@ -119,9 +123,9 @@ public class SpindexerSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void updateLoggingData(){
-    /* RobotLogger.logDouble("Spindexer/Voltage", motor.getMotorVoltage().getValueAsDouble());
-    RobotLogger.logDouble("Spindexer/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Spindexer/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble()); */
+    RobotLogger.logDouble("Spindexer/Voltage", motorUtil.getMotorVoltage().in(Volts));
+    RobotLogger.logDouble("Spindexer/StatorCurrent", motorUtil.getStatorCurrent().in(Amps));
+    RobotLogger.logDouble("Spindexer/SupplyCurrent", motorUtil.getSupplyCurrent().in(Amps));
     RobotLogger.logString("Spindexer/State", state.name());
   }
 

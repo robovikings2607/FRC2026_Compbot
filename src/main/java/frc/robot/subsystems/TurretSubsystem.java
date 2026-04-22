@@ -46,6 +46,7 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.GeometryUtil;
 import frc.robot.utilities.LimelightHelpers;
+import frc.robot.utilities.MotorUtil;
 import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.ShooterUtils;
 
@@ -62,6 +63,8 @@ public class TurretSubsystem extends SubsystemBase {
   private boolean fixedShot = false;
   private boolean isDeactivated = false;
   private boolean isZeroed = false;
+  private final MotorUtil motorUtil;
+
 
   public TurretSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -77,9 +80,11 @@ public class TurretSubsystem extends SubsystemBase {
     magicMotionRequest = new MotionMagicVoltage(0.0);
     positionVoltage = new PositionVoltage(0.0);
 
-    //logNumber2("Turret/BootUpPose", turretMotor.getPosition().getValueAsDouble());
+    motorUtil = new MotorUtil(turretMotor);
+
+    //logNumber2("Turret/BootUpPose", motorUtil.getPosition().in(Rotations));
     //logNumber2("SetOffset", 0.0);    
-    //logNumber2("Turret/MotorCurrent", turretMotor.getStatorCurrent().getValueAsDouble());        
+    //logNumber2("Turret/MotorCurrent", motorUtil.getStatorCurrent().in(Amps));        
   }
 
   private void configureMotor() {
@@ -163,7 +168,7 @@ public class TurretSubsystem extends SubsystemBase {
     //RobotLogger.logDouble("SOTMDistance", shooterPose.getDistance(goalPose));
 
     //checks alliance and aims at corresponding hub
-    currentEncoderPos = turretMotor.getPosition().getValueAsDouble();
+    currentEncoderPos = motorUtil.getPosition().in(Rotations);
     double targetEncoderPos = getTurretSetPoint(shooterPose, goalPose, robotRotation);
 
     double wantedEncoderPos = currentEncoderPos + getDelta(currentEncoderPos, targetEncoderPos);
@@ -253,8 +258,10 @@ public class TurretSubsystem extends SubsystemBase {
   } */
 
   public boolean inTolerance(double pose){
-    return turretMotor.getPosition().getValueAsDouble() > pose - 0.5 ||
-           turretMotor.getPosition().getValueAsDouble() < pose + 0.5; 
+    double currentPos = motorUtil.getPosition().in(Rotations);
+
+    return currentPos > pose - 0.5 ||
+           currentPos < pose + 0.5; 
   }
 
   public void deactivateTurret(boolean deactivate){
@@ -266,11 +273,11 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getTurretAngleDegrees() {
-    return turretMotor.getPosition().getValueAsDouble() * (1.0 / rotationsPerDegree);
+    return motorUtil.getPosition().in(Rotations) * (1.0 / rotationsPerDegree);
   }
 
   public double getTurretRateDegPerSec() {
-    return turretMotor.getVelocity().getValueAsDouble() * (1.0 / rotationsPerDegree);
+    return motorUtil.getVelocity().in(RotationsPerSecond) * (1.0 / rotationsPerDegree);
   }
 
   public boolean isFixed(){
@@ -278,7 +285,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public boolean goodToShoot(){
-    return Math.abs(turretMotor.getClosedLoopError().getValueAsDouble()) < 10.0 * rotationsPerDegree;
+    return Math.abs(motorUtil.getClosedLoopError()) < 10.0 * rotationsPerDegree;
   }
 
   public void logNumber(String key, double value){
