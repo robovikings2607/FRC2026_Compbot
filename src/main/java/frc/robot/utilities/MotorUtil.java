@@ -12,6 +12,7 @@ import edu.wpi.first.units.measure.Voltage;
 public class MotorUtil {
     private final TalonFX motor;    
     private final StatusSignal<Current> statorCurrentSignal;
+    private final StatusSignal<Current> supplyCurrentSignal;    
     private final StatusSignal<Angle> motorPositionSignal;  
     private final StatusSignal<AngularVelocity> motorVelocitySignal;    
     private final StatusSignal<Voltage> motorVoltageSignal;      
@@ -23,6 +24,9 @@ public class MotorUtil {
 
         statorCurrentSignal = this.motor.getStatorCurrent();
         statorCurrentSignal.setUpdateFrequency(50);
+
+        supplyCurrentSignal = this.motor.getSupplyCurrent();
+        supplyCurrentSignal.setUpdateFrequency(50);
 
         motorPositionSignal = this.motor.getPosition();
         motorPositionSignal.setUpdateFrequency(50);
@@ -42,6 +46,13 @@ public class MotorUtil {
      */
     public Current getStatorCurrent() {
         return statorCurrentSignal.refresh().getValue();    
+    }
+
+    /**
+     * Retrieves the supply current
+     */
+    public Current getSupplyCurrent() {
+        return supplyCurrentSignal.refresh().getValue();    
     }
 
     /**
