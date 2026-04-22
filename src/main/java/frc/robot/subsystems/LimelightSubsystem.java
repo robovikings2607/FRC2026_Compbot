@@ -110,7 +110,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
   // Camera position relative to turret pivot, in the turret's own frame (X+ = turret forward, Y+ = turret left).
   // At turret angle=0 this frame is aligned with the robot frame.
-  private static final Translation2d TURRET_TO_CAM = new Translation2d(0.0, Units.inchesToMeters(4.625));
+  private static final Translation2d TURRET_TO_CAM = new Translation2d(Units.inchesToMeters(0.25), Units.inchesToMeters(4.625));
 
   // Which way the camera points when the turret encoder reads 0, relative to robot forward
   // (degrees, positive = counterclockwise)
@@ -121,14 +121,14 @@ public class LimelightSubsystem extends SubsystemBase {
   private static final double CAM_ROLL_DEG  = 0.0;
 
   // How high the camera is off the ground (meters)
-  private static final double CAM_UP_M = 0.267;
+  private static final double CAM_UP_M = 0.62865;
 
   // -------------------------------------------------------------------------
   // Filtering constants
   // -------------------------------------------------------------------------
-  private static final double kAmbiguityThreshold = 0.3;
+  private static final double kAmbiguityThreshold = 0.5;
   private static final double kMinTagArea         = 0.1;
-  private static final double kMaxTagArea         = 4.9;
+  private static final double kMaxTagArea         = 5.5;
   private static final double kMinPoseNorm           = 0.5;
   private static final double kMaxHeadingErrorDeg    = 30.0;
 
@@ -140,7 +140,7 @@ public class LimelightSubsystem extends SubsystemBase {
   // Static position uncertainty (meters) for each camera.
   // We also tell the filter to never correct gyro heading from vision (1e9).
   private static final double kFrontStd  = 0.2;
-  private static final double kTurretStd = 0.15;
+  private static final double kTurretStd = 0.5;
   private static final double kLargeVariance = 1e9;
 
   // -------------------------------------------------------------------------
@@ -284,25 +284,39 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
   // Turret camera (MT1)
   // -------------------------------------------------------------------------
-  private Optional<CameraEstimate> processTurretCamera(LimelightHelpers.PoseEstimate mt) {
-    if (mt == null || mt.tagCount == 0) return Optional.empty();
-    if (mt.timestampSeconds <= lastSubmittedTimestamp) return Optional.empty();
+  private Optional<CameraEstimate> processTurretCamera(LimelightHelpers.PoseEstimate mt) {      RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/noTags?", mt == null || mt.tagCount == 0);
+    RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/noTags?", mt == null || mt.tagCount == 0);
+    if (mt == null || mt.tagCount == 0) {
+      return Optional.empty();
+    }
+
+    RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badTimestamp", mt.timestampSeconds <= lastSubmittedTimestamp);
+    if (mt.timestampSeconds <= lastSubmittedTimestamp){ 
+      return Optional.empty();}
 
     if (mt.rawFiducials != null) {
       for (LimelightHelpers.RawFiducial f : mt.rawFiducials) {
+        RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badAmbiquity", f.ambiguity > kAmbiguityThreshold);
+        RobotLogger.logDouble("Limelight/" + TURRET_NAME + "/Ambiquity", f.ambiguity);
         if (f.ambiguity > kAmbiguityThreshold) return Optional.empty();
       }
     }
+
+    RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badArea", mt.avgTagArea < kMinTagArea || mt.avgTagArea > kMaxTagArea);
     if (mt.avgTagArea < kMinTagArea || mt.avgTagArea > kMaxTagArea) return Optional.empty();
+
+    RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badNorm", mt.pose.getTranslation().getNorm() < kMinPoseNorm);
     if (mt.pose.getTranslation().getNorm() < kMinPoseNorm) return Optional.empty();
 
     // Find out where the turret was pointing when this image was taken.
     // If the image is too old to be in our history, skip it.
     Optional<TurretState> stateOpt = turretBuffer.getSample(mt.timestampSeconds);
+    RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badSample", stateOpt.isEmpty());
     if (stateOpt.isEmpty()) return Optional.empty();
     TurretState state = stateOpt.get();
 
     // Skip this reading if the turret was spinning fast when the photo was taken.
+      RobotLogger.logBoolean("Limelight/"+TURRET_NAME +"/badRate?", Math.abs(state.rateDegsPerSec) > kMaxTurretRateDegPerSec);
     if (Math.abs(state.rateDegsPerSec) > kMaxTurretRateDegPerSec) return Optional.empty();
 
     // Because we told the LL the camera is at the robot center (no offset),
@@ -319,7 +333,8 @@ public class LimelightSubsystem extends SubsystemBase {
     // with the gyro by more than kMaxHeadingErrorDeg, something went wrong.
     Rotation2d gyroYaw = robot.drivetrain.getState().Pose.getRotation();
     double headingError = Math.abs(robotPose.getRotation().minus(gyroYaw).getDegrees());
-    if (headingError > kMaxHeadingErrorDeg) return Optional.empty();
+    RobotLogger.logBoolean("Limelight/"+TURRET_NAME +"/badHeading?", headingError > kMaxHeadingErrorDeg);
+    //if (headingError > kMaxHeadingErrorDeg) return Optional.empty();
 
     Matrix<N3, N1> stdDevs = VecBuilder.fill(kTurretStd, kTurretStd, kLargeVariance);
 
@@ -334,7 +349,7 @@ public class LimelightSubsystem extends SubsystemBase {
       Pose2d cameraPose, Rotation2d turretAngle,
       double turretCenterX, double turretCenterY, Translation2d turretToCam) {
     Translation2d cameraTranslation = new Translation2d(turretCenterX, turretCenterY)  // start at turret pivot in robot frame
-        .plus(turretToCam.rotateBy(turretAngle));                                      // add cam offset rotated to current turret angle
+        .plus(turretToCam.rotateBy(turretAngle.unaryMinus()));                                      // add cam offset rotated to current turret angle
 
     Transform2d robotToCamera = new Transform2d(cameraTranslation, turretAngle);        // camera pose in robot frame (position + heading)
     return cameraPose.transformBy(robotToCamera.inverse());                             // camera field pose -> robot field pose
