@@ -1,15 +1,19 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+import frc.robot.utilities.MotorUtil;
 import frc.robot.utilities.RobotLogger;
 import frc.robot.Constants.PivotConstants;
 import frc.robot.Constants.RollerConstants;
@@ -25,6 +29,10 @@ public class IntakeSubsystem extends SubsystemBase {
   private final CANcoder encoder = new CANcoder(PivotConstants.ENCODER_ID);
   private final PhoenixPIDController pid = new PhoenixPIDController(PivotConstants.P, PivotConstants.I, PivotConstants.D);
   private final Timer timer = new Timer();
+  private final MotorUtil rollerMotorUtil;
+  private final MotorUtil pivotMotorUtil;  
+  private final StatusSignal<Angle> canCoderAbsolutePositionSignal;    
+
   private double output;
   private IntakeState state = IntakeState.RETRACTED;
   private PivotState pivotState = PivotState.RETRACTED;
@@ -38,6 +46,20 @@ public class IntakeSubsystem extends SubsystemBase {
     //configureEncoder();
     //configurePID();
     createTuningData();
+
+    rollerMotorUtil = new MotorUtil(rollerMotor);
+    pivotMotorUtil = new MotorUtil(pivotMotor);
+
+    canCoderAbsolutePositionSignal = this.encoder.getAbsolutePosition();
+    canCoderAbsolutePositionSignal.setUpdateFrequency(50);
+
+  }
+
+  /**
+  * Retrieves the absolute position from the encoder
+  */
+  public Angle getEncoderAbsolutePosition() {
+      return canCoderAbsolutePositionSignal.refresh().getValue();    
   }
 
   @Override
@@ -122,12 +144,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
   //Pivot Controls
   public void deployPivotControl(){
-    output = pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), PivotConstants.DEPLOYED, Timer.getFPGATimestamp());
+    output = pid.calculate(getEncoderAbsolutePosition().in(Rotations), PivotConstants.DEPLOYED, Timer.getFPGATimestamp());
     pivotMotor.set(-output);
   }  
   
   public void retractPivotControl(){
-    output = pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), PivotConstants.RETRACTED, Timer.getFPGATimestamp());
+    output = pid.calculate(getEncoderAbsolutePosition().in(Rotations), PivotConstants.RETRACTED, Timer.getFPGATimestamp());
     pivotMotor.set(-output);
   }
 
@@ -144,10 +166,10 @@ public class IntakeSubsystem extends SubsystemBase {
     pid.setI(SmartDashboard.getNumber("Intake/Pivot/Tuning/PID/I", 0));
     pid.setD(SmartDashboard.getNumber("Intake/Pivot/Tuning/PID/D", 0));
     if(SmartDashboard.getBoolean("Intake/Pivot/Tuning/Deploy?", false)){
-      output = pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), PivotConstants.DEPLOYED, Timer.getFPGATimestamp());
+      output = pid.calculate(getEncoderAbsolutePosition().in(Rotations), PivotConstants.DEPLOYED, Timer.getFPGATimestamp());
     }
     else{
-      output = pid.calculate(encoder.getAbsolutePosition().getValueAsDouble(), PivotConstants.RETRACTED, Timer.getFPGATimestamp());
+      output = pid.calculate(getEncoderAbsolutePosition().in(Rotations), PivotConstants.RETRACTED, Timer.getFPGATimestamp());
     }
     pivotMotor.set(output);    
   }
@@ -329,18 +351,18 @@ public class IntakeSubsystem extends SubsystemBase {
   public void updateLoggingData(){
     RobotLogger.logString("Intake/State", state.name());
     //Pivot
-    //RobotLogger.logDouble("Intake/Pivot/Output", output);
-    //RobotLogger.logDouble("Intake/Pivot/CurrentPosition", encoder.getAbsolutePosition().getValueAsDouble());
-    //RobotLogger.logDouble("Intake/Pivot/Goal", pid.getSetpoint());
-    //RobotLogger.logBoolean("Intake/Pivot/AtGoal", pid.atSetpoint());
-    //RobotLogger.logDouble("Intake/Pivot/StatorCurrent", pivotMotor.getStatorCurrent().getValueAsDouble());
-    //RobotLogger.logDouble("Intake/Pivot/SupplyCurrent", pivotMotor.getSupplyCurrent().getValueAsDouble());
-    //RobotLogger.logDouble("Intake/Pivot/Voltage", pivotMotor.getMotorVoltage().getValueAsDouble());
+    // RobotLogger.logDouble("Intake/Pivot/Output", output);
+    // RobotLogger.logDouble("Intake/Pivot/CurrentPosition", getEncoderAbsolutePosition().in(Rotations));
+    // RobotLogger.logDouble("Intake/Pivot/Goal", pid.getSetpoint());
+    // RobotLogger.logBoolean("Intake/Pivot/AtGoal", pid.atSetpoint());
+    // RobotLogger.logDouble("Intake/Pivot/StatorCurrent", pivotMotorUtil.getStatorCurrent().in(Amps));
+    // RobotLogger.logDouble("Intake/Pivot/SupplyCurrent", pivotMotorUtil.getSupplyCurrent().in(Amps));
+    // RobotLogger.logDouble("Intake/Pivot/Voltage", pivotMotorUtil.getMotorVoltage().in(Volts));
     RobotLogger.logString("Intake/Pivot/State", pivotState.name());
     //Roller
-    RobotLogger.logDouble("Intake/Roller/StatorCurrent", rollerMotor.getStatorCurrent().getValueAsDouble());
-    //RobotLogger.logDouble("Intake/Roller/SupplyCurrent", rollerMotor.getSupplyCurrent().getValueAsDouble());
-    //RobotLogger.logDouble("Intake/Roller/Voltage", rollerMotor.getMotorVoltage().getValueAsDouble());
+    RobotLogger.logDouble("Intake/Roller/StatorCurrent", rollerMotorUtil.getStatorCurrent().in(Amps));
+    //RobotLogger.logDouble("Intake/Roller/SupplyCurrent", rollerMotorUtil.getSupplyCurrent().in(Amps));
+    //RobotLogger.logDouble("Intake/Roller/Voltage", rollerMotorUtil.getMotorVoltage().in(Volts));
     RobotLogger.logString("Intake/Roller/State", rollerState.name());
   }
 
@@ -352,11 +374,11 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public boolean isJammed(){
-    return rollerMotor.getStatorCurrent().getValueAsDouble() > RollerConstants.JAMMED_THRESHOLD;
+    return rollerMotorUtil.getStatorCurrent().in(Amps) > RollerConstants.JAMMED_THRESHOLD;
   }
 
   public boolean hittingBumper(){
-    return pivotMotor.getStatorCurrent().getValueAsDouble() > PivotConstants.FORCED_DOWN_THRESHOLD;
+    return pivotMotorUtil.getStatorCurrent().in(Amps) > PivotConstants.FORCED_DOWN_THRESHOLD;
   }
 
   public TalonFX getPivotMotor(){
