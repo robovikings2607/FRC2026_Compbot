@@ -126,11 +126,11 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
   // Filtering constants
   // -------------------------------------------------------------------------
-  private static final double kAmbiguityThreshold = 0.5;
+  private static final double kAmbiguityThreshold = 0.3;
   private static final double kMinTagArea         = 0.1;
   private static final double kMaxTagArea         = 5.5;
   private static final double kMinPoseNorm           = 0.5;
-  private static final double kMaxHeadingErrorDeg    = 30.0;
+  private static final double kMaxHeadingErrorDeg    = 10.0;
 
   // Skip turret camera readings when the turret is spinning too fast — at high
   // speed the angle we look up may be wrong, and the LL pose solve gets noisy.
@@ -294,7 +294,7 @@ public class LimelightSubsystem extends SubsystemBase {
     if (mt.timestampSeconds <= lastSubmittedTimestamp){ 
       return Optional.empty();}
 
-    if (mt.rawFiducials != null) {
+    if (mt.tagCount == 1 && mt.rawFiducials != null) {
       for (LimelightHelpers.RawFiducial f : mt.rawFiducials) {
         RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badAmbiquity", f.ambiguity > kAmbiguityThreshold);
         RobotLogger.logDouble("Limelight/" + TURRET_NAME + "/Ambiquity", f.ambiguity);
@@ -323,7 +323,7 @@ public class LimelightSubsystem extends SubsystemBase {
     // mt.pose is where the camera is on the field. From there, we subtract
     // the camera's position on the robot (which rotates with the turret)
     // to get where the robot center actually is.
-    Rotation2d turretAngle = Rotation2d.fromDegrees(state.angleDeg + CAM_YAW_OFFSET_DEG);
+    Rotation2d turretAngle = Rotation2d.fromDegrees(state.angleDeg + CAM_YAW_OFFSET_DEG).unaryMinus();
     Pose2d robotPose = cameraToRobotPose(mt.pose, turretAngle, TURRET_CENTER_X, TURRET_CENTER_Y, TURRET_TO_CAM);
 
     // If the pose is right at (0,0), it's probably garbage from the LL.
@@ -334,7 +334,7 @@ public class LimelightSubsystem extends SubsystemBase {
     Rotation2d gyroYaw = robot.drivetrain.getState().Pose.getRotation();
     double headingError = Math.abs(robotPose.getRotation().minus(gyroYaw).getDegrees());
     RobotLogger.logBoolean("Limelight/"+TURRET_NAME +"/badHeading?", headingError > kMaxHeadingErrorDeg);
-    //if (headingError > kMaxHeadingErrorDeg) return Optional.empty();
+    if (headingError > kMaxHeadingErrorDeg) return Optional.empty();
 
     Matrix<N3, N1> stdDevs = VecBuilder.fill(kTurretStd, kTurretStd, kLargeVariance);
 
@@ -348,8 +348,12 @@ public class LimelightSubsystem extends SubsystemBase {
   public static Pose2d cameraToRobotPose(
       Pose2d cameraPose, Rotation2d turretAngle,
       double turretCenterX, double turretCenterY, Translation2d turretToCam) {
+
+    // turretAngle is used twice here:
+    // once to rotate the turret->camera offset vector into the robot frame
+    // and once as the camera's heading in the robot frame
     Translation2d cameraTranslation = new Translation2d(turretCenterX, turretCenterY)  // start at turret pivot in robot frame
-        .plus(turretToCam.rotateBy(turretAngle.unaryMinus()));                                      // add cam offset rotated to current turret angle
+        .plus(turretToCam.rotateBy(turretAngle));                                      // add cam offset rotated to current turret angle
 
     Transform2d robotToCamera = new Transform2d(cameraTranslation, turretAngle);        // camera pose in robot frame (position + heading)
     return cameraPose.transformBy(robotToCamera.inverse());                             // camera field pose -> robot field pose
