@@ -234,9 +234,9 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   public void updateLoggingData(){
     RobotLogger.logDouble("Flywheel/Goal(RPS)", goal);
     RobotLogger.logDouble("Flywheel/CurrentRPS", motorUtil.getVelocity().in(RotationsPerSecond));
-    //RobotLogger.logDouble("Flywheel/StatorCurrent", motorUtil.getStatorCurrent().in(Amps));
-    //RobotLogger.logDouble("Flywheel/SupplyCurrent", motorUtil.getSupplyCurrent().in(Amps));
-    //RobotLogger.logDouble("Flywheel/Voltage", motorUtil.getMotorVoltage().in(Volts));
+    RobotLogger.logDouble("Flywheel/StatorCurrent", motorUtil.getStatorCurrent().in(Amps));
+    RobotLogger.logDouble("Flywheel/SupplyCurrent", motorUtil.getSupplyCurrent().in(Amps));
+    RobotLogger.logDouble("Flywheel/Voltage", motorUtil.getMotorVoltage().in(Volts));
     RobotLogger.logBoolean("Flywheel/GoodToShoot", goodToShoot());
     RobotLogger.logString("Flywheel/State", state.name());
   }

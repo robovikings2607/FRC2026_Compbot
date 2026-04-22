@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.MotorUtil;
 import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.SysIdBuilder;
 import frc.robot.Constants.FeederConstants;
@@ -33,14 +34,19 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
   private final TalonFXConfiguration configs = new TalonFXConfiguration();
   private final VelocityVoltage pid = new VelocityVoltage(0.0);
   private final CoastOut coastOut = new CoastOut();
+  private final MotorUtil motorUtil;
   private FeederState state = FeederState.FORWARD;
   private double goal;
+
 
   public FeederSubsystem(RobotContainer robot) {
     this.robot = robot;
 
     configureMotor();
     //configurePID();
+
+    motorUtil = new MotorUtil(motor);
+
   }
 
   @Override
@@ -158,11 +164,11 @@ public class FeederSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public void updateLoggingData(){
-    RobotLogger.logDouble("Feeder/CurrentRPS", motor.getVelocity().getValueAsDouble());
+    RobotLogger.logDouble("Feeder/CurrentRPS", motorUtil.getVelocity().in(RotationsPerSecond));
     RobotLogger.logDouble("Feeder/Goal(rps)", goal);
-    RobotLogger.logDouble("Feeder/Voltage", motor.getMotorVoltage().getValueAsDouble());
-    RobotLogger.logDouble("Feeder/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    RobotLogger.logDouble("Feeder/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
+    RobotLogger.logDouble("Feeder/Voltage", motorUtil.getMotorVoltage().in(Volts));
+    RobotLogger.logDouble("Feeder/StatorCurrent", motorUtil.getStatorCurrent().in(Amps));
+    RobotLogger.logDouble("Feeder/SupplyCurrent", motorUtil.getSupplyCurrent().in(Amps));
     RobotLogger.logString("Feeder/State", state.name());
     RobotLogger.logBoolean("Feeder/MotorReset", motor.hasResetOccurred());
   }
