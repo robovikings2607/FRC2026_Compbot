@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.utilities.ISysIdTunable;
+import frc.robot.utilities.MotorUtil;
 import frc.robot.utilities.RobotLogger;
 import frc.robot.utilities.SysIdBuilder;
 
@@ -33,8 +34,10 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   private final CoastOut coastOut = new CoastOut();
   private final InterpolatingDoubleTreeMap shootingInterp = new InterpolatingDoubleTreeMap(); 
   private final InterpolatingDoubleTreeMap ferryingInterp = new InterpolatingDoubleTreeMap();
+  private final MotorUtil motorUtil;
   private FlywheelState state = FlywheelState.SHOOTING;
   private double goal;
+
 
   public FlywheelSubsystem(RobotContainer robot) {
     this.robot = robot;
@@ -44,6 +47,8 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
     createShootingInterpMap();
     createFerryingInterpMap();
     //createTuningData();
+
+    motorUtil = new MotorUtil(motor);
   }
 
   @Override
@@ -157,7 +162,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public double getSpeed(){
-    return motor.getVelocity().getValueAsDouble();
+    return motorUtil.getVelocity().in(RotationsPerSecond);
   }
 
   public void shootingControl(double distance){
@@ -228,10 +233,10 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
 
   public void updateLoggingData(){
     RobotLogger.logDouble("Flywheel/Goal(RPS)", goal);
-    RobotLogger.logDouble("Flywheel/CurrentRPS", motor.getVelocity().getValueAsDouble());
-    //RobotLogger.logDouble("Flywheel/StatorCurrent", motor.getStatorCurrent().getValueAsDouble());
-    //RobotLogger.logDouble("Flywheel/SupplyCurrent", motor.getSupplyCurrent().getValueAsDouble());
-    //RobotLogger.logDouble("Flywheel/Voltage", motor.getMotorVoltage().getValueAsDouble());
+    RobotLogger.logDouble("Flywheel/CurrentRPS", motorUtil.getVelocity().in(RotationsPerSecond));
+    //RobotLogger.logDouble("Flywheel/StatorCurrent", motorUtil.getStatorCurrent().in(Amps));
+    //RobotLogger.logDouble("Flywheel/SupplyCurrent", motorUtil.getSupplyCurrent().in(Amps));
+    //RobotLogger.logDouble("Flywheel/Voltage", motorUtil.getMotorVoltage().in(Volts));
     RobotLogger.logBoolean("Flywheel/GoodToShoot", goodToShoot());
     RobotLogger.logString("Flywheel/State", state.name());
   }
