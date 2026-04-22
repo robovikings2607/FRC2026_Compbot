@@ -255,7 +255,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }
 
   public double percentOfGoal(){
-    return motor.getVelocity().getValueAsDouble() / goal;
+    return motorUtil.getVelocity().in(RotationsPerSecond) / goal;
   }
   
   private final SysIdRoutine sysIdRoutine = SysIdBuilder.buildTalonFXRoutine(

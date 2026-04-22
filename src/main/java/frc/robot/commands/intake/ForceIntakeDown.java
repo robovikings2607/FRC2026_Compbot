@@ -52,6 +52,6 @@ public class ForceIntakeDown extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return intake.getPivotMotor().getStatorCurrent().getValueAsDouble() > PivotConstants.FORCED_DOWN_THRESHOLD;
+    return intake.getPivotStatorCurrent() > PivotConstants.FORCED_DOWN_THRESHOLD;
   }
 }

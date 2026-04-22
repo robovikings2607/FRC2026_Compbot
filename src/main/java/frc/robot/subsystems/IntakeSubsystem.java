@@ -58,8 +58,15 @@ public class IntakeSubsystem extends SubsystemBase {
   /**
   * Retrieves the absolute position from the encoder
   */
-  public Angle getEncoderAbsolutePosition() {
+  private Angle getEncoderAbsolutePosition() {
       return canCoderAbsolutePositionSignal.refresh().getValue();    
+  }
+
+    /**
+  * Retrieves the stator current for the pivot motor
+  */
+  public double getPivotStatorCurrent() {
+      return pivotMotorUtil.getStatorCurrent().in(Amps);    
   }
 
   @Override

@@ -72,7 +72,7 @@ public class TurretSubsystem extends SubsystemBase {
     turretMotor = new TalonFX(TurretConstants.TURRET_ID);
 
     //turretMotor.setPosition(0);
-    //previousSetPoint = turretMotor.getPosition().getValueAsDouble();
+    //previousSetPoint = motorUtil.getPosition().in(Rotations);
         
     // turretMotor.setPosition(0.0);
 
