@@ -548,6 +548,7 @@ public class LimelightHelpers {
      */
     public static class PoseEstimate {
         public Pose2d pose;
+        public double z;
         public double timestampSeconds;
         public double latency;
         public int tagCount;
@@ -555,7 +556,7 @@ public class LimelightHelpers {
         public double avgTagDist;
         public double avgTagArea;
 
-        public RawFiducial[] rawFiducials; 
+        public RawFiducial[] rawFiducials;
         public boolean isMegaTag2;
 
         /**
@@ -563,6 +564,7 @@ public class LimelightHelpers {
          */
         public PoseEstimate() {
             this.pose = new Pose2d();
+            this.z = 0;
             this.timestampSeconds = 0;
             this.latency = 0;
             this.tagCount = 0;
@@ -573,11 +575,12 @@ public class LimelightHelpers {
             this.isMegaTag2 = false;
         }
 
-        public PoseEstimate(Pose2d pose, double timestampSeconds, double latency, 
-            int tagCount, double tagSpan, double avgTagDist, 
+        public PoseEstimate(Pose2d pose, double z, double timestampSeconds, double latency,
+            int tagCount, double tagSpan, double avgTagDist,
             double avgTagArea, RawFiducial[] rawFiducials, boolean isMegaTag2) {
 
             this.pose = pose;
+            this.z = z;
             this.timestampSeconds = timestampSeconds;
             this.latency = latency;
             this.tagCount = tagCount;
@@ -596,6 +599,7 @@ public class LimelightHelpers {
             // We don't compare the timestampSeconds as it isn't relevant for equality and makes
             // unit testing harder
             return Double.compare(that.latency, latency) == 0
+                && Double.compare(that.z, z) == 0
                 && tagCount == that.tagCount
                 && Double.compare(that.tagSpan, tagSpan) == 0
                 && Double.compare(that.avgTagDist, avgTagDist) == 0
@@ -748,6 +752,7 @@ public class LimelightHelpers {
         }
     
         var pose = toPose2D(poseArray);
+        double z = extractArrayEntry(poseArray, 2);
         double latency = extractArrayEntry(poseArray, 6);
         int tagCount = (int)extractArrayEntry(poseArray, 7);
         double tagSpan = extractArrayEntry(poseArray, 8);
@@ -777,7 +782,7 @@ public class LimelightHelpers {
             }
         }
     
-        return new PoseEstimate(pose, adjustedTimestamp, latency, tagCount, tagSpan, tagDist, tagArea, rawFiducials, isMegaTag2);
+        return new PoseEstimate(pose, z, adjustedTimestamp, latency, tagCount, tagSpan, tagDist, tagArea, rawFiducials, isMegaTag2);
     }
 
     /**

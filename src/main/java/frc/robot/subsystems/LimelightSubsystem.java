@@ -309,9 +309,7 @@ public class LimelightSubsystem extends SubsystemBase {
     RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badNorm", mt.pose.getTranslation().getNorm() < kMinPoseNorm);
     if (mt.pose.getTranslation().getNorm() < kMinPoseNorm) return Optional.empty();
 
-    // PoseEstimate is 2D-only; use the 3D method to get Z for the height sanity check.
-    double poseZ = LimelightHelpers.getBotPose3d_wpiBlue(TURRET_NAME).getZ();
-    boolean badZ = Math.abs(poseZ) > kMaxPoseZMeters;
+    boolean badZ = Math.abs(mt.z) > kMaxPoseZMeters;
     RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badZ", badZ);
     if (badZ) return Optional.empty();
 
