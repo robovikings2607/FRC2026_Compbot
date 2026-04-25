@@ -141,7 +141,7 @@ public class LimelightSubsystem extends SubsystemBase {
   // Static position uncertainty (meters) for each camera.
   // We also tell the filter to never correct gyro heading from vision (1e9).
   private static final double kFrontStd  = 0.2;
-  private static final double kTurretStd = 0.5;
+  private static final double kTurretStd = 0.6;
   private static final double kLargeVariance = 1e9;
 
   // -------------------------------------------------------------------------
@@ -255,7 +255,7 @@ public class LimelightSubsystem extends SubsystemBase {
     updateFieldVisualization(turretVizPose, getTagPoses(turretRaw), TURRET_NAME);
 
     // Prefer turret camera (locked on hub) over front camera
-    Optional<CameraEstimate> toSubmit = turretEst.isPresent() ? turretEst : frontEst;
+    Optional<CameraEstimate> toSubmit = frontEst.isPresent() ? frontEst : turretEst;
 
     toSubmit.ifPresent(est -> {
       if (est.timestampSeconds > lastSubmittedTimestamp) {

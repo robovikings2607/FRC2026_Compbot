@@ -80,7 +80,7 @@ public class KickerSubsystem extends SubsystemBase {
   }
 
   public void shootingControl(){
-    motor.setVoltage(1.0);
+    motor.setVoltage(2.0);
   }
 
   public void stopMotor(){
