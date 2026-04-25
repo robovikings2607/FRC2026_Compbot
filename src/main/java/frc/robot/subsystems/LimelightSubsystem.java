@@ -117,7 +117,7 @@ public class LimelightSubsystem extends SubsystemBase {
   private static final double CAM_YAW_OFFSET_DEG = 0.0;
 
   // Camera tilt — these don't change as the turret rotates (TODO: measure)
-  private static final double CAM_PITCH_DEG = 0.0;
+  private static final double CAM_PITCH_DEG = 2.0;
   private static final double CAM_ROLL_DEG  = 0.0;
 
   // How high the camera is off the ground (meters)
@@ -131,7 +131,7 @@ public class LimelightSubsystem extends SubsystemBase {
   private static final double kMaxTagArea         = 5.5;
   private static final double kMinPoseNorm           = 0.5;
   private static final double kMaxHeadingErrorDeg    = 10.0;
-  private static final double kMaxPoseZMeters        = 0.5;
+  private static final double kMaxPoseZMeters        = 0.2;
 
   // Skip turret camera readings when the turret is spinning too fast — at high
   // speed the angle we look up may be wrong, and the LL pose solve gets noisy.
@@ -287,7 +287,7 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
   private Optional<CameraEstimate> processTurretCamera(LimelightHelpers.PoseEstimate mt) {      RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/noTags?", mt == null || mt.tagCount == 0);
     RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/noTags?", mt == null || mt.tagCount == 0);
-    if (mt == null || mt.tagCount == 0) {
+    if (mt == null || mt.tagCount <= 1) {
       return Optional.empty();
     }
 
@@ -313,6 +313,7 @@ public class LimelightSubsystem extends SubsystemBase {
     double poseZ = LimelightHelpers.getBotPose3d_wpiBlue(TURRET_NAME).getZ();
     boolean badZ = Math.abs(poseZ) > kMaxPoseZMeters;
     RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badZ", badZ);
+    RobotLogger.logDouble("Limelight/" + TURRET_NAME + "/z", poseZ);
     if (badZ) return Optional.empty();
 
     // Find out where the turret was pointing when this image was taken.
@@ -341,7 +342,7 @@ public class LimelightSubsystem extends SubsystemBase {
     Rotation2d gyroYaw = robot.drivetrain.getState().Pose.getRotation();
     double headingError = Math.abs(robotPose.getRotation().minus(gyroYaw).getDegrees());
     RobotLogger.logBoolean("Limelight/"+TURRET_NAME +"/badHeading?", headingError > kMaxHeadingErrorDeg);
-    if (headingError > kMaxHeadingErrorDeg) return Optional.empty();
+    //if (headingError > kMaxHeadingErrorDeg) return Optional.empty();
 
     Matrix<N3, N1> stdDevs = VecBuilder.fill(kTurretStd, kTurretStd, kLargeVariance);
 
