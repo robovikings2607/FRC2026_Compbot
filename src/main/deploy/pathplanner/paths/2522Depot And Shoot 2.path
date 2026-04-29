@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.64807272728024,
-        "y": 6.083990909080623
+        "x": 1.1565555555555556,
+        "y": 6.1787777777777775
       },
       "isLocked": false,
       "linkedName": "2522DepotAndShoot1End"
@@ -34,7 +34,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 0.75,
-    "maxAcceleration": 2.0,
+    "maxAcceleration": 1.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.3929817359896
+    "rotation": 180.0
   },
   "useDefaultConstraints": false
 }

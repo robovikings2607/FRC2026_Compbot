@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.2794008559201138,
-        "y": 5.6070470756062765
+        "x": 2.3453777777777782,
+        "y": 5.753387836548233
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.138844507845935,
-        "y": 6.021084165477887
+        "x": 5.190599144079885,
+        "y": 5.82700427960057
       },
       "isLocked": false,
-      "linkedName": "LeftShoot"
+      "linkedName": "DepotToShootEnd"
     },
     {
       "anchor": {
@@ -37,8 +37,21 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.41402877697841567,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    },
+    {
+      "name": "Constraints Zone",
       "minWaypointRelativePos": 0.09377289377289388,
-      "maxWaypointRelativePos": 0.4483457123565165,
+      "maxWaypointRelativePos": 1.0,
       "constraints": {
         "maxVelocity": 1.5,
         "maxAcceleration": 3.0,
@@ -67,7 +80,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": false
 }

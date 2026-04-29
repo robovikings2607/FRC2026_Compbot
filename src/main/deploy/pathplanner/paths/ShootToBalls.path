@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.54265306122449,
-        "y": 5.205824829931973
+        "x": 2.3453777777777782,
+        "y": 5.753387836548233
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.532406462585033,
-        "y": 6.406479591836733
+        "x": 6.335131179138321,
+        "y": 6.954042598452994
       },
       "isLocked": false,
       "linkedName": "DepotToShootEnd"
@@ -67,7 +67,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

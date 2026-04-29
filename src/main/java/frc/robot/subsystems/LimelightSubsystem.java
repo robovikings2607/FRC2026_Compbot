@@ -87,6 +87,7 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.utilities.LimelightHelpers;
 import frc.robot.utilities.RobotLogger;
+import frc.robot.utilities.LimelightHelpers.IMUData;
 
 public class LimelightSubsystem extends SubsystemBase {
 
@@ -117,7 +118,7 @@ public class LimelightSubsystem extends SubsystemBase {
   private static final double CAM_YAW_OFFSET_DEG = 0.0;
 
   // Camera tilt — these don't change as the turret rotates (TODO: measure)
-  private static final double CAM_PITCH_DEG = 2.0;
+  private static final double CAM_PITCH_DEG = -2.0;
   private static final double CAM_ROLL_DEG  = 0.0;
 
   // How high the camera is off the ground (meters)
@@ -131,7 +132,7 @@ public class LimelightSubsystem extends SubsystemBase {
   private static final double kMaxTagArea         = 5.5;
   private static final double kMinPoseNorm           = 0.5;
   private static final double kMaxHeadingErrorDeg    = 10.0;
-  private static final double kMaxPoseZMeters        = 0.2;
+  private static final double kMaxPoseZMeters        = 0.15;
 
   // Skip turret camera readings when the turret is spinning too fast — at high
   // speed the angle we look up may be wrong, and the LL pose solve gets noisy.
@@ -141,7 +142,7 @@ public class LimelightSubsystem extends SubsystemBase {
   // Static position uncertainty (meters) for each camera.
   // We also tell the filter to never correct gyro heading from vision (1e9).
   private static final double kFrontStd  = 0.2;
-  private static final double kTurretStd = 0.6;
+  private static final double kTurretStd = 0.35;
   private static final double kLargeVariance = 1e9;
 
   // -------------------------------------------------------------------------
@@ -214,7 +215,7 @@ public class LimelightSubsystem extends SubsystemBase {
     // so we can do the offset math ourselves using the actual turret angle.
     // Yaw is 0 here — we add turret rotation ourselves each loop.
     // Pitch and roll are the fixed tilt of the camera on its mount.
-    LimelightHelpers.setCameraPose_RobotSpace(TURRET_NAME, 0, 0, CAM_UP_M, CAM_ROLL_DEG, CAM_PITCH_DEG, 0);
+    //LimelightHelpers.setCameraPose_RobotSpace(TURRET_NAME, 0, 0, CAM_UP_M, CAM_ROLL_DEG, CAM_PITCH_DEG, 0);
 
     try {
       java.io.File fieldJsonFile = new java.io.File(
@@ -230,8 +231,11 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
   @Override
   public void periodic() {
+    double pitch = LimelightHelpers.getIMUData(TURRET_NAME).Pitch;
     double yaw      = robot.drivetrain.getState().Pose.getRotation().getDegrees();
     double fpgaTime = Timer.getFPGATimestamp();
+
+    LimelightHelpers.setCameraPose_RobotSpace(TURRET_NAME, 0, 0, CAM_UP_M, CAM_ROLL_DEG, pitch, 0);
 
     turretBuffer.addSample(fpgaTime, new TurretState(
         robot.turret.getTurretAngleDegrees(),
@@ -311,7 +315,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
     boolean badZ = Math.abs(mt.z) > kMaxPoseZMeters;
     RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badZ", badZ);
-    RobotLogger.logDouble("Limelight/" + TURRET_NAME + "/z", poseZ);
+    RobotLogger.logDouble("Limelight/" + TURRET_NAME + "/z", mt.z);
     if (badZ) return Optional.empty();
 
     // Find out where the turret was pointing when this image was taken.

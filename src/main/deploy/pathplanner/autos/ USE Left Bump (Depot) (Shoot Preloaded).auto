@@ -24,32 +24,13 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "DeployIntake"
-          }
-        },
-        {
           "type": "race",
           "data": {
             "commands": [
               {
-                "type": "sequential",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 8.5
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "ShootOnTheMove"
-                      }
-                    }
-                  ]
+                  "name": "DeployIntakeNoSOTM"
                 }
               },
               {
@@ -73,6 +54,32 @@
                       "data": {
                         "pathName": "2522 Depot And Shoot"
                       }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "AllianceToDepot (LeftBump)"
+                      }
                     },
                     {
                       "type": "path",
@@ -82,8 +89,20 @@
                     }
                   ]
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntakeNoSOTM"
+                }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
           }
         }
       ]

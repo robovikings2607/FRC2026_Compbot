@@ -9,19 +9,13 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "DeployIntakeNoSOTM"
-                }
-              },
-              {
                 "type": "sequential",
                 "data": {
                   "commands": [
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral1 (RightBump)"
+                        "pathName": "AllianceToNeutral1 (LeftBump)"
                       }
                     },
                     {
@@ -33,16 +27,22 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Copy of WrapAroundCollectFuel (LeftBump)"
+                        "pathName": "WrapAroundCollectFuel (LeftBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Copy of WrapToAlliance (LeftBump)"
+                        "pathName": "WrapToAlliance (LeftBump)"
                       }
                     }
                   ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntakeNoSOTM"
                 }
               }
             ]
@@ -59,37 +59,25 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "DeployIntakeNoSOTM"
-                }
-              },
-              {
                 "type": "sequential",
                 "data": {
                   "commands": [
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral2 (RightBump)"
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "NeutralToAlliance2 (RightBump)"
+                        "pathName": "AllianceToNeutral2 (LeftBump)"
                       }
                     }
                   ]
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntakeNoSOTM"
+                }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
           }
         }
       ]

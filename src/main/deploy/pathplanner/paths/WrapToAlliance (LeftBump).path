@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 1.8265477888730377,
-        "y": 5.76231098430813
+        "x": 2.3453777777777782,
+        "y": 5.753387836548233
       },
       "prevControl": {
-        "x": 2.279400855920113,
-        "y": 5.788188302425106
+        "x": 2.7982308448248534,
+        "y": 5.779265154665209
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LeftWrapShot"
+      "linkedName": "DepotToShootEnd"
     }
   ],
   "rotationTargets": [
@@ -61,7 +61,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -0.0
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,

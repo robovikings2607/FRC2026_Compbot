@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.8265477888730377,
-        "y": 5.76231098430813
+        "x": 2.3453777777777782,
+        "y": 5.753387836548233
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3995720399429379,
-        "y": 6.034022824536376
+        "x": 1.9184020288476784,
+        "y": 6.025099676776479
       },
       "isLocked": false,
-      "linkedName": "LeftWrapShot"
+      "linkedName": "DepotToShootEnd"
     },
     {
       "anchor": {
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 179.3929817359896
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -0.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": false
 }

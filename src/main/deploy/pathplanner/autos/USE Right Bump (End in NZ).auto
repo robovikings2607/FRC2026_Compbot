@@ -9,13 +9,38 @@
           "data": {
             "commands": [
               {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.0
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntakeNoSOTM"
+                }
+              },
+              {
                 "type": "sequential",
                 "data": {
                   "commands": [
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral1 (LeftBump)"
+                        "pathName": "AllianceToNeutral1 (RightBump)"
                       }
                     },
                     {
@@ -27,22 +52,16 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "WrapAroundCollectFuel (LeftBump)"
+                        "pathName": "Copy of WrapAroundCollectFuel (LeftBump)"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "WrapToAlliance (LeftBump)"
+                        "pathName": "Copy of WrapToAlliance (LeftBump)"
                       }
                     }
                   ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "DeployIntakeNoSOTM"
                 }
               }
             ]
@@ -55,15 +74,15 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "DeployIntake"
-          }
-        },
-        {
           "type": "race",
           "data": {
             "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntakeNoSOTM"
+                }
+              },
               {
                 "type": "sequential",
                 "data": {
@@ -71,31 +90,19 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Rotate"
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "AllianceToDepot (LeftBump)"
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "2522Depot And Shoot 2"
+                        "pathName": "AllianceToNeutral2 (RightBump)"
                       }
                     }
                   ]
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ShootOnTheMove"
-                }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
           }
         }
       ]
