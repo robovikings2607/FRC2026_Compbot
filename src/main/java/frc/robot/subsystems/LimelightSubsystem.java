@@ -94,8 +94,8 @@ public class LimelightSubsystem extends SubsystemBase {
   // -------------------------------------------------------------------------
   // Camera names
   // -------------------------------------------------------------------------
-  private static final String FRONT_NAME  = "limelight-front";
-  private static final String TURRET_NAME = "limelight-back";
+  public static final String FRONT_NAME  = "limelight-front";
+  public static final String TURRET_NAME = "limelight-back";
 
   // Only look at hub tags with the turret camera — ignore everything else
   private static final int[] HUB_TAG_IDS = {2, 3, 4, 5, 8, 9 , 10, 11, 18, 19, 20, 21, 24, 25, 26, 27};
