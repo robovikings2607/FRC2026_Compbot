@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -142,6 +143,15 @@ public class TurretSubsystem extends SubsystemBase {
       isZeroed = false;
     }
 
+    if(!isZeroed){
+      robot.operatorController.controller.setRumble(RumbleType.kBothRumble, 1);
+      robot.driverController.controller.setRumble(RumbleType.kBothRumble, 1);
+    }
+    else{
+      robot.operatorController.controller.setRumble(RumbleType.kBothRumble, 0);
+      robot.driverController.controller.setRumble(RumbleType.kBothRumble, 0);
+    }
+
     boolean isManualMove = false;
     if(robot.operatorController.povWest.getAsBoolean()){
         isManualMove = true;
@@ -166,8 +176,6 @@ public class TurretSubsystem extends SubsystemBase {
 
     double robotRotation = robotPose.getRotation().getDegrees();
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
-
-    RobotLogger.logStruct("Shooter/Pose", Pose2d.struct, new Pose2d(shooterPose.getX(), shooterPose.getY(), shooterPose.getAngle()));
 
     Translation2d goalPose = ShooterUtils.stuypulesShootOnMove(robot.drivetrain, robotPose);
 
@@ -197,11 +205,11 @@ public class TurretSubsystem extends SubsystemBase {
     // Try and debug if needed
 
     double distance = shooterPose.getDistance(goalPose);
-    var turretHeading = (wantedEncoderPos * 36.0) + robotRotation;
+    var turretHeading = (-wantedEncoderPos * 36.0) + robotRotation;
     double targetX = shooterPose.getX() + distance * Math.cos(Units.degreesToRadians(turretHeading));
     double targetY = shooterPose.getY() + distance * Math.sin(Units.degreesToRadians(turretHeading));
     Pose2d turretAim = new Pose2d(new Translation2d(targetX,targetY),new Rotation2d(Units.degreesToRadians(turretHeading)));
-    RobotLogger.logStruct("Turret/ShooterPose", Translation2d.struct, shooterPose);    
+    RobotLogger.logStruct("Shooter/Pose", Pose2d.struct, new Pose2d(shooterPose.getX(), shooterPose.getY(), Rotation2d.fromDegrees(turretHeading)));
     RobotLogger.logStruct("Turret/AprilTagPoses", Pose2d.struct, turretAim);
 
 
@@ -226,13 +234,14 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public static double clampEncoderPos(double newEncoderPos){
-/*     if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
+    if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
       newEncoderPos -= 360 * rotationsPerDegree;
     }
     else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
       newEncoderPos += 360 * rotationsPerDegree;
-    } */
-    return MathUtil.inputModulus(newEncoderPos, rotationsPerDegree * TurretConstants.MIN_ANGLE, rotationsPerDegree * TurretConstants.MAX_ANGLE);
+    } 
+   return newEncoderPos;
+    //return MathUtil.inputModulus(newEncoderPos, rotationsPerDegree * TurretConstants.MIN_ANGLE, rotationsPerDegree * TurretConstants.MAX_ANGLE);
   }
 
   public static double getDelta(double previousSetPoint, double newSetPoint){

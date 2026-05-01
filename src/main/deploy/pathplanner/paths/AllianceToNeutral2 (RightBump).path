@@ -51,9 +51,9 @@
     {
       "name": "Over Bump",
       "minWaypointRelativePos": 0.2272952853598026,
-      "maxWaypointRelativePos": 0.4674937965260524,
+      "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 1.25,
+        "maxVelocity": 1.5,
         "maxAcceleration": 3.5,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
