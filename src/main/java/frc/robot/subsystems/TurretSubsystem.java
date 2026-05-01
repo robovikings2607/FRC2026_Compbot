@@ -22,6 +22,7 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.hal.simulation.RoboRioDataJNI;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -131,27 +132,33 @@ public class TurretSubsystem extends SubsystemBase {
 
     // This method will be called once per scheduler run
         RobotLogger.logBoolean("Turret/Magnet", !magnet.get());
+        RobotLogger.logBoolean("Turret/IsZeroed", isZeroed);
+        RobotLogger.logBoolean("Turret/IsDeactivated", isDeactivated);
 
-    if(turretMotor.hasResetOccurred()){
+    boolean turretHasReset = turretMotor.hasResetOccurred();
+
+    if(turretHasReset){
       turretMotor.setPosition(currentEncoderPos);
+      isZeroed = false;
     }
 
-    if(!magnet.get()){
+    boolean isManualMove = false;
+    if(robot.operatorController.povWest.getAsBoolean()){
+        isManualMove = true;
+        turretMotor.set(0.07);
+      }
+
+    else if(robot.operatorController.povEast.getAsBoolean()){
+        isManualMove = true;
+        turretMotor.set(-0.07);
+    }
+
+    if(!magnet.get() && (!isZeroed || isManualMove)){
       turretMotor.setPosition(92.74 * rotationsPerDegree);
       isZeroed = true;
- 
     }     
 
-    if(robot.operatorController.povWest.getAsBoolean()){
-        turretMotor.set(0.07);
-        return;
-      }
-    else if(robot.operatorController.povEast.getAsBoolean()){
-        turretMotor.set(-0.07);
-        return;
-    }
-
-    if(!isZeroed){
+    if(!isZeroed || isManualMove){
         return;
     }
 
@@ -160,7 +167,7 @@ public class TurretSubsystem extends SubsystemBase {
     double robotRotation = robotPose.getRotation().getDegrees();
     Translation2d shooterPose = ShooterUtils.getShooterPose(robotPose);
 
-    //RobotLogger.logStruct("Shooter/Pose", Pose2d.struct, new Pose2d(shooterPose.getX(), shooterPose.getY(), shooterPose.getAngle()));
+    RobotLogger.logStruct("Shooter/Pose", Pose2d.struct, new Pose2d(shooterPose.getX(), shooterPose.getY(), shooterPose.getAngle()));
 
     Translation2d goalPose = ShooterUtils.stuypulesShootOnMove(robot.drivetrain, robotPose);
 
@@ -198,13 +205,17 @@ public class TurretSubsystem extends SubsystemBase {
     RobotLogger.logStruct("Turret/AprilTagPoses", Pose2d.struct, turretAim);
 
 
-    //RobotLogger.logBoolean("Turret/MotorReset", turretMotor.hasResetOccurred());
+    RobotLogger.logBoolean("Turret/MotorReset", turretHasReset);
     //RobotLogger.logBoolean("UserButtonPressed", RobotController.getUserButton());
 
     //logNumber2("Turret/Delta", getDelta(currentEncoderPos, targetEncoderPos));        
     logNumber("Turret/CurrentPose", currentEncoderPos);        
     logNumber2("Turret/TargetPose", targetEncoderPos);        
-    logNumber2("Turret/WantedPose", wantedEncoderPos);        
+    logNumber2("Turret/WantedPose", wantedEncoderPos); 
+    logNumber2("Turret/Rate", getTurretRateDegPerSec());   
+    RobotLogger.logBoolean("Turret/GoodToShoot", goodToShoot());
+
+    currentEncoderPos = motorUtil.getPosition().in(Rotations);
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
@@ -249,6 +260,10 @@ public class TurretSubsystem extends SubsystemBase {
     turretMotor.setPosition(0);
   }
 
+  public boolean turretZeroed() {
+    return isZeroed;
+  }
+
 /*   public Command zeroTurret(){
     return run(() -> turretMotor.set(0.2))
            .until(() -> isPressed)
@@ -285,7 +300,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public boolean goodToShoot(){
-    return Math.abs(motorUtil.getClosedLoopError()) < 10.0 * rotationsPerDegree;
+    return isDeactivated || Math.abs(motorUtil.getClosedLoopError()) < 10.0 * rotationsPerDegree;
   }
 
   public void logNumber(String key, double value){

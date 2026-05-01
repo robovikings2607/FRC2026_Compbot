@@ -47,13 +47,6 @@ public class Robot extends TimedRobot {
         start = Timer.getFPGATimestamp();
         CommandScheduler.getInstance().run();
         SmartDashboard.putNumber("Runtime/scheduler", Timer.getFPGATimestamp() -start);
-
-        
-/*         if(RobotController.getUserButton()){
-            //m_robotContainer.hood.getMotor().setPosition(0.0);
-            m_robotContainer.turret.getMotor().setPosition(0.0);
-            m_robotContainer.intake.getPivotMotor().setPosition(0.0);
-        }  */
         
     }
 
@@ -64,6 +57,11 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
+
+        if(RobotController.getUserButton()){
+            //m_robotContainer.hood.getMotor().setPosition(0.0);
+           m_robotContainer.drivetrain.seedFieldCentric();
+        }  
     }
 
     @Override

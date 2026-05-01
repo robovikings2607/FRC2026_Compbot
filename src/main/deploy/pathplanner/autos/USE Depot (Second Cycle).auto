@@ -9,6 +9,50 @@
           "data": {
             "commands": [
               {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "StartToDepot"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "2522Depot And Shoot 2"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "DepotToShoot"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "DeployIntakeNoSOTM"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
                 "type": "named",
                 "data": {
                   "name": "Shoot"
@@ -17,7 +61,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 5.0
+                  "waitTime": 3.0
                 }
               }
             ]
@@ -28,81 +72,25 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "DeployIntakeNoSOTM"
-                }
-              },
-              {
                 "type": "sequential",
                 "data": {
                   "commands": [
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AllianceToNeutral1 (RightBump)"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.0
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "Copy of WrapAroundCollectFuel (LeftBump)"
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "Copy of WrapToAlliance (LeftBump)"
+                        "pathName": "DepotShotToNZ"
                       }
                     }
                   ]
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
+              },
               {
                 "type": "named",
                 "data": {
                   "name": "DeployIntakeNoSOTM"
                 }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "AllianceToNeutral2 (RightBump)"
-                      }
-                    }
-                  ]
-                }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
           }
         }
       ]

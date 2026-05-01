@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.64807272728024,
-        "y": 6.083990909080623
+        "x": 0.5973751783166898,
+        "y": 6.176348074179743
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.1565555555555556,
-        "y": 6.1787777777777775
+        "x": 1.1058580065920054,
+        "y": 6.271134942876897
       },
       "isLocked": false,
-      "linkedName": "2522DepotAndShoot1End"
+      "linkedName": "DepotToShootStart"
     },
     {
       "anchor": {

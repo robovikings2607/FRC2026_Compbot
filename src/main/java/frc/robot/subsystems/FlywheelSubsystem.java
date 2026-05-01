@@ -257,7 +257,7 @@ public class FlywheelSubsystem extends SubsystemBase implements ISysIdTunable {
   }  
 
   public boolean goodToShoot(){
-    return getSpeed() < goal + 2.5;
+    return getSpeed() < goal + 3.5;
   }
 
   public double percentOfGoal(){

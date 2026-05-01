@@ -108,8 +108,7 @@ public class LimelightSubsystem extends SubsystemBase {
   // Where the turret spins from, measured from the robot center (meters)
   private static final double TURRET_CENTER_X = Units.inchesToMeters(-6.75);
   private static final double TURRET_CENTER_Y = Units.inchesToMeters(-5.75);
-
-  // Camera position relative to turret pivot, in the turret's own frame (X+ = turret forward, Y+ = turret left).
+ // Camera position relative to turret pivot, in the turret's own frame (X+ = turret forward, Y+ = turret left).
   // At turret angle=0 this frame is aligned with the robot frame.
   private static final Translation2d TURRET_TO_CAM = new Translation2d(Units.inchesToMeters(0.25), Units.inchesToMeters(4.625));
 
@@ -137,7 +136,7 @@ public class LimelightSubsystem extends SubsystemBase {
   // Skip turret camera readings when the turret is spinning too fast — at high
   // speed the angle we look up may be wrong, and the LL pose solve gets noisy.
   // This also catches the turret snapping back when it hits a soft limit.
-  private static final double kMaxTurretRateDegPerSec = 60.0;
+  private static final double kMaxTurretRateDegPerSec = 360.0; //60.0
 
   // Static position uncertainty (meters) for each camera.
   // We also tell the filter to never correct gyro heading from vision (1e9).
@@ -204,6 +203,7 @@ public class LimelightSubsystem extends SubsystemBase {
     // Front camera: bolted to the robot, uses MegaTag2 (requires us to send the robot's heading)
     LimelightHelpers.setPipelineIndex(FRONT_NAME, 0);
     LimelightHelpers.SetIMUMode(FRONT_NAME, 1);
+    LimelightHelpers.SetFiducialIDFiltersOverride(FRONT_NAME, HUB_TAG_IDS);
 
     // Turret camera: only look at hub tags, use MT1 (no heading needed)
     LimelightHelpers.setPipelineIndex(TURRET_NAME, 0);
@@ -215,7 +215,7 @@ public class LimelightSubsystem extends SubsystemBase {
     // so we can do the offset math ourselves using the actual turret angle.
     // Yaw is 0 here — we add turret rotation ourselves each loop.
     // Pitch and roll are the fixed tilt of the camera on its mount.
-    //LimelightHelpers.setCameraPose_RobotSpace(TURRET_NAME, 0, 0, CAM_UP_M, CAM_ROLL_DEG, CAM_PITCH_DEG, 0);
+    LimelightHelpers.setCameraPose_RobotSpace(TURRET_NAME, 0, 0, CAM_UP_M, CAM_ROLL_DEG, CAM_PITCH_DEG, 0);
 
     try {
       java.io.File fieldJsonFile = new java.io.File(
@@ -259,7 +259,7 @@ public class LimelightSubsystem extends SubsystemBase {
     updateFieldVisualization(turretVizPose, getTagPoses(turretRaw), TURRET_NAME);
 
     // Prefer turret camera (locked on hub) over front camera
-    Optional<CameraEstimate> toSubmit = frontEst.isPresent() ? frontEst : turretEst;
+    Optional<CameraEstimate> toSubmit = turretEst.isPresent() ? turretEst : frontEst;
 
     toSubmit.ifPresent(est -> {
       if (est.timestampSeconds > lastSubmittedTimestamp) {
@@ -307,8 +307,8 @@ public class LimelightSubsystem extends SubsystemBase {
       }
     }
 
-    RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badArea", mt.avgTagArea < kMinTagArea || mt.avgTagArea > kMaxTagArea);
-    if (mt.avgTagArea < kMinTagArea || mt.avgTagArea > kMaxTagArea) return Optional.empty();
+    //RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badArea", mt.avgTagArea < kMinTagArea || mt.avgTagArea > kMaxTagArea);
+    //if (mt.avgTagArea < kMinTagArea || mt.avgTagArea > kMaxTagArea) return Optional.empty();
 
     RobotLogger.logBoolean("Limelight/" + TURRET_NAME + "/badNorm", mt.pose.getTranslation().getNorm() < kMinPoseNorm);
     if (mt.pose.getTranslation().getNorm() < kMinPoseNorm) return Optional.empty();
