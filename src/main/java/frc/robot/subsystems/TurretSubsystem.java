@@ -155,14 +155,19 @@ public class TurretSubsystem extends SubsystemBase {
       // cached currentEncoderPos is one loop stale and can be off by several
       // degrees if the turret was moving when the reset hit.
       isZeroed = false;
-      if (!Double.isNaN(recovered)) {
-        turretMotor.setPosition(recoveredPos);
-        isZeroed = true;
-      } 
+
       RobotLogger.logBoolean("Turret/MotorReset", true);
     } else {
       RobotLogger.logBoolean("Turret/MotorReset", false);
     }
+
+
+    if (robot.operatorController.leftBumper.getAsBoolean() &&
+        robot.operatorController.rightBumper.getAsBoolean() &&
+      !Double.isNaN(recovered)) {
+      turretMotor.setPosition(recoveredPos);
+      isZeroed = true;
+    } 
 
 
     boolean isManualMove = false;
@@ -233,6 +238,8 @@ public class TurretSubsystem extends SubsystemBase {
     // Try and debug if needed
 
     double distance = shooterPose.getDistance(goalPose);
+    var turretMeasuredAngle = (currentEncoderPos * 36.0);
+    RobotLogger.logDouble("Turret/measuredAngle", turretMeasuredAngle);
     var turretHeading = (-wantedEncoderPos * 36.0) + robotRotation;
     double targetX = shooterPose.getX() + distance * Math.cos(Units.degreesToRadians(turretHeading));
     double targetY = shooterPose.getY() + distance * Math.sin(Units.degreesToRadians(turretHeading));
@@ -259,7 +266,7 @@ public class TurretSubsystem extends SubsystemBase {
   private void refreshImuBias() {
     double[] imu = LimelightHelpers.getLimelightNTDoubleArray(LimelightSubsystem.TURRET_NAME, "imu");
     if (imu == null || imu.length < 4) return;
-    double driveYaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
+    double driveYaw = robot.drivetrain.getState().RawHeading.getDegrees();
     double encoderDeg = motorUtil.getPosition().in(Rotations) / rotationsPerDegree;
     llImuBias = MathUtil.inputModulus(imu[3] - driveYaw - encoderDeg, -180.0, 180.0);
     RobotLogger.logDouble("Turret/LLImuBias", llImuBias);
@@ -280,10 +287,16 @@ public class TurretSubsystem extends SubsystemBase {
     if (Double.isNaN(llImuBias)) return Double.NaN;
     double[] imu = LimelightHelpers.getLimelightNTDoubleArray(LimelightSubsystem.TURRET_NAME, "imu");
     if (imu == null || imu.length < 4) return Double.NaN;
-    double driveYaw = robot.drivetrain.getState().Pose.getRotation().getDegrees();
+    double driveYaw = robot.drivetrain.getState().RawHeading.getDegrees();
     double raw      = imu[3] - driveYaw - llImuBias;
+    // turret is not CCW positive
+    raw = 360.0 - raw;
+    //raw *= -1.0;
 
     double cachedDeg = currentEncoderPos / rotationsPerDegree;
+    return cachedDeg;
+    /*
+    return cachedDeg'
     double best      = Double.NaN;
     double bestDist  = Double.POSITIVE_INFINITY;
     for (int k = -1; k <= 1; k++) {
@@ -292,7 +305,7 @@ public class TurretSubsystem extends SubsystemBase {
       double dist = Math.abs(candidate - cachedDeg);
       if (dist < bestDist) { best = candidate; bestDist = dist; }
     }
-    return best;
+    return best;*/
   }
 
   private static double getTurretSetPoint(Translation2d turretCenter, Translation2d hubCenter, double robotRotation) {
@@ -303,14 +316,15 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public static double clampEncoderPos(double newEncoderPos){
+    /* 
     if(newEncoderPos > (TurretConstants.MAX_ANGLE * rotationsPerDegree)){
       newEncoderPos -= 360 * rotationsPerDegree;
     }
     else if(newEncoderPos < (TurretConstants.MIN_ANGLE * rotationsPerDegree)){
       newEncoderPos += 360 * rotationsPerDegree;
     } 
-   return newEncoderPos;
-    //return MathUtil.inputModulus(newEncoderPos, rotationsPerDegree * TurretConstants.MIN_ANGLE, rotationsPerDegree * TurretConstants.MAX_ANGLE);
+   return newEncoderPos; */
+    return MathUtil.inputModulus(newEncoderPos, rotationsPerDegree * TurretConstants.MIN_ANGLE, rotationsPerDegree * TurretConstants.MAX_ANGLE);
   }
 
   public static double getDelta(double previousSetPoint, double newSetPoint){

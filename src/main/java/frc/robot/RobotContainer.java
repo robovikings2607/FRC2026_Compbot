@@ -93,7 +93,7 @@ public class RobotContainer {
     private boolean fieldCentricDrive = true;
     private boolean lowGear = true;
     private double highGear = 1.0; // 0.6 or 60% (max speed) for competition
-    private double slowGear = 0.2; // 0.2 or 20% of max speed for competition
+    private double slowGear = 0.4; // 0.2 or 20% of max speed for competition
     private double driveSpeedScale = (lowGear ? slowGear : highGear);
     public OI driverController = new OI(OI.kDriverControllerPort);
     public OI operatorController = new OI(OI.kOperatorControllerPort);
@@ -196,7 +196,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("DeployIntake", new DeployIntakeAndRunKicker(this).raceWith(new WaitCommand(0.1)));
         NamedCommands.registerCommand("DeployIntakeNoSOTM", new DeployIntakeAndRunKicker(this));
         NamedCommands.registerCommand("RetractIntake", new RetratctIntakeAndStopKicker(this));
-        NamedCommands.registerCommand("Shoot", (new AutonShoot(this).alongWith(new JostlePieces(this))).raceWith(new WaitCommand(7.0)));
+        NamedCommands.registerCommand("Shoot", (new AutonShoot(this).raceWith(new WaitCommand(7.0))));
         NamedCommands.registerCommand("ShootOnTheMove", new Shoot(this));
     }
 
@@ -327,11 +327,14 @@ public class RobotContainer {
     }
 
     private double slewIfShooting(double input, SlewRateLimiter limiter) {
+        return input;
+        /* 
         if (shootCommand.isScheduled()) {
             return limiter.calculate(input);
         }
         limiter.reset(input);
         return input;
+        */
     }
 
      // This method is called to modify the drivetrain mode
